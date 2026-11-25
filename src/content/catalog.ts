@@ -14,6 +14,8 @@ export interface Standard {
   id: string;
   code: string;
   text: string;
+  /** Higher level only (hidden in SL courses). */
+  hl?: boolean;
 }
 
 export interface Topic {
@@ -44,12 +46,12 @@ export interface Course {
   themes: Theme[];
 }
 
-function topic(code: string, name: string, standards: [string, string][] = [], hlOnly = false): Topic {
+function topic(code: string, name: string, standards: [string, string, 'HL'?][] = [], hlOnly = false): Topic {
   return {
     id: `ibp.${code}`,
     code,
     name,
-    standards: standards.map(([c, text]) => ({ id: `ibp.${c}`, code: c, text })),
+    standards: standards.map(([c, text, level]) => ({ id: `ibp.${c}`, code: c, text, ...(level === 'HL' ? { hl: true } : {}) })),
     ...(hlOnly ? { hlOnly } : {}),
   };
 }
@@ -65,7 +67,20 @@ const T = {
     ['A.1.6', 'Projectile motion without fluid resistance (horizontal and vertical components)'],
     ['A.1.7', 'Qualitative effects of fluid resistance on projectiles; terminal speed'],
   ]),
-  A2: topic('A.2', 'Forces and momentum'),
+  // The IB guide has no additional higher level content in A.2, except that HL
+  // treats collisions and explosions in two dimensions (SL: one dimension).
+  A2: topic('A.2', 'Forces and momentum', [
+    ['A.2.1', 'Newton’s three laws of motion; forces as interactions between bodies'],
+    ['A.2.2', 'Free-body diagrams, resultant force and translational equilibrium'],
+    ['A.2.3', 'Contact forces: normal force, tension, and static and dynamic friction'],
+    ['A.2.4', 'Elastic restoring force (Hooke’s law), viscous drag (Stokes’ law) and buoyancy'],
+    ['A.2.5', 'Field forces: gravitational force (weight), electric and magnetic forces'],
+    ['A.2.6', 'Linear momentum and its conservation in an isolated system'],
+    ['A.2.7', 'Impulse and change of momentum; force–time graphs; F = Δp/Δt'],
+    ['A.2.8', 'Collisions and explosions in one dimension; elastic and inelastic collisions; energy'],
+    ['A.2.9', 'Circular motion: centripetal acceleration and force, angular velocity and period'],
+    ['A.2.10', 'Collisions and explosions in two dimensions (HL)', 'HL'],
+  ]),
   A3: topic('A.3', 'Work, energy and power'),
   A4: topic('A.4', 'Rigid body mechanics', [], true),
   A5: topic('A.5', 'Galilean and special relativity', [], true),
@@ -112,7 +127,10 @@ export const IB_PHYSICS_SL: Course = {
   style: 'IB',
   level: 'SL',
   printInstructions: IB_PRINT_INSTRUCTIONS,
-  themes: IB_PHYSICS_THEMES.map((th) => ({ ...th, topics: th.topics.filter((t) => !t.hlOnly) })),
+  themes: IB_PHYSICS_THEMES.map((th) => ({
+    ...th,
+    topics: th.topics.filter((t) => !t.hlOnly).map((t) => ({ ...t, standards: t.standards.filter((s) => !s.hl) })),
+  })),
 };
 
 export const IB_PHYSICS_HL: Course = {
@@ -133,20 +151,23 @@ export function allTopics(course: Course): Topic[] {
   return course.themes.flatMap((t) => t.topics);
 }
 
+/** Every topic with all of its standards (SL and HL). */
+export const ALL_TOPICS: Topic[] = Object.values(T);
+
+/** A topic with all of its standards, including HL-only ones. */
 export function findTopic(topicId: string): Topic | undefined {
-  for (const course of COURSES) {
-    const found = allTopics(course).find((t) => t.id === topicId);
-    if (found) return found;
-  }
-  return undefined;
+  return ALL_TOPICS.find((t) => t.id === topicId);
+}
+
+/** A topic as a course sees it (SL courses leave out HL-only standards). */
+export function courseTopic(course: Course, topicId: string): Topic | undefined {
+  return allTopics(course).find((t) => t.id === topicId);
 }
 
 export function findStandard(standardId: string): Standard | undefined {
-  for (const course of COURSES) {
-    for (const t of allTopics(course)) {
-      const s = t.standards.find((x) => x.id === standardId);
-      if (s) return s;
-    }
+  for (const t of ALL_TOPICS) {
+    const s = t.standards.find((x) => x.id === standardId);
+    if (s) return s;
   }
   return undefined;
 }

@@ -38,6 +38,7 @@ export function StandardPicker({ topic, selected, onChange, counts }: StandardPi
           return (
             <button key={s.id} type="button" className={`std-chip${on ? ' is-on' : ''}`} aria-pressed={on} title={s.text} onClick={() => toggle(s.id)}>
               {s.code}
+              {s.hl && <span className="std-hl">HL</span>}
               <span className="std-count">
                 {n}
                 <span className="sr-only"> {n === 1 ? 'question' : 'questions'}</span>

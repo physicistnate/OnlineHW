@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { COURSES, allTopics, courseOrDefault, findStandard, findTopic } from '../content/catalog';
+import { COURSES, allTopics, courseOrDefault, courseTopic, findStandard } from '../content/catalog';
 import { questionsForTopic } from '../content/registry';
 import { PageHeader } from '../components/Layout';
 import { StandardPicker, countByStandard } from '../components/StandardPicker';
@@ -45,7 +45,7 @@ export function BankPage({ courseId, topicId, standards: initialStandards = [] }
   const course = courseOrDefault(courseId);
   const topics = allTopics(course);
   const active = topicId && topics.some((t) => t.id === topicId) ? topicId : (topics.find((t) => questionsForTopic(t.id, course.id).length > 0) ?? topics[0]).id;
-  const topic = findTopic(active)!;
+  const topic = courseTopic(course, active)!;
   const [type, setType] = useState<QuestionType | ''>('');
   const [standards, setStandardsState] = useState<string[]>(() => initialStandards.filter((s) => topic.standards.some((x) => x.id === s)));
   const [search, setSearch] = useState('');

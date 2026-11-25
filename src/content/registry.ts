@@ -11,8 +11,9 @@ import { courseOrDefault, findCourse } from './catalog';
 import type { AnyTemplate } from '../engine/types';
 import { ARCHIVED_REVISIONS } from './archive';
 import ibPhysicsA1 from './ib-physics/a1-kinematics';
+import ibPhysicsA2 from './ib-physics/a2-forces-momentum';
 
-export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1];
+export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1, ...ibPhysicsA2];
 
 const byId = new Map(ALL_QUESTIONS.map((q) => [q.id, q]));
 const archived = new Map(ARCHIVED_REVISIONS.map((q) => [`${q.id}@v${q.version}`, q]));

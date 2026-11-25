@@ -43,7 +43,8 @@ function samePoints(a: [number, number][], b: [number, number][]): boolean {
 export function questionMeta(template: AnyTemplate): string {
   const course = findCourse(template.courses[0]);
   const topic = findTopic(template.topic);
-  return [course?.name, topic && `${topic.code} ${topic.name}`, template.level === 'HL' ? 'HL' : '', template.paper].filter(Boolean).join(' · ');
+  const hlTag = template.level === 'HL' && !course?.name.includes('HL') ? 'HL' : '';
+  return [course?.name, topic && `${topic.code} ${topic.name}`, hlTag, template.paper].filter(Boolean).join(' · ');
 }
 
 /** The grading state recorded after a result (null for unreadable input or written answers). */
@@ -440,14 +441,19 @@ export function Markscheme({ part }: { part: PartInstance }) {
     if (right) extra.push({ mark: `Answer: **${right.letter}**` });
   }
   if (r.kind === 'numeric') {
-    const [lo, hi] = fmtRange(r.range.lo, r.range.hi);
     const unit = r.unit ? `\\ ${unitTex(r.unit)}` : '';
-    const others = r.altRanges.map((a) => {
-      const [alo, ahi] = fmtRange(a.lo, a.hi);
-      return `$${alo}$ to $${ahi}${unit}$`;
-    });
+    const span = (a: { lo: number; hi: number }) => {
+      if (a.lo === a.hi) return `only $${fmtRange(a.lo, a.hi)[0]}${unit}$`;
+      const [lo, hi] = fmtRange(a.lo, a.hi);
+      return `$${lo}$ to $${hi}${unit}$`;
+    };
+    const main = span(r.range);
+    // An alternative method whose range reads the same as one already listed is not repeated.
+    const others = [...new Set(r.altRanges.map(span))].filter((text) => text !== main);
     const alt = others.length ? ` (or ${others.join(' or ')} by the alternative method)` : '';
-    extra.push({ note: `Online marking: accepts any value from $${lo}$ to $${hi}${unit}$${alt}, or that value rounded to 2 or more significant figures.` });
+    const what = r.range.lo === r.range.hi ? `accepts ${main}` : `accepts any value from ${main}`;
+    const rounding = r.range.lo === r.range.hi ? '' : ', or that value rounded to 2 or more significant figures';
+    extra.push({ note: `Online marking: ${what}${alt}${rounding}.` });
   }
   const lines = [...(r.kind === 'mcq' ? extra : []), ...part.markscheme, ...(r.kind === 'numeric' ? extra : [])];
   return (

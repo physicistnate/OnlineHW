@@ -4,7 +4,7 @@
  * then save it for students or print it.
  */
 import { useEffect, useState } from 'react';
-import { COURSES, allTopics, courseOrDefault, findStandard, findTopic, type Course } from '../content/catalog';
+import { COURSES, allTopics, courseOrDefault, courseTopic, findStandard, type Course } from '../content/catalog';
 import { getQuestion, questionsForCourse, questionsForTopic } from '../content/registry';
 import { PageHeader } from '../components/Layout';
 import { Dialog } from '../components/Modal';
@@ -69,7 +69,7 @@ function initialDraft(query: URLSearchParams): Draft {
     draft.standards = [...new Set([...draft.standards, ...added.standards])]; // so the added question is visible
     if (!draft.selected.includes(added.id)) draft.selected = [...draft.selected, added.id];
   }
-  const topic = findTopic(draft.topicId);
+  const topic = courseTopic(course, draft.topicId);
   draft.standards = (topic?.standards ?? []).map((s) => s.id).filter((s) => draft.standards.includes(s));
   return draft;
 }
@@ -98,7 +98,7 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
   }, [query]);
 
   const course = courseOrDefault(courseId);
-  const topic = findTopic(topicId) ?? findTopic(firstTopicWithQuestions(course))!;
+  const topic = courseTopic(course, topicId) ?? courseTopic(course, firstTopicWithQuestions(course))!;
   const topicQuestions = questionsForTopic(topic.id, course.id);
   const shown = topicQuestions.filter((q) => q.standards.some((s) => standards.includes(s)));
   const toggle = (id: string) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));

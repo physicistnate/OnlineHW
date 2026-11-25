@@ -30,7 +30,11 @@ engine before real accounts are added in Phase 3.
 
 Courses so far: IB Physics SL and IB Physics HL. HL includes every SL topic
 and question plus the HL-only topics (A.4, A.5, B.4, D.4, E.2); a question
-marked level 'HL' appears only in HL. Questions so far: A.1 Kinematics (7).
+marked level 'HL' appears only in HL. Questions so far: A.1 Kinematics (12)
+and A.2 Forces and momentum (10, one of them HL only). The IB guide has no
+additional higher level understandings in A.1 or A.2; the one HL difference in
+A.2 is collisions and explosions in two dimensions, which has its own HL-only
+standard (A.2.10) and question. HL-only standards are hidden in SL courses.
 
 Technology: a static website (Vite + React + TypeScript), maths rendered with
 KaTeX, graphs drawn as SVG. No server is needed, so it can be hosted free on
@@ -158,15 +162,44 @@ Marking rules (one policy, online and on paper):
   - Unreadable input (including a wrong unit typed after the number) is
     reported as unreadable, not as wrong, and does not use up a try.
 
-The 7 IB Physics SL · A.1 Kinematics questions (29 marks):
-  1. Uniformly accelerating train           calculation (suvat), 4 marks
-  2. Reaction time and stopping distance    calculation + multiple choice, 5 marks
-  3. Velocity–time graph for a cyclist      graph reading + calculation, 5 marks
-  4. Drawing a v–t graph for a lift         graph drawing + area, 5 marks
-  5. Speed of a falling object              multiple choice, 1 mark
-  6. Projectile at the highest point        multiple choice (table), 1 mark
-  7. Ball kicked across level ground        multi-part: components, height,
-                                            range, air resistance (table), 8 marks
+A.1 Kinematics: 12 questions (61 marks), in bank order
+   1. Distance and displacement on a walk    distance, displacement, average speed
+                                             and velocity; a zero answer, 7 marks
+   2. Uniformly accelerating train           calculation (suvat), two methods, 4 marks
+   3. Reaction time and stopping distance    calculation + multiple choice, 5 marks
+   4. Accelerating an electron               suvat in scientific notation, two
+                                             methods, 6 marks
+   5. Speed of a falling object              multiple choice, 1 mark
+   6. Velocity–time graph for a cyclist      graph reading + calculation, 5 marks
+   7. Instantaneous velocity from an s–t     tangent gradient, average velocity,
+      graph                                  multiple choice, 6 marks
+   8. Drawing a v–t graph for a lift         graph drawing + area, 5 marks
+   9. Projectile at the highest point        multiple choice (table), 1 mark
+  10. Ball kicked across level ground        multi-part: components, height,
+                                             range, air resistance (table), 8 marks
+  11. Stone thrown horizontally from a cliff time, distance, impact speed (two
+                                             methods) and angle, 9 marks
+  12. A skydiver reaching terminal speed     graph reading + multiple choice, 4 marks
+
+A.2 Forces and momentum: 10 questions (53 marks), in bank order
+   1. Standing on scales in a lift           Newton's laws, normal force, which-row
+                                             multiple choice, 6 marks
+   2. Pulling a crate across a floor         static and dynamic friction, F = ma, 6 marks
+   3. A spring, a metal block and buoyancy   Hooke's law from a graph, equilibrium,
+                                             buoyancy, 7 marks
+   4. Measuring viscosity with a falling     weight, buoyancy, Stokes' law at
+      ball                                   terminal speed, 6 marks
+   5. Two trolleys stick together            momentum conservation, kinetic energy,
+                                             multiple choice, 6 marks
+   6. Force–time graph for a kick            impulse as area, average force (two
+                                             methods), multiple choice, 6 marks
+   7. Kinetic energy after an explosion      multiple choice, 1 mark
+   8. A car going round a bend               centripetal acceleration and force,
+                                             friction, maximum speed, ω, 7 marks
+   9. Centripetal acceleration from the      multiple choice, 1 mark
+      period
+  10. A glancing collision on an air table   HL only: momentum in two dimensions,
+                                             7 marks
 All are original questions written in IB style (command terms, "[2]" marks,
 IB units such as m s⁻¹, markschemes with ✓ per marking point, ECF/OWTTE
 notes). No past-paper questions are copied.
@@ -245,7 +278,7 @@ ZERO ANSWERS AND SCIENTIFIC NOTATION
   - Given data can be shown in scientific notation with sci: <s.f.> in the
     parameter (e.g. 3.84 × 10⁸ m); the tests check that every value is shown
     exactly as it is used. Answers are shown in scientific notation outside
-    0.001 to 99 999, and the tests check that each answer is accepted when
+    0.01 to 99 999, and the tests check that each answer is accepted when
     typed in every format listed above.
 
 ERROR CARRIED FORWARD (ECF), METHOD BY METHOD
@@ -479,7 +512,9 @@ src/engine: the question engine (no user interface code)
 
 src/content: questions and the syllabus they are tagged with
   catalog.ts                Courses, themes, topics and standards: IB Physics SL
-                            and HL (HL includes SL, plus the HL-only topics).
+                            and HL (HL includes SL, plus the HL-only topics and
+                            HL-only standards such as A.2.10). Standards so far
+                            for A.1 and A.2.
                             A.1 standards paraphrase the IB guide's
                             understandings (numbering A.1.1–A.1.7 is ours). Also
                             the instructions printed at the top of PDFs.
@@ -488,20 +523,47 @@ src/content: questions and the syllabus they are tagged with
                             exact version an assignment was made with.
   archive/index.ts          Earlier versions of questions that were revised after
                             being assigned (empty so far; see section 8).
-  ib-physics/a1-kinematics/
-    index.ts                The A.1 questions, in display order.
-    train-acceleration.ts   Q1: v² = u² + 2as and v = u + at (two methods for
+  ib-physics/graph-axes.ts  niceAxis(): tidy axes (5–8 labelled lines) for
+                            graphs drawn in questions.
+  ib-physics/a1-kinematics/ (one file per question; index.ts sets the order)
+    walk-displacement.ts    Distance vs displacement, average speed vs velocity;
+                            the whole-journey average velocity is zero.
+    train-acceleration.ts   v² = u² + 2as and v = u + at (two methods for
                             the time), with ECF.
-    stopping-distance.ts    Q2: thinking and braking distance; (d) multiple
-                            choice on why the distance does not double.
-    vt-graph-cyclist.ts     Q3: randomized v–t graph; gradient, area, average speed.
-    lift-vt-draw.ts         Q4: students draw a v–t graph by dragging points; then area.
-    free-fall-mcq.ts        Q5: Paper 1A, v = √(2gh), distractors from common slips.
-    projectile-top-mcq.ts   Q6: Paper 1A "which row", velocity and acceleration
-                            at the top of a projectile's path.
-    projectile-kick.ts      Q7: Paper 2 multi-part: components, maximum height,
+    stopping-distance.ts    Thinking and braking distance; (d) multiple choice
+                            on why the distance does not double.
+    electron-acceleration.ts An electron in a cathode-ray tube: answers in
+                            scientific notation; two methods for the time.
+    free-fall-mcq.ts        Paper 1A, v = √(2gh), distractors from common slips.
+    vt-graph-cyclist.ts     Randomized v–t graph; gradient, area, average speed.
+    st-graph-tangent.ts     Curved s–t graph with a drawn tangent: average and
+                            instantaneous velocity, then acceleration.
+    lift-vt-draw.ts         Students draw a v–t graph by dragging points; then area.
+    projectile-top-mcq.ts   Paper 1A "which row", velocity and acceleration at
+                            the top of a projectile's path.
+    projectile-kick.ts      Paper 2 multi-part: components, maximum height,
                             range, and (multiple choice) the effect of air
                             resistance.
+    cliff-launch.ts         Horizontal launch from a cliff: time, distance,
+                            impact speed (two methods for the vertical
+                            component) and angle.
+    skydiver-terminal.ts    v–t graph levelling off at terminal speed (drag ∝ v²);
+                            forces and acceleration at terminal speed.
+  ib-physics/a2-forces-momentum/ (one file per question; index.ts sets the order)
+    lift-scales.ts          Scales in an accelerating and decelerating lift.
+    friction-crate.ts       Static vs dynamic friction, then F = ma and v = at.
+    spring-buoyancy.ts      Spring constant from a graph, extension, buoyancy.
+    stokes-viscosity.ts     Viscosity from terminal speed: weight, buoyancy,
+                            Stokes' law (answers in scientific notation).
+    trolley-collision.ts    Trolleys that stick together: momentum, velocity,
+                            kinetic energy, why it is inelastic.
+    impulse-kick.ts         Triangular force–time graph: impulse, speed, average
+                            force (two methods), longer contact time.
+    explosion-mcq.ts        Paper 1A: kinetic energy shared after an explosion.
+    circular-bend.ts        Car on a level bend: centripetal acceleration and
+                            force, friction, maximum speed, angular velocity.
+    circular-period-mcq.ts  Paper 1A: centripetal acceleration from the period.
+    collision-2d.ts         HL only: glancing collision, momentum components.
 
 src/components: reusable pieces of the interface
   Tex.tsx                   Renders text with KaTeX maths (cached).
@@ -611,7 +673,7 @@ tests (run with: npm test)
 -------------------------------------------------------------------------------
 
 Adding a question
-  1. Copy a similar file in src/content/ib-physics/a1-kinematics/ and give it
+  1. Copy a similar file in src/content/ib-physics/<topic folder>/ and give it
      a new, permanent id (never change an id after students have used it).
   2. Tag it: topic, one or more standards from that topic (these drive the
      standards picker now and the per-standard reports and retakes later),
@@ -659,19 +721,20 @@ Revising a question that has already been assigned
 9. NEXT STEPS
 -------------------------------------------------------------------------------
 
-Next: content, on its own branch and pull request
-  [ ] A.1 Kinematics: more questions to cover the whole topic: a horizontal
-      (or downward) launch from a cliff, terminal speed / the effect of fluid
-      resistance, a displacement–time graph with instantaneous velocity from a
-      tangent, and distance vs displacement.
-  [ ] A.2 Forces and momentum, SL and HL.
-  [ ] HL: add the HL standards to the catalog and HL questions (level: 'HL').
-  [ ] The batch should include (as the last review asked) an answer of zero,
-      an answer in scientific notation, and a multi-part question with two
-      methods, to exercise those parts of the engine with real content.
-  Then the remaining SL topics, about 10 questions each: A.3, B.1, B.2, B.3,
-  B.5, C.1–C.5, D.1–D.3, E.1, E.3–E.5, and the HL-only topics. Each batch:
-  write, npm test, review in the browser, then merge.
+Content (each batch on its own branch and pull request)
+  [x] A.1 Kinematics: 12 questions covering every standard, including a zero
+      answer (walk), scientific notation (electron) and two-method multi-part
+      questions (cliff, electron, train, impulse).
+  [x] A.2 Forces and momentum: standards and 10 questions covering every
+      standard, including the HL-only two-dimensional collision.
+  [ ] More questions for standards with only one or two (A.2.5 field forces,
+      A.2.7 impulse, A.2.10 HL collisions), so retakes have choice later.
+  [ ] A.3 Work, energy and power next, then the remaining SL topics, about 10
+      questions each: B.1, B.2, B.3, B.5, C.1–C.5, D.1–D.3, E.1, E.3–E.5.
+  [ ] HL-only topics (A.4, A.5, B.4, D.4, E.2) and the HL additions inside
+      shared topics (for example B.3, C.1, D.1, D.2, E.1, E.3), each with its
+      HL standards marked 'HL' in the catalog.
+  Each batch: write, npm test, review in the browser, then merge.
   [ ] Physical constants beyond g (c, e, h, G, k, N_A, ...) in site.ts.
   [ ] More graph tools as later topics need them: data plotting with a line of
       best fit and gradient, sketching curves (e.g. SHM).

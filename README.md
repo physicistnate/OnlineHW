@@ -8,7 +8,7 @@ Online homework for IB, AP and general high-school physics and precalculus/calcu
 - **Assignments with rules.** Pick questions by course (IB Physics SL or HL), topic and one or more standards. Set tries per part (multiple choice: half the choices), a due date and time (students get warnings 5 and 1 minutes before it closes), when students see their own answer key, and how the class grade is worked out. Students see a class grade and their IB marks.
 - **PDFs.** Print the base version or any student's version, with or without the answer key.
 
-**Status: Phase 1.** The question engine, the site, assignments, and 7 IB Physics SL · A.1 Kinematics questions are done. Student work is saved in the browser for now; accounts, server-side marking and the gradebook come with a free Supabase database in Phase 3.
+**Status: Phase 1.** The question engine, the site, assignments, and 22 IB Physics questions are done: A.1 Kinematics (12) and A.2 Forces and momentum (10, one HL only). Student work is saved in the browser for now; accounts, server-side marking and the gradebook come with a free Supabase database in Phase 3.
 
 ## Run it locally
 

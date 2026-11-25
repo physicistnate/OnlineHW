@@ -117,6 +117,7 @@ describe.each(ALL_QUESTIONS.map((t) => [t.id, t] as const))('%s', (_id, t) => {
       expect(findTopic(t.topic)?.standards.some((x) => x.id === s), `standard ${s} is not in topic ${t.topic}`).toBe(true);
     }
     if (findTopic(t.topic)?.hlOnly) expect(t.level, 'questions in an HL-only topic must be level HL').toBe('HL');
+    if (t.standards.some((s) => findStandard(s)?.hl)) expect(t.level, 'questions on an HL-only standard must be level HL').toBe('HL');
     for (const part of t.parts) expect(part.response.kind, `${part.label}: written answers are not used yet`).not.toBe('text');
     for (const [name, spec] of Object.entries(t.params as ParamSpecs)) {
       if (isChoice(spec)) {

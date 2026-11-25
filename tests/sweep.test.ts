@@ -139,5 +139,5 @@ describe.each(ALL_QUESTIONS.map((t) => [t.id, t] as const))('%s', (_id, t) => {
       }
     }
     expect(checked, 'no combination of given data satisfies the constraint').toBeGreaterThan(0);
-  });
+  }, 60_000); // up to 20,000 combinations, each with its full rounding analysis
 });

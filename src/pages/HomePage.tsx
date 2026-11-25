@@ -87,7 +87,10 @@ export function HomePage() {
             <h4 className="ok">Working now</h4>
             <ul>
               <li>Question engine: seeded randomization, rounding-aware marking, error carried forward</li>
-              <li>IB Physics SL · A.1 Kinematics: {questionsForTopic('ibp.A.1').length} questions (calculation, graph reading and drawing, multiple choice), all marked by the computer</li>
+              <li>
+                IB Physics · A.1 Kinematics: {questionsForTopic('ibp.A.1').length} questions; A.2 Forces and momentum: {questionsForTopic('ibp.A.2').length} questions (one HL
+                only). Calculation, graph reading and drawing, and multiple choice, all marked by the computer
+              </li>
               <li>Question preview with any student’s numbers, worked solutions and markschemes</li>
               <li>Assignment builder: SL or HL, several standards at once, tries per part, due date, answer key release, class-grade rules</li>
               <li>Printable PDFs (base or per-student version)</li>
@@ -97,7 +100,7 @@ export function HomePage() {
           <div>
             <h4 className="next">Coming next</h4>
             <ul>
-              <li>More A.1 questions, then A.2 Forces and momentum, including HL questions and standards</li>
+              <li>A.3 Work, energy and power, then the other SL topics and the HL-only topics</li>
               <li>Supabase database: real teacher and student accounts, classes, saved work across devices, server-side marking and deadlines</li>
               <li>Teacher gradebook by class, assignment, student and standard</li>
               <li>Hosting on a host school networks allow (Cloudflare Pages or Netlify)</li>

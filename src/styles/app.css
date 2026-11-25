@@ -1449,6 +1449,15 @@ h4.next {
   font-size: 0.78rem;
   text-align: center;
 }
+.std-hl {
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+}
+.std-chip.is-on .std-hl {
+  color: #fff4cf;
+}
 .std-chip.is-on .std-count {
   background: rgba(0, 0, 0, 0.22);
   color: #ffffff;
