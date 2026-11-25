@@ -84,8 +84,9 @@ export function HomePage() {
             <ul>
               <li>Question engine: seeded randomization, rounding-aware marking, error carried forward</li>
               <li>
-                IB Physics · A.1 Kinematics: {questionsForTopic('ibp.A.1').length} questions; A.2 Forces and momentum: {questionsForTopic('ibp.A.2').length} questions (one HL
-                only). Calculation, graph reading and drawing, and multiple choice, all marked by the computer
+                IB Physics · A.1 Kinematics: {questionsForTopic('ibp.A.1').length} questions; A.2 Forces and momentum: {questionsForTopic('ibp.A.2').length} questions (
+                {questionsForTopic('ibp.A.2').filter((q) => q.level === 'HL').length} HL only). Calculation, graph reading and drawing, and multiple choice, all marked by
+                the computer
               </li>
               <li>Question preview with any student’s numbers, worked solutions and markschemes</li>
               <li>Assignment builder: SL or HL, several standards at once, tries per part, due date, answer key release, class-grade rules</li>

@@ -31,7 +31,7 @@ engine before real accounts are added in Phase 3.
 Courses so far: IB Physics SL and IB Physics HL. HL includes every SL topic
 and question plus the HL-only topics (A.4, A.5, B.4, D.4, E.2); a question
 marked level 'HL' appears only in HL. Questions so far: A.1 Kinematics (12)
-and A.2 Forces and momentum (10, one of them HL only). The IB guide has no
+and A.2 Forces and momentum (15, two of them HL only). The IB guide has no
 additional higher level understandings in A.1 or A.2; the one HL difference in
 A.2 is collisions and explosions in two dimensions, which has its own HL-only
 standard (A.2.10) and question. HL-only standards are hidden in SL courses.
@@ -90,33 +90,47 @@ Site (dark theme, works on phones):
   Question bank           IB Physics SL or HL, by theme and topic. Choose one or
                           more standards (green ovals, "Select all", "Unselect
                           all"; nothing is shown until at least one is chosen),
-                          filter by question type, search titles. The chosen
-                          standards are kept in the address, so coming back
-                          from a preview shows the same list.
+                          filter by question type, search titles. Questions
+                          that also need ideas from later topics (e.g. kinetic
+                          energy, A.3, in an A.2 question) are left out unless
+                          "Also include questions that use ideas from later
+                          topics" is ticked. "Combine topics" mode instead
+                          lists only questions that use every topic chosen
+                          (e.g. A.2 + A.3). Choices are kept in the address,
+                          so coming back from a preview shows the same list.
   Question preview        Any question with the base numbers or any student's
                           numbers; answer it interactively (unlimited tries);
                           switch worked solutions and the IB-style markscheme
                           on or off; "Teacher details" shows the given data,
                           exact answers and the accepted range for every part.
-  Assignment builder      1. Choose the course (SL or HL), a topic and one or
-                             more standards, then tick questions.
+  Assignment builder      1. Choose the course (SL or HL), then either
+                             "One topic" (the default: a topic and one or more
+                             standards, with the same later-topics option as
+                             the bank) or "Combine topics" (two or more topics;
+                             only questions that use all of them, with the
+                             instructions shown on the page). Tick questions.
                           2. Settings: tries per part, due date and time,
                              answer key for students (hidden / open now / open
                              after the due date), class-grade rules (penalty
                              per extra try, lowest score per part). Save.
                           3. Print / download a PDF of the base version or of
                              one student's version, with or without worked
-                             solutions and markscheme.
+                             solutions and markscheme, and optionally with the
+                             written extension questions (paper only).
                           Saved assignments: edit settings, print the key,
                           open as a student, delete. Each assignment keeps the
                           version of every question it was made with.
-                          An unsaved draft (course, topic, standards, questions,
-                          settings) survives visits to other pages.
+                          An unsaved draft (course, mode, topic, standards,
+                          topics, questions, settings) survives visits to other
+                          pages.
   Printable view / PDF    Exam-style paper: name/class/date lines, answer lines
                           with units, working space, blank graph grids, then a
                           separate answer-key section; shows the due date of a
-                          saved assignment. "Download PDF" opens the print
-                          dialog; choose "Save as PDF".
+                          saved assignment. Written extension questions
+                          ("explain …", marked by the teacher) can be added to
+                          printed copies, with their markscheme in the key.
+                          "Download PDF" opens the print dialog; choose "Save
+                          as PDF".
   Student view (demo)     Sign in with a class code + username (no password in
                           the demo). Assignment list with due dates, a live
                           countdown, progress, class grade and IB marks. Each
@@ -136,10 +150,12 @@ Question types implemented (all marked by the computer):
   Graph reading     A randomized graph is part of the question.
   Graph drawing     Students drag points that snap to the grid (mouse, touch
                     or keyboard arrows). Marked segment by segment.
-  Written answers   Left out for now: every part must be marked by the
-                    computer (the tests enforce this). The two "explain"
-                    parts became multiple choice. The engine keeps the
-                    written-answer type for later (see FUTURE_FEATURES.md).
+  Written answers   Not online for now: every online part is marked by the
+                    computer (the tests enforce this). Written "explain"
+                    questions exist as paper-only extensions on some
+                    questions (stopping distance, kicked ball, skydiver,
+                    trolleys): the teacher can print them and mark them by
+                    hand; students never see them online.
 
 Marking rules (one policy, online and on paper):
   - A correct final answer earns full marks for that part (markschemes say
@@ -152,9 +168,11 @@ Marking rules (one policy, online and on paper):
     and says so. This also works from a drawn graph (the lift question's
     distance is accepted if it matches the area under the student's graph).
     See section 4 for how the earlier answers are combined.
-  - ECF credit is re-checked whenever an earlier answer changes or is
-    cleared. In an assignment, a part that is already locked (correct, or out
-    of tries) keeps its mark.
+  - ECF uses the earlier parts' CHECKED answers only, never an answer that
+    was typed but not checked, so marks always reflect submitted work. When
+    an earlier part is checked again, later parts that already have a mark
+    are re-marked against it. In an assignment, a part that is already locked
+    (correct, or out of tries) keeps its mark.
   - ECF never uses inadmissible inputs (e.g. negative velocity components
     where the question defines them as positive) and never credits a
     physically impossible calculation (e.g. a negative time of flight).
@@ -181,25 +199,37 @@ A.1 Kinematics: 12 questions (61 marks), in bank order
                                              methods) and angle, 9 marks
   12. A skydiver reaching terminal speed     graph reading + multiple choice, 4 marks
 
-A.2 Forces and momentum: 10 questions (53 marks), in bank order
+A.2 Forces and momentum: 15 questions (83 marks), in bank order
    1. Standing on scales in a lift           Newton's laws, normal force, which-row
                                              multiple choice, 6 marks
    2. Pulling a crate across a floor         static and dynamic friction, F = ma, 6 marks
-   3. A spring, a metal block and buoyancy   Hooke's law from a graph, equilibrium,
+   3. A probe landing on Mars                weight in another field, thrust, F = ma,
+                                             stopping with suvat, 7 marks
+   4. A spring, a metal block and buoyancy   Hooke's law from a graph, equilibrium,
                                              buoyancy, 7 marks
-   4. Measuring viscosity with a falling     weight, buoyancy, Stokes' law at
+   5. Measuring viscosity with a falling     weight, buoyancy, Stokes' law at
       ball                                   terminal speed, 6 marks
-   5. Two trolleys stick together            momentum conservation, kinetic energy,
-                                             multiple choice, 6 marks
-   6. Force–time graph for a kick            impulse as area, average force (two
+   6. Railway trucks that couple together    momentum, coupling, buffer force (two
+                                             methods), impulse, 6 marks
+   7. Two skaters push apart                 total momentum zero, recoil, average
+                                             force, Newton's third law, 6 marks
+   8. A collision between two trolleys       momentum, a velocity that can be
+                                             negative, kinetic energy (A.3), 6 marks
+   9. Kinetic energy after an explosion      multiple choice (uses A.3), 1 mark
+  10. A ball rebounds from a wall            change of momentum with a sign change,
+                                             average force, directions, 5 marks
+  11. Force–time graph for a kick            impulse as area, average force (two
                                              methods), multiple choice, 6 marks
-   7. Kinetic energy after an explosion      multiple choice, 1 mark
-   8. A car going round a bend               centripetal acceleration and force,
+  12. A car going round a bend               centripetal acceleration and force,
                                              friction, maximum speed, ω, 7 marks
-   9. Centripetal acceleration from the      multiple choice, 1 mark
+  13. Centripetal acceleration from the      multiple choice, 1 mark
       period
-  10. A glancing collision on an air table   HL only: momentum in two dimensions,
-                                             7 marks
+  14. A firework shell explodes into three   HL only: momentum in two dimensions,
+      pieces                                 6 marks
+  15. A glancing collision on an air table   HL only: momentum in two dimensions,
+                                             kinetic energy (A.3), 7 marks
+Questions marked "uses A.3" (or, for the skydiver, A.2) need ideas from a
+later topic: by default they are left out of A.1/A.2 lists (section 3).
 All are original questions written in IB style (command terms, "[2]" marks,
 IB units such as m s⁻¹, markschemes with ✓ per marking point, ECF/OWTTE
 notes). No past-paper questions are copied.
@@ -259,6 +289,10 @@ what they typed. In practice:
   - whole numbers ending in zero ("200") get the benefit of the doubt (they
     could mean 1, 2 or 3 s.f.).
 
+Typing extra zeros never makes an answer stricter: 2.0000000000 is read like
+2.0 (trailing zeros are not counted as significant figures), so it is accepted
+whenever 2.0 would be.
+
 Accepted input formats: 13.8, -0.48, .5, 3.0e8, 3.0E8, 3.0x10^8, 3.0X10^8,
 3.0x10^(8), 3.0x10^{8}, 3.0*10^8, 3.0*10**8, 3.0·10^8, 3.0×10⁸ and a decimal
 comma (1,5). A unit may be typed after the number only if it is the expected
@@ -283,8 +317,9 @@ ZERO ANSWERS AND SCIENTIFIC NOTATION
 
 ERROR CARRIED FORWARD (ECF), METHOD BY METHOD
 When a later part is marked wrong, the system re-runs the calculation (with
-all the rounding options above) using the student's own earlier answers in
-place of the carried values: wrong answers (error carried forward) and also
+all the rounding options above) using the student's own earlier CHECKED
+answers in place of the carried values (an answer typed in an earlier part but
+not checked is ignored): wrong answers (error carried forward) and also
 accepted rounded ones (0.33 written for 0.325). It tries each earlier answer
 on its own first, then in pairs, and so on, because a student may use their
 own value from (a) but an unrounded value for (b). Example, stopping distance
@@ -304,8 +339,13 @@ marked correct by ECF from (a).
   - A question can also define ECF from a non-numeric answer, such as the
     area under a graph the student drew. A graph left at, or moved back to,
     its starting layout counts as no answer, and "Reset points" clears it.
-  - Later parts are re-marked automatically whenever an earlier answer is
-    edited or cleared (except parts already locked in an assignment).
+  - Later parts that already have a mark are re-marked automatically when an
+    earlier part is checked again (except parts already locked in an
+    assignment). Editing an answer without checking it changes nothing else.
+  - Where a value is next subtracted from a similar one (thrust − weight),
+    the question can say students keep at least 3 s.f. of it
+    (c.carry(value, 'name', 3)); otherwise rounding to 2 s.f. would swing the
+    difference far more than any examiner allows.
 
 WORKED SOLUTIONS AND ROUNDING
 Worked solutions write intermediate values with one guard digit (4 s.f.)
@@ -552,18 +592,30 @@ src/content: questions and the syllabus they are tagged with
   ib-physics/a2-forces-momentum/ (one file per question; index.ts sets the order)
     lift-scales.ts          Scales in an accelerating and decelerating lift.
     friction-crate.ts       Static vs dynamic friction, then F = ma and v = at.
+    mars-lander.ts          Weight on Mars, thrust and acceleration, the thrust
+                            needed to land (uses the equations of motion).
     spring-buoyancy.ts      Spring constant from a graph, extension, buoyancy.
     stokes-viscosity.ts     Viscosity from terminal speed: weight, buoyancy,
-                            Stokes' law (answers in scientific notation).
-    trolley-collision.ts    Trolleys that stick together: momentum, velocity,
-                            kinetic energy, why it is inelastic.
+                            Stokes' law (creeping flow only; scientific notation).
+    trucks-coupling.ts      Trucks that couple: momentum, speed, buffer force
+                            (two methods), impulse. No energy needed.
+    skaters-push.ts         Skaters push apart: total momentum zero, recoil
+                            speed, average force, Newton's third law.
+    trolley-collision.ts    Non-sticking collision: momentum, A's velocity (may
+                            be negative), kinetic energy (uses A.3).
+    explosion-mcq.ts        Paper 1A: kinetic energy shared after an explosion
+                            (uses A.3).
+    ball-wall-rebound.ts    Change of momentum when a ball rebounds (sign
+                            change), average force, directions.
     impulse-kick.ts         Triangular force–time graph: impulse, speed, average
                             force (two methods), longer contact time.
-    explosion-mcq.ts        Paper 1A: kinetic energy shared after an explosion.
     circular-bend.ts        Car on a level bend: centripetal acceleration and
                             force, friction, maximum speed, angular velocity.
     circular-period-mcq.ts  Paper 1A: centripetal acceleration from the period.
-    collision-2d.ts         HL only: glancing collision, momentum components.
+    explosion-2d.ts         HL only: a shell explodes into three pieces; momentum
+                            in two dimensions. No energy needed.
+    collision-2d.ts         HL only: glancing collision of smooth pucks,
+                            momentum components (uses A.3 in the last part).
 
 src/components: reusable pieces of the interface
   Tex.tsx                   Renders text with KaTeX maths (cached).
@@ -577,6 +629,9 @@ src/components: reusable pieces of the interface
   StandardPicker.tsx        The standards ovals (green when chosen) with "Select
                             all" / "Unselect all" and the "Choose at least one
                             standard" prompt. Used by the bank and the builder.
+  TopicFilters.tsx          "One topic" / "Combine topics" switch, the Combine
+                            topics instructions and topic ovals, the "later
+                            topics" option, and the "Also uses …" labels.
   SettingsForm.tsx          An assignment's settings: tries, due date, answer
                             key, class-grade rules (with a worked example).
   Modal.tsx                 Pop-ups (the due-date warnings) and dialogs (edit
@@ -663,9 +718,19 @@ tests (run with: npm test)
   store.test.ts             Saved data: migration from earlier builds,
                             assignment settings, failed saves, damaged data,
                             due dates, answer keys, pinned numbers and grades.
-  numbers.test.ts           Reading and formatting numbers; random generator.
+  topics.test.ts            Later topics and combined topics: which topics a
+                            question uses, the filter, and that every A.1/A.2
+                            standard still has a question without later topics.
+  numbers.test.ts           Reading and formatting numbers (including answers
+                            padded with zeros); random generator.
   helpers.ts                Shared test tools: typed forms of numbers, and the
                             sweep over combinations of given data.
+  browser/*.cjs             Browser checks of the built site (they need
+                            Playwright; run npm run build and npm run preview,
+                            then node tests/browser/<file>). They cover the
+                            pages, tries, due-date warnings with a simulated
+                            clock, standards and topic choosers, follow-through,
+                            printing and phone layouts.
 
 
 -------------------------------------------------------------------------------
@@ -677,7 +742,10 @@ Adding a question
      a new, permanent id (never change an id after students have used it).
   2. Tag it: topic, one or more standards from that topic (these drive the
      standards picker now and the per-standard reports and retakes later),
-     and level: 'HL' if it is HL-only (required in an HL-only topic).
+     and level: 'HL' if it is HL-only (required in an HL-only topic or on an
+     HL-only standard). If it also needs ideas from another topic, list them
+     in uses (standard ids such as 'ibp.A.3.3', or topic ids): that drives
+     the later-topics option and Combine topics.
   3. Define params (the given data): { min, max, step, base } for each value,
      with max reached in whole steps from min. Add dp to fix decimal places,
      or sci: <s.f.> for scientific notation. Add a constraint if some
@@ -696,13 +764,16 @@ Adding a question
      substituted into later steps with fmtW() and final answers with fmtA();
      the solution then displays exactly what its working gives. Mark times,
      distances and speeds with positive: true. For ECF from a drawn graph or
-     other non-numeric answer, add followThrough.
+     other non-numeric answer, add followThrough. A written "explain" question
+     can be added as a paper-only extension ({ prompt, marks, lines,
+     markscheme }); it is printed only when the teacher asks for it.
   6. Add the question to the topic's index.ts, then run: npm test
      The tests report LaTeX errors, impossible numbers, ranges that are too
      wide or do not end on max, given data shown differently from the value
      used, methods that disagree, rounding noise around zero, duplicate MCQ
-     options, graph points off the grid, written-answer parts, and any worked
-     solution whose own answer would be marked wrong.
+     options, graph points off the grid, written-answer parts, displayed
+     sums, products, squares and simple fractions that do not add up, and any
+     worked solution whose own answer would be marked wrong.
   7. Look at it in the browser: npm run dev, then Question bank → Preview,
      and try a few students' versions with solutions turned on.
 
@@ -725,10 +796,11 @@ Content (each batch on its own branch and pull request)
   [x] A.1 Kinematics: 12 questions covering every standard, including a zero
       answer (walk), scientific notation (electron) and two-method multi-part
       questions (cliff, electron, train, impulse).
-  [x] A.2 Forces and momentum: standards and 10 questions covering every
-      standard, including the HL-only two-dimensional collision.
-  [ ] More questions for standards with only one or two (A.2.5 field forces,
-      A.2.7 impulse, A.2.10 HL collisions), so retakes have choice later.
+  [x] A.2 Forces and momentum: standards and 15 questions covering every
+      standard, with and without later topics, including two HL-only
+      two-dimensional questions.
+  [ ] More questions for standards with only one or two, so retakes have
+      choice later, and more questions that combine topics (e.g. A.2 + A.3).
   [ ] A.3 Work, energy and power next, then the remaining SL topics, about 10
       questions each: B.1, B.2, B.3, B.5, C.1–C.5, D.1–D.3, E.1, E.3–E.5.
   [ ] HL-only topics (A.4, A.5, B.4, D.4, E.2) and the HL additions inside
@@ -823,6 +895,15 @@ written answers with optional AI marking, and more).
     (the warnings tell students to check their answers).
   - The question bank, like the builder, shows no questions until at least
     one standard is chosen.
+  - "Later topics" follows the IB guide's order (A.1, A.2, …, E.5). Questions
+    that need a later topic are left out by default; one tick includes them.
+    A teacher's own teaching order is on the future-features list.
+  - "Combine topics" lists questions that use EVERY chosen topic (not all the
+    questions in any of them), so choosing more topics narrows the list.
+  - Follow-through uses checked answers only, in the teacher preview as well
+    as in assignments, so the same rule applies everywhere.
+  - Written "explain" questions are paper-only extensions for now (online
+    marking stays computer-only, as decided).
   - Marking policy: a correct final answer earns full marks, online and in
     the printed markschemes ("Award [2] for a bald correct answer"); on paper,
     correct working earns marks when the answer is wrong. For stricter hand
