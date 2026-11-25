@@ -1212,6 +1212,20 @@ h4.next {
 .pick-title {
   font-weight: 600;
 }
+.pick-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.std-codes {
+  overflow-wrap: anywhere;
+}
+.chip-uses {
+  white-space: normal;
+  max-width: 100%;
+}
 .pick-side {
   display: flex;
   flex-direction: column;

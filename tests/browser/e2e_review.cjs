@@ -64,8 +64,10 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
     for (let k = 0; k < Math.abs(dx); k++) await p.keyboard.press(dx > 0 ? 'ArrowRight' : 'ArrowLeft');
     for (let k = 0; k < Math.abs(dy); k++) await p.keyboard.press(dy > 0 ? 'ArrowUp' : 'ArrowDown');
   }
+  // Follow-through uses the checked graph, so check the new drawing first.
+  await p.getByRole('button', { name: 'Check graph' }).click();
   await p.locator('.num-input').first().fill('30'); await p.locator('.num-input').first().press('Enter');
-  expect((await fb(1).innerText()).includes('your graph in (a)'), '(b) 30 m accepted by ECF from the drawn graph');
+  expect((await fb(1).innerText()).includes('your graph in (a)'), '(b) 30 m accepted by ECF from the drawn (and checked) graph');
 
   console.log('Two MCQs on one page keep separate selections');
   await go('#/student');

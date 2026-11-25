@@ -37,12 +37,12 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   await p.selectOption('select[aria-label="Topic"]', 'ibp.A.2');
   await p.getByRole('button', { name: 'Select all', exact: true }).click();
   const sl = await p.locator('.pick-list .pick-title').allInnerTexts();
-  expect(sl.length === 9 && !sl.some((t) => t.includes('glancing')), `SL A.2 lists 9 questions without the HL one (${sl.length})`);
+  expect(sl.length === 11 && !sl.some((t) => t.includes('glancing') || t.includes('firework')), `SL A.2 lists 11 questions (no HL ones, none needing later topics) (${sl.length})`);
   expect(!(await p.locator('.std-chip').allInnerTexts()).some((t) => t.includes('A.2.10')), 'SL hides the HL standard A.2.10');
   await p.locator('.segmented button', { hasText: 'IB Physics HL' }).click();
   await p.getByRole('button', { name: 'Select all', exact: true }).click();
   const hl = await p.locator('.pick-list .pick-title').allInnerTexts();
-  expect(hl.length === 10 && hl.some((t) => t.includes('glancing')), `HL A.2 lists 10 questions including the HL one (${hl.length})`);
+  expect(hl.length === 12 && hl.some((t) => t.includes('firework')), `HL A.2 lists 12 questions including the HL explosion (${hl.length})`);
 
   await b.close();
   console.log(problems.length ? `\n${problems.length} PROBLEM(S):\n- ${problems.join('\n- ')}` : '\nAll content checks passed.');

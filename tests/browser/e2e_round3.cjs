@@ -37,7 +37,7 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   expect(await p.locator('.std-prompt').isVisible(), 'prompt is back');
   await p.getByRole('button', { name: 'Select all', exact: true }).click();
   expect((await p.locator('.std-chip[aria-pressed="true"]').count()) === 7, 'Select all turns every oval green');
-  expect((await p.locator('.pick-list li').count()) === 12, 'and lists every A.1 question');
+  expect((await p.locator('.pick-list li').count()) === 11, 'and lists every A.1 question that avoids later topics');
   await p.getByRole('button', { name: 'Unselect all' }).click();
   expect((await p.locator('.std-chip[aria-pressed="true"]').count()) === 0, 'Unselect all clears them');
   await p.getByRole('button', { name: 'Select all', exact: true }).click();
@@ -46,7 +46,7 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   await p.locator('.segmented button', { hasText: 'IB Physics HL' }).click();
   const options = await p.locator('select[aria-label="Topic"] option').allInnerTexts();
   expect(options.some((o) => o.includes('A.4 Rigid body mechanics (HL)')), 'HL lists the HL-only topics');
-  expect((await p.locator('.pick-list li').count()) === 12, 'HL still has the SL A.1 questions');
+  expect((await p.locator('.pick-list li').count()) === 11, 'HL still has the SL A.1 questions');
   await p.locator('.segmented button', { hasText: 'IB Physics SL' }).click();
   const slOptions = await p.locator('select[aria-label="Topic"] option').allInnerTexts();
   expect(!slOptions.some((o) => o.includes('Rigid body')), 'SL does not list HL-only topics');
@@ -54,7 +54,7 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   console.log('Builder: settings and save');
   await p.screenshot({ path: 'shots3/builder-chips.png', fullPage: false });
   await p.getByRole('button', { name: 'Add all shown' }).click();
-  expect((await p.locator('.selection-summary').innerText()).includes('12 questions selected'), '12 questions selected');
+  expect((await p.locator('.selection-summary').innerText()).includes('11 questions selected'), '11 questions selected');
   await p.getByLabel('Assignment title').fill('Round3 HW');
   await p.locator('.settings-form select').first().selectOption('2');
   await p.locator('.settings-form input[type="datetime-local"]').fill('2026-11-25T10:06');
@@ -148,7 +148,7 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
 
   console.log('Print key of a saved assignment');
   await go(`#/print?a=${id}&sol=1&ms=1`);
-  expect((await p.locator('.paper-question').count()) === 12, '12 questions printed');
+  expect((await p.locator('.paper-question').count()) === 11, '11 questions printed');
   expect((await p.locator('.paper-meta').innerText()).includes('due'), 'print shows the due date');
 
   console.log('Question bank: same standards picker, kept when coming back from a preview');
@@ -156,13 +156,13 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   expect(await p.locator('.std-prompt').isVisible(), 'bank starts with no standards chosen');
   expect(!(await p.locator('.q-list').isVisible()), 'and no questions shown');
   await p.getByRole('button', { name: 'Select all', exact: true }).click();
-  expect((await p.locator('.q-card').count()) === 12, 'Select all shows the 12 questions');
+  expect((await p.locator('.q-card').count()) === 11, 'Select all shows the 11 questions that avoid later topics');
   expect(p.url().includes('std='), 'choice kept in the address');
   await p.locator('.q-card').first().getByRole('link', { name: 'Preview' }).click();
   await p.waitForSelector('.question');
   await p.goBack();
   await p.waitForSelector('.std-chip');
-  expect((await p.locator('.q-card:visible').count()) === 12, 'still 12 after coming back');
+  expect((await p.locator('.q-card:visible').count()) === 11, 'still 11 after coming back');
   await go('#/bank?course=ib-physics-hl&topic=ibp.A.4');
   expect((await p.locator('.side-topic.is-active').innerText()).includes('A.4'), 'HL bank opens an HL-only topic');
 

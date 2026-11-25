@@ -36,7 +36,7 @@ function expect(cond, msg) {
   await go('#/bank');
   expect(await page.locator('.std-prompt').isVisible(), 'bank asks for a standard first');
   await page.getByRole('button', { name: 'Select all', exact: true }).click();
-  expect((await page.locator('.q-card').count()) === 12, 'bank lists 12 A.1 questions');
+  expect((await page.locator('.q-card').count()) === 11, 'bank lists the 11 A.1 questions that avoid later topics');
   await page.screenshot({ path: `${OUT}/bank.png`, fullPage: true });
 
   log('Preview: train (base), wrong (a) then ECF (b)');
