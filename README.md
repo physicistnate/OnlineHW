@@ -4,11 +4,11 @@ Online homework for IB, AP and general high-school physics and precalculus/calcu
 
 - **Every student gets their own numbers.** Given data are randomized per student and per assignment, and pinned the first time a student opens a question, so numbers never change. Worked solutions and printed versions use the same numbers.
 - **Answers are checked the way a teacher would.** Each calculation is re-run with every intermediate value kept exact, rounded to 3 s.f. or rounded to 2 s.f. (and with g = 9.8 or 9.81). Any answer in that range is accepted, and significant figures are never penalized. Error carried forward works part by part, the way an IB markscheme does.
-- **Worked solutions and markschemes.** Each step puts the explanation beside the maths. Markschemes use IB conventions (✓ per marking point, error carried forward); AP and university questions are written in their own style. A correct final answer earns full marks; on paper, correct working earns marks when the final answer is wrong.
-- **Assignments with rules.** Pick questions by course (IB Physics SL or HL, AP Physics C: Mechanics, University Physics I), topic and one or more standards; questions that need later topics are left out unless you ask for them, and "Combine topics" finds questions that bring several topics together. Set tries per part (multiple choice: half the choices), a due date and time (students get warnings 5 and 1 minutes before it closes), when students see their own answer key, and how the class grade is worked out. Students see a class grade and their IB marks.
+- **Worked solutions and marking keys.** Each step puts the explanation beside the maths. IB questions have markschemes (✓ per marking point, error carried forward), AP questions scoring guidelines and university questions grading rubrics, each written in its own style (IB questions use British spelling, AP and university questions US spelling). A correct final answer earns full marks; on paper, correct working earns marks when the final answer is wrong.
+- **Assignments from any mix of courses, with rules.** Pick questions by course (IB Physics SL or HL, AP Physics C: Mechanics, University Physics I, University Modern Physics), topic and one or more standards; questions that need later topics are left out unless you ask for them, and "Combine topics" finds questions that bring several topics together. Ticked questions collect in "Your assignment" as you move between courses and topics, so one assignment can mix IB, AP and university questions; save it when you are done, and edit its questions later. Set tries per part (multiple choice: half the choices), a due date and time (students get warnings 5 and 1 minutes before it closes), when students see their own answer key, and how the class grade is worked out. Students see a class grade and their IB marks.
 - **PDFs.** Print the base version or any student's version, with or without the answer key.
 
-**Status: Phase 1.** The question engine, the site, assignments and 59 questions are done: IB Physics A.1 Kinematics (12), A.2 Forces and momentum (15, two HL only) and A.3 Work, energy and power (12), plus trial units for AP Physics C: Mechanics (Unit 3 Work, Energy, and Power, 10 questions) and University Physics I (Topic 3 Work, energy and power, calculus-based, 10 questions). Student work is saved in the browser for now; accounts, server-side marking and the gradebook come with a free Supabase database in Phase 3.
+**Status: Phase 1.** The question engine, the site, assignments and 103 questions are done: IB Physics A.1 Kinematics (12), A.2 Forces and momentum (15, two HL only), A.3 Work, energy and power (13), and all of Theme E: E.1 Structure of the atom (7, three HL only), E.2 Quantum physics (5, an HL-only topic), E.3 Radioactive decay (7, three HL only), E.4 Fission (6) and E.5 Fusion and stars (6). There are also trial units for AP Physics C: Mechanics (Unit 3 Work, Energy, and Power, 10 questions) and University Physics I (Topic 3 Work, energy and power, calculus-based, 10 questions), and University Modern Physics (12 calculus-based questions on the Theme E ideas). Student work is saved in the browser for now; accounts, server-side marking and the gradebook come with a free Supabase database in Phase 3.
 
 ## Run it locally
 
@@ -28,7 +28,7 @@ Open http://localhost:5173. Other commands:
 npm test
 ```
 
-This checks every question (every allowed set of numbers, and 150 random students) and the grading rules.
+This checks every question (every allowed set of numbers, and 150 random students) and the grading rules. It takes a few minutes.
 
 ```bash
 npm run build

@@ -28,18 +28,29 @@ Phase 1 is a working website with no database yet. Everything a student does
 is saved in their own browser, which is enough to test the whole question
 engine before real accounts are added in Phase 3.
 
-Courses so far: IB Physics SL and IB Physics HL, plus two trial courses with
-one unit each: AP Physics C: Mechanics (Unit 3 Work, Energy, and Power) and
-University Physics I, calculus-based (Topic 3 Work, energy and power). Course
-menus group them as IB, AP and University. HL includes every SL topic and
-question plus the HL-only topics (A.4, A.5, B.4, D.4, E.2); a question marked
-level 'HL' appears only in HL. Questions so far (59): A.1 Kinematics (12),
-A.2 Forces and momentum (15, two of them HL only), A.3 Work, energy and power
-(12), AP Unit 3 (10) and University Topic 3 (10). The IB guide has no
-additional higher level understandings in A.1, A.2 or A.3; the one HL
-difference in A.2 is collisions and explosions in two dimensions, which has
-its own HL-only standard (A.2.10) and question. HL-only standards are hidden
-in SL courses.
+Courses so far (five): IB Physics SL and IB Physics HL; two trial courses
+with one unit each, AP Physics C: Mechanics (Unit 3 Work, Energy, and Power)
+and University Physics I, calculus-based (Topic 3 Work, energy and power);
+and University Modern Physics, calculus-based, with questions for the ideas
+of IB Theme E (Topics 2–7). Course menus group them as IB, AP and
+University. HL includes every SL topic and question plus the HL-only topics
+(A.4, A.5, B.4, D.4, E.2); a question marked level 'HL' appears only in HL.
+
+Questions so far (103, 628 marks): A.1 Kinematics (12), A.2 Forces and
+momentum (15, two of them HL only), A.3 Work, energy and power (13), E.1
+Structure of the atom (7, three HL only), E.2 Quantum physics (5, an HL-only
+topic), E.3 Radioactive decay (7, three HL only), E.4 Fission (6), E.5 Fusion
+and stars (6), AP Unit 3 (10), University Physics I Topic 3 (10) and
+University Modern Physics (12). The IB guide has no additional higher level
+understandings in A.1, A.2 or A.3; the one HL difference in A.2 is collisions
+and explosions in two dimensions, which has its own HL-only standard (A.2.10)
+and question. In Theme E the HL understandings are in E.1 (nuclear radius,
+closest approach, the Bohr model), E.3 (nuclear stability, the decay
+constant) and the whole of E.2; each has HL-only standards and questions.
+HL-only standards are hidden in SL courses.
+
+One assignment can mix questions from any courses and topics (section 3,
+"Assignment builder").
 
 Technology: a static website (Vite + React + TypeScript), maths rendered with
 KaTeX, graphs drawn as SVG. No server is needed, so it can be hosted free on
@@ -57,7 +68,8 @@ One-time setup:
 
 Every time:
   npm run dev        Start the site at http://localhost:5173 (reloads as you edit)
-  npm test           Check every question and the grading rules (about 4 s)
+  npm test           Check every question and the grading rules (a few
+                     minutes: every question with every allowed set of numbers)
   npm run build      Build the finished site into the dist/ folder
   npm run preview    Serve the built site at http://localhost:4173
 
@@ -106,35 +118,53 @@ Site (dark theme, works on phones):
                           so coming back from a preview shows the same list.
   Question preview        Any question with the base numbers or any student's
                           numbers; answer it interactively (unlimited tries);
-                          switch worked solutions and the IB-style markscheme
-                          on or off; "Teacher details" shows the given data,
+                          switch worked solutions and the marking key (IB
+                          markscheme, AP scoring guidelines or university
+                          grading rubric) on or off; "Teacher details" shows the given data,
                           exact answers and the accepted range for every part.
-  Assignment builder      1. Choose the course (IB SL or HL, AP, University), then either
-                             "One topic" (the default: a topic and one or more
-                             standards, with the same later-topics option as
-                             the bank) or "Combine topics" (two or more topics;
-                             only questions that use all of them, with the
-                             instructions shown on the page). Tick questions.
+  Assignment builder      1. Choose questions. Pick a course (IB SL or HL, AP,
+                             University), then either "One topic" (the default:
+                             a topic and one or more standards, with the same
+                             later-topics option as the bank) or "Combine
+                             topics" (two or more topics; only questions that
+                             use all of them, with the instructions shown on
+                             the page). Tick questions: they collect in "Your
+                             assignment" on the right, in order, and stay there
+                             when you change the course or topic, so one
+                             assignment can mix IB, AP and university questions
+                             from any number of topics. Reorder (↑ ↓), remove
+                             one (✕) or "Remove all".
                           2. Settings: tries per part, due date and time,
                              answer key for students (hidden / open now / open
                              after the due date), class-grade rules (penalty
-                             per extra try, lowest score per part). Save.
+                             per extra try, lowest score per part). Press
+                             "Save assignment" once everything is chosen.
                           3. Print / download a PDF of the base version or of
                              one student's version, with or without worked
-                             solutions and markscheme, and optionally with the
-                             written extension questions (paper only).
-                          Saved assignments: edit settings, print the key,
-                          open as a student, delete. Each assignment keeps the
-                          version of every question it was made with.
-                          An unsaved draft (course, mode, topic, standards,
-                          topics, questions, settings) survives visits to other
-                          pages.
+                             solutions and marking keys, and optionally with
+                             the written extension questions (paper only).
+                          Saved assignments: "Edit questions" reopens one in
+                          the builder (add or remove questions in any course
+                          or topic, then "Save changes"; questions it already
+                          had keep the version students were given; "Stop
+                          editing" leaves it unchanged), edit settings, print
+                          the key, open as a student, delete. Each assignment
+                          keeps the version of every question it was made
+                          with. An unsaved draft (course, mode, topic,
+                          standards, topics, chosen questions, settings)
+                          survives visits to other pages.
   Printable view / PDF    Exam-style paper: name/class/date lines, answer lines
                           with units, working space, blank graph grids, then a
                           separate answer-key section; shows the due date of a
-                          saved assignment. Written extension questions
-                          ("explain …", marked by the teacher) can be added to
-                          printed copies, with their markscheme in the key.
+                          saved assignment. A paper that mixes courses names
+                          them all, prints instructions that suit them all
+                          and labels each question with its course; its key
+                          is headed "Worked solutions and marking keys" and
+                          names each question's key in brackets (Markscheme,
+                          Scoring guidelines, Grading rubric). Written
+                          extension questions ("explain …", "derive …",
+                          marked by the teacher) can be added to printed
+                          copies, with their marking key.
                           "Download PDF" opens the print dialog; choose "Save
                           as PDF".
   Student view (demo)     Sign in with a class code + username (no password in
@@ -154,14 +184,18 @@ Question types implemented (all marked by the computer):
                     Options are shuffled per student (base version keeps the
                     printed order).
   Graph reading     A randomized graph is part of the question.
+  Sankey diagrams   Drawn to scale on a counting grid (one square = a stated
+                    power), with a key; read off and calculated from (A.3).
   Graph drawing     Students drag points that snap to the grid (mouse, touch
                     or keyboard arrows). Marked segment by segment.
   Written answers   Not online for now: every online part is marked by the
                     computer (the tests enforce this). Written "explain"
                     questions exist as paper-only extensions on some
                     questions (stopping distance, kicked ball, skydiver,
-                    trolleys): the teacher can print them and mark them by
-                    hand; students never see them online.
+                    trolleys) and derivations on three AP questions
+                    (variable force, potential function, rough incline): the
+                    teacher can print them and mark them by hand; students
+                    never see them online.
 
 Marking rules (one policy, online and on paper):
   - A correct final answer earns full marks for that part (markschemes say
@@ -237,7 +271,7 @@ A.2 Forces and momentum: 15 questions (83 marks), in bank order
 Questions marked "uses A.3" (or, for the skydiver, A.2) need ideas from a
 later topic: by default they are left out of A.1/A.2 lists (section 3).
 
-A.3 Work, energy and power: 12 questions (79 marks), in bank order
+A.3 Work, energy and power: 13 questions (85 marks), in bank order
    1. Pulling a sledge with a rope at an     W = Fs cos θ (the dot product), forces
       angle                                  that do no work, friction, power, 5 marks
    2. A crate slides down a rough ramp       GPE from the height, work against
@@ -252,16 +286,20 @@ A.3 Work, energy and power: 12 questions (79 marks), in bank order
       speed of a car                         resistance, P ∝ v³, top speed, 8 marks
    7. Efficiency of an electric motor        useful power, efficiency (%), wasted
       lifting a load                         energy, Sankey diagram, 7 marks
-   8. Energy used by a home in one day       appliance table in kW h, power vs energy,
-                                             30-day cost, average power, 6 marks
-   9. An AI data centre compared with the    PUE, TW h a year, average US homes and
+   8. Reading a Sankey diagram for a car     Sankey drawn to scale: useful power,
+      engine                                 efficiency, cooling, exhaust energy, a
+                                             better engine, 6 marks
+   9. Energy used by a home in one day       appliance table in kW h, power vs
+                                             energy, 30-day cost (from (a)),
+                                             average power, 6 marks
+  10. An AI data centre compared with the    PUE, TW h a year, average US homes and
       homes of whole cities                  whole cities, 7 marks
-  10. Power from a hydroelectric dam         GPE per second, efficiency, GW h a day,
-                                             energy transfers, 6 marks
-  11. Energy transfers in a gas-fired power  Sankey percentages, efficiencies in
+  11. Power from a hydroelectric dam         GPE per second, efficiency, GW h a
+                                             day, energy transfers, 6 marks
+  12. Energy transfers in a gas-fired power  Sankey percentages, efficiencies in
       station                                series, fuel per second, 7 marks
-  12. Petrol and batteries                   energy in a tank, battery energy density,
-                                             useful-energy ratio, 7 marks
+  13. Petrol and batteries                   energy in a tank, battery energy
+                                             density, useful-energy ratio, 7 marks
 Questions 1, 2, 3 and 6 also use A.2 (forces), so they appear in "Combine
 topics" for A.2 + A.3. None needs a later topic.
 
@@ -279,7 +317,9 @@ AP Physics C: Mechanics, Unit 3 Work, Energy, and Power: 10 questions (67 marks)
    6. Elastic potential energy in a bungee   free fall, maximum extension, U_s,
       jump                                   maximum speed, acceleration, 8 marks
    7. Force, equilibrium and energy from a   F = −dU/dx, stable and unstable
-      potential energy function              equilibrium, energy barrier, 7 marks
+      potential energy function              equilibrium, critical speed to cross
+                                             the barrier (follows on from (b)),
+                                             7 marks
    8. Energy and forces in a vertical loop   speed and normal force at the top,
                                              h = 2.5R, the 6mg difference, 7 marks
    9. Instantaneous and average power from a v = ∫a dt, P = Fv, average power,
@@ -294,7 +334,7 @@ University Physics I, Topic 3 Work, energy and power: 10 questions (67 marks)
       decreasing force                       integral, 6 marks
    3. Elastic potential energy of a          ∫(kx + βx³) dx, share of the cubic term,
       stiffening spring                      speed, U(x), 6 marks
-   4. Work to pump the water out of a tank   slicing integral, pump time, centre of
+   4. Work to pump the water out of a tank   slicing integral, pump time, center of
                                              mass, outlet above the rim, 7 marks
    5. Equilibrium, force and escape in a     U = A/x² − B/x: equilibrium, force,
       potential well                         escape speed, bounded motion, 7 marks
@@ -309,6 +349,160 @@ University Physics I, Topic 3 Work, energy and power: 10 questions (67 marks)
   10. A home's daily power curve and         integral of a daily cosine load,
       time-of-use prices                     peak-hour energy, cost, battery, 8 marks
 
+E.1 Structure of the atom: 7 questions (39 marks), in bank order
+   1. The Geiger–Marsden experiment and      conclusions from the scattering,
+      nuclear notation                       nucleons and neutrons from notation,
+                                             isotopes, 4 marks
+   2. Photons from the energy levels of      photon energy in eV and J, wavelength,
+      hydrogen                               region of the spectrum, number of
+                                             lines, 6 marks
+   3. Dark lines in the spectrum of a star   absorption lines, photon energy,
+                                             emission spectra, identifying
+                                             elements, 5 marks
+   4. Photons from a laser pointer           E = hf in J and eV, photons per
+                                             second, red and violet lasers, 5 marks
+   5. Nuclear radius and nuclear density     HL only: R = R₀A^(1/3), density, the
+                                             same for all nuclei, radius ratio,
+                                             6 marks
+   6. Distance of closest approach in alpha  HL only: kinetic energy to electric
+      scattering                             potential energy (uses D.2), nuclear
+                                             radius, energy to reach it, 7 marks
+   7. The Bohr model of hydrogen             HL only: energy levels, emitted
+                                             wavelength, speed from mvr = nh/2π,
+                                             negative energies, 6 marks
+
+E.2 Quantum physics (an HL-only topic): 5 questions (27 marks)
+   1. Photoelectrons from a metal surface    photon energy, E_max = hf − Φ, maximum
+                                             speed, threshold frequency, intensity,
+                                             6 marks
+   2. Planck’s constant from a               E_max against f: threshold, h from the
+      photoelectric graph                    gradient, work function, another
+                                             metal, 5 marks
+   3. Waves and particles: evidence and      evidence for photons and for electron
+      scale                                  waves, de Broglie wavelength of a
+                                             ball, 5 marks
+   4. The de Broglie wavelength of           kinetic energy from eV, momentum,
+      electrons                              wavelength, diffraction rings, 5 marks
+   5. Compton scattering of X-rays           Δλ, scattered wavelength, the
+                                             electron’s energy, the largest shift,
+                                             6 marks
+
+E.3 Radioactive decay: 7 questions (37 marks)
+   1. Mass defect and binding energy of a    mass defect, binding energy, per
+      nucleus                                nucleon, the strong force, 5 marks
+   2. Completing a radioactive decay         Z and N of the daughter, the particles
+      equation                               emitted (neutrinos), conserved
+                                             quantities, 4 marks
+   3. Identifying radiation with absorbers   count rates through paper and
+                                             aluminium, background, ionizing
+                                             ability, 5 marks
+   4. Half-life from an activity–time graph  half-life from the graph, whole
+                                             numbers of half-lives, 5 marks
+   5. Nuclear stability, beta spectra and    HL only: neutron-rich decay, the
+      nuclear energy levels                  neutrino from the beta spectrum, gamma
+                                             photons, discrete energies, 5 marks
+   6. A medical tracer: the decay constant   HL only: λ = ln 2/T½, A = A₀e^(−λt),
+      and the decay law                      N₀ from A = λN, time to a percentage,
+                                             7 marks
+   7. Radiocarbon dating                     HL only: decay constant, age of a
+                                             tool, carbon-14 nuclei per gram, the
+                                             50 000-year limit, 6 marks
+
+E.4 Fission: 6 questions (33 marks)
+   1. Energy released in the fission of      mass decrease from atomic masses, MeV,
+      uranium-235                            energy from a few grams, coal
+                                             equivalent (A.3), 6 marks
+   2. Fission energy from binding energies   total binding energies, energy
+      per nucleon                            released, fissions per second, why
+                                             fission releases energy, 6 marks
+   3. Chain reactions and controlling a      control rods and moderator, critical
+      reactor                                mass, lowering the rods, power growth
+                                             for k > 1, 5 marks
+   4. Slowing neutrons down in a moderator   energy after a head-on elastic
+                                             collision (uses A.2), collisions to
+                                             thermal energy, light nuclei, 6 marks
+   5. How much uranium does a power station  thermal power from the efficiency
+      use?                                   (A.3), fissions per second, kilograms
+                                             a year, heat exchanger, 6 marks
+   6. Fission products and radioactive       neutron-rich products, whole numbers
+      waste                                  of half-lives (E.3), storing spent
+                                             fuel, 4 marks
+
+E.5 Fusion and stars: 6 questions (32 marks)
+   1. Energy from fusing light nuclei        D–T, D–³He or D–D: mass decrease, MeV,
+                                             energy from grams of fuel, why 10⁸ K,
+                                             6 marks
+   2. The fusion that powers a star          mass lost per second, helium nuclei
+                                             per second, hydrogen used, stability,
+                                             6 marks
+   3. How a star’s mass decides its life     evolution of 1 and 20 solar-mass
+                                             stars, why fusion stops at iron,
+                                             lifetimes, 4 marks
+   4. Reading the Hertzsprung–Russell        regions, radius ratio at equal
+      diagram                                temperature, giant and main sequence
+                                             at equal luminosity, 6 marks
+   5. A nearby star: distance from           d = 1/p in pc and m, L = 4πd²b, the
+      parallax, luminosity from brightness   limits of parallax, 5 marks
+   6. The temperature and size of a star     Wien’s law, radius from L = σ4πR²T⁴
+      from its spectrum                      (uses B.1), R/R☉, black bodies,
+                                             5 marks
+
+University Modern Physics: 12 questions (97 marks), by topic (no questions
+yet for Topic 1, special relativity)
+   1. Measuring Planck’s constant with the   Topic 2: h and the work function from
+      photoelectric effect                   two stopping potentials, threshold,
+                                             dV/dλ estimate, 9 marks
+   2. Compton scattering: the scattered      Topic 2: gamma lines of lab sources:
+      photon and the recoiling electron      λ′, electron energy, recoil angle from
+                                             momentum, Compton edge, 9 marks
+   3. Rutherford scattering: closest         Topic 3: U = −∫F dr, closest approach
+      approach, recoil and scattering angle  with and without recoil, cot(θ/2) =
+                                             2b/d₀, Z², 9 marks
+   4. The Bohr model of a hydrogen-like      Topic 3: H, He⁺ or Li²⁺: radius,
+      atom                                   speed, photon energy and wavelength,
+                                             7 marks
+   5. An electron in a box: energy levels,   Topic 4: E₁ = h²/8mL², quantum-dot
+      light and probabilities                wavelength, probability by integrating
+                                             |ψ|², zero-point energy, 8 marks
+   6. A PET scan: counting decays by         Topic 5: λ, ∫₀^∞ A dt = N₀, decays
+      integrating the activity               during the scan, mean life by parts,
+                                             8 marks
+   7. A radioisotope generator: solving the  Topic 5: integrating factor for
+      parent–daughter decay equations        N_D(t), daughter activity, time of the
+                                             maximum, transient equilibrium,
+                                             8 marks
+   8. Fission of uranium-235: the Q-value    Topic 6: Q from atomic masses, energy
+      and the fragments’ energies            shared by momentum, fragment speed,
+                                             fissions per second, 9 marks
+   9. A nuclear reactor for an AI data       Topic 6: thermal power, fissions per
+      center                                 second, uranium-235 a year, mass
+                                             converted to energy, 7 marks
+  10. Fusion: the Coulomb barrier, plasma    Topic 6: barrier height, (3/2)kT as a
+      temperature and the energy released    percentage of it, Q-value, the
+                                             neutron’s or proton’s energy, 8 marks
+  11. The equilibrium temperature of an      Topic 7: L = 4πR²σT⁴, intensity,
+      exoplanet                              equilibrium temperature, albedo change
+                                             by differentials, 7 marks
+  12. What powers a star? Gravity versus     Topic 7: U = −3GM²/5R by integration,
+      fusion                                 Kelvin–Helmholtz time, fusion
+                                             lifetime, 8 marks
+
+Theme E standards paraphrase the understandings in the IB guide (first
+assessment 2025); the numbering E.1.1, E.1.2, ... is ours. The IB's own site
+could not be reached from the environment they were written in, so their
+wording and the SL/HL split were checked against published summaries of the
+guide, not the guide itself. Please compare them with your copy of the guide
+and adjust src/content/catalog.ts if anything differs. The University Modern
+Physics outline is ours, modelled on typical calculus-based modern physics
+courses.
+
+Constants: IB Theme E questions use the values in the IB data booklet, plus
+the Sun's luminosity, radius and mass (src/content/ib-physics/constants.ts).
+University Modern Physics questions use 4 s.f. values as US textbooks give
+them (src/content/university-modern-physics/constants.ts). Each question
+states the values it needs, and the 0.5% allowance covers students who use
+more precise ones.
+
 Real-world figures used (check them about once a year and update the
 questions' text and constants if they change):
   - Average US home: 865 kW h a month in 2024, about 10 400 kW h a year, at an
@@ -322,6 +516,10 @@ questions' text and constants if they change):
     https://epoch.ai/graphs/largest-ai-data-centers-by-power-capacity
   - Power usage effectiveness (PUE) about 1.1–1.5. Lawrence Berkeley National
     Laboratory: https://eta-publications.lbl.gov/publications/united-states-data-center-energy-2025
+  - Three Mile Island Unit 1 (about 835 MW): in September 2024 Microsoft
+    agreed to buy its output for its data centers once it restarts
+    (Constellation Energy, renamed the Crane Clean Energy Center). Quoted in
+    the University Modern Physics data center reactor question.
   - AP Physics C: Mechanics units and topics: College Board course and exam
     description (effective fall 2024):
     https://apcentral.collegeboard.org/media/pdf/ap-physics-c-mechanics-course-and-exam-description-effective-fall-2024.pdf
@@ -330,8 +528,11 @@ All are original questions. IB questions are written in IB style (command
 terms, "[2]" marks, IB units such as m s⁻¹, markschemes with ✓ per marking
 point, ECF/OWTTE notes). AP questions use AP wording, symbols (K, U, W) and
 units (m/s, N/m), four-choice multiple choice and the AP equation sheet;
-university questions are calculus-based problem-set style. AP and university
-questions use US spelling. No past-paper or textbook questions are copied.
+university questions are calculus-based problem-set style. IB questions use
+British spelling (centre, colour, aluminium); AP and university questions use
+US spelling (center, color, aluminum). Marking keys are named by exam style
+(KEY_NAMES in src/config/site.ts): IB markschemes, AP scoring guidelines and
+university grading rubrics. No past-paper or textbook questions are copied.
 
 
 -------------------------------------------------------------------------------
@@ -606,8 +807,9 @@ Top level
 src/config
   site.ts                   Organization and product names, answer tolerance
                             settings, assignment defaults (tries, penalty,
-                            lowest score, warning times), and physical
-                            constants by exam style (IB/AP/General).
+                            lowest score, warning times), physical constants
+                            by exam style (IB/AP/General), and the names of
+                            the marking keys by style (KEY_NAMES).
 
 src/engine: the question engine (no user interface code)
   types.ts                  Definitions of a question template (what authors
@@ -655,11 +857,15 @@ src/content: questions and the syllabus they are tagged with
   catalog.ts                Courses, themes, topics and standards: IB Physics SL
                             and HL (HL includes SL, plus the HL-only topics and
                             HL-only standards such as A.2.10), AP Physics C:
-                            Mechanics (Units 1–7, ids apcm.1–apcm.7) and
-                            University Physics I (Topics 1–7, ids up1.1–up1.7).
-                            Each course has a family (IB, AP, University) for
-                            the grouped menus. Standards so far for A.1, A.2,
-                            A.3, AP Unit 3 and University Topic 3.
+                            Mechanics (Units 1–7, ids apcm.1–apcm.7),
+                            University Physics I (Topics 1–7, ids up1.1–up1.7)
+                            and University Modern Physics (Topics 1–7, ids
+                            ump.1–ump.7). Each course has a family (IB, AP,
+                            University) for the grouped menus. Standards so
+                            far for A.1–A.3, E.1–E.5, AP Unit 3, University
+                            Topic 3 and Modern Physics Topics 2–7.
+                            courseOfQuestion() and printInstructionsFor() label
+                            questions and papers that mix courses.
                             A.1 standards paraphrase the IB guide's
                             understandings (numbering A.1.1–A.1.7 is ours). Also
                             the instructions printed at the top of PDFs.
@@ -723,9 +929,25 @@ src/content: questions and the syllabus they are tagged with
                             momentum components (uses A.3 in the last part).
   ib-physics/a3-work-energy-power/ (one file per question; index.ts sets the order)
     sledge-pull, rough-ramp, force-extension-area, spring-launcher,
-    roller-coaster, car-power, motor-efficiency, home-energy (appliance table),
-    data-centre (AI data centre vs cities), hydroelectric, power-station,
-    energy-density. See the list in section 3.
+    roller-coaster, car-power, motor-efficiency, sankey-engine (a Sankey
+    diagram drawn to scale), home-energy (appliance table), data-centre (AI
+    data centre vs cities), hydroelectric, power-station, energy-density. See
+    the list in section 3.
+  ib-physics/constants.ts   Data-booklet constants for Theme E (c, e, h, mₑ, u,
+                            k, σ, Wien, R₀, pc, ly, the Sun).
+  ib-physics/e1-structure-of-the-atom/ … e5-fusion-and-stars/ (one file per
+                            question; index.ts sets the order; HL-only questions
+                            have courses ['ib-physics-hl'] and level 'HL')
+    E.1: rutherford-scattering, hydrogen-levels, star-absorption, laser-photons,
+         nuclear-radius, closest-approach, bohr-hydrogen.
+    E.2: photoelectric-effect, photoelectric-graph, wave-particle-duality,
+         de-broglie-electrons, compton-scattering.
+    E.3: binding-energy, decay-equations, absorbers, half-life-graph,
+         nuclear-stability, decay-constant, carbon-dating.
+    E.4: fission-energy, binding-energy-fission, reactor-control, moderator,
+         reactor-fuel, fission-waste.
+    E.5: fusion-reactions, star-fusion, stellar-evolution, hr-diagram,
+         parallax-brightness, wien-stefan.
   ap-physics-c-mech/u3-work-energy-power/ (AP style: courses ['ap-physics-c-mech'],
                             topic apcm.3, standards apcm.3.1–apcm.3.5)
     variable-force, force-position-graph, dot-product, incline-friction,
@@ -737,9 +959,22 @@ src/content: questions and the syllabus they are tagged with
     dot-product-3d, exponential-force, nonlinear-spring, pumping-tank,
     potential-well, spring-incline, ramp-variable-friction, constant-power-car,
     data-center-ramp, home-load-profile.
+  university-modern-physics/ (style General: courses ['university-modern-physics'],
+                            topics ump.2–ump.7; index.ts sets the order)
+    constants.ts            4 s.f. constants and the atomic masses used.
+    t2-light/               photoelectric-planck, compton-recoil.
+    t3-atoms/               rutherford-scattering, bohr-atom.
+    t4-quantum/             particle-in-box.
+    t5-decay/               pet-tracer, isotope-generator.
+    t6-reactions/           fission-fragments, data-center-reactor,
+                            fusion-barrier.
+    t7-stars/               planet-temperature, kelvin-helmholtz.
 
 src/components: reusable pieces of the interface
   Tex.tsx                   Renders text with KaTeX maths (cached).
+  Figure.tsx                A question's figure: a graph or a Sankey diagram.
+  Sankey.tsx                Sankey diagrams drawn to scale on a counting grid,
+                            with the bands' labels in a key below.
   Graph.tsx                 SVG graph paper: axes, gridlines, labels, lines,
                             draggable snapping points for graph answers, and a
                             read-only view of a locked answer.
@@ -768,9 +1003,11 @@ src/pages: one file per screen
   PreviewPage.tsx           Single-question preview with version/solution
                             controls and "Teacher details".
   BuilderPage.tsx           Assignment builder: course, topic, standards,
-                            questions, settings, print options, saved
-                            assignments (edit settings, print key, delete).
-                            Keeps an unsaved draft when you visit other pages.
+                            questions (kept in "Your assignment" across
+                            courses and topics, with reordering), settings,
+                            print options, saved assignments (edit questions,
+                            edit settings, print key, delete). Keeps an unsaved
+                            draft when you visit other pages.
   PrintPage.tsx             Printable paper and answer key ("Download PDF"):
                             instructions, working space for calculations,
                             blank graph grids; a saved assignment prints with
@@ -840,10 +1077,14 @@ tests (run with: npm test)
                             assignment settings, failed saves, damaged data,
                             due dates, answer keys, pinned numbers and grades.
   topics.test.ts            Later topics and combined topics: which topics a
-                            question uses, the filter, that every A.1, A.2,
-                            A.3, AP Unit 3 and University Topic 3 standard has a
-                            question without later topics, and that AP and
-                            university questions stay in their own courses.
+                            question uses, the filter, that every A.1–A.3, E.1–
+                            E.5 (SL and HL), AP Unit 3, University Topic 3 and
+                            Modern Physics standard has a question without
+                            later topics, and that each course's questions stay
+                            in that course.
+  review5.test.ts           Review 5 and round 6: follow-through in the fixed
+                            questions, key names by style, papers that mix
+                            courses, and editing a saved assignment.
   numbers.test.ts           Reading and formatting numbers (including answers
                             padded with zeros); random generator.
   helpers.ts                Shared test tools: typed forms of numbers, and the
@@ -856,7 +1097,12 @@ tests (run with: npm test)
                             printing and phone layouts. e2e_round5.cjs covers
                             the grouped course menu, every A.3, AP and
                             university question, m/s answer boxes and printing
-                            for each course.
+                            for each course; e2e_round6.cjs an assignment
+                            mixing courses, saving and editing it, key names
+                            and the Sankey diagram; e2e_theme_e.cjs the Theme
+                            E and Modern Physics topic lists, every new
+                            question, follow-through, a mixed paper and phone
+                            widths down to 320 px.
 
 
 -------------------------------------------------------------------------------
@@ -925,9 +1171,17 @@ Content (each batch on its own branch and pull request)
   [x] A.2 Forces and momentum: standards and 15 questions covering every
       standard, with and without later topics, including two HL-only
       two-dimensional questions.
-  [x] A.3 Work, energy and power: 12 questions covering every standard,
+  [x] A.3 Work, energy and power: 13 questions covering every standard,
       including real data (a home's energy use and cost, an AI data centre
-      compared with cities of homes) and four questions that combine A.2.
+      compared with cities of homes), a Sankey diagram drawn to scale and
+      four questions that combine A.2.
+  [x] Theme E Nuclear and quantum physics: 31 questions covering every SL
+      and HL standard of E.1–E.5 (E.2 is HL only; nine HL-only questions in
+      all), with real contexts such as medical tracers, reactors and stars.
+  [x] University Modern Physics: 12 calculus-based questions for the same
+      ideas (integrals, differentials, a differential equation).
+  [ ] Check the Theme E standards against your copy of the IB guide (see
+      the note in section 3).
   [x] Trial units for other courses: AP Physics C: Mechanics Unit 3 and
       University Physics I Topic 3 (10 questions each, with integrals for
       variable forces, the dot product, friction on ramps, elastic potential
@@ -937,14 +1191,18 @@ Content (each batch on its own branch and pull request)
   [ ] More questions for standards with only one or two, so retakes have
       choice later, and more questions that combine topics.
   [ ] The remaining SL topics, about 10 questions each: B.1 Thermal energy
-      transfers next, then B.2, B.3, B.5, C.1–C.5, D.1–D.3, E.1, E.3–E.5.
+      transfers next, then B.2, B.3, B.5, C.1–C.5, D.1–D.3.
   [ ] Once a year: check the real-world figures listed in section 3 (EIA,
       IEA, Epoch AI) and update the questions that quote them.
-  [ ] HL-only topics (A.4, A.5, B.4, D.4, E.2) and the HL additions inside
-      shared topics (for example B.3, C.1, D.1, D.2, E.1, E.3), each with its
-      HL standards marked 'HL' in the catalog.
+  [ ] HL-only topics (A.4, A.5, B.4, D.4) and the HL additions inside shared
+      topics (for example B.3, C.1, D.1, D.2), each with its HL standards
+      marked 'HL' in the catalog.
+  [ ] University Modern Physics Topic 1, special relativity.
   Each batch: write, npm test, review in the browser, then merge.
-  [ ] Physical constants beyond g (c, e, h, G, k, N_A, ...) in site.ts.
+  [ ] Physical constants beyond g (c, e, h, G, k, N_A, ...) in site.ts. (Theme
+      E and Modern Physics questions state their constants, and the 0.5%
+      allowance covers other common values; site.ts would let each style
+      accept a list of values, as it does for g.)
   [ ] More graph tools as later topics need them: data plotting with a line of
       best fit and gradient, sketching curves (e.g. SHM).
 
@@ -1004,7 +1262,7 @@ Deployment (school wifi blocks GitHub, so do not rely on GitHub Pages)
       username, and work.
 
 Later: see FUTURE_FEATURES.md (retakes weighted to missed standards, links to
-your simulations, mixed IB/AP/TEKS/college courses, per-standard charts,
+your simulations, organizing mixed IB/AP/TEKS/college courses, per-standard charts,
 written answers with optional AI marking, and more).
 
 

@@ -23,9 +23,9 @@ const UP_T3 = ['dot-product-3d', 'exponential-force', 'nonlinear-spring', 'pumpi
   console.log('Home page');
   await go('#/');
   const stats = await p.locator('.hero-stats').innerText();
-  expect(stats.includes('4 courses') && stats.includes('AP Physics C: Mechanics'), 'the stats name all four courses');
+  expect(stats.includes('5 courses') && stats.includes('AP Physics C: Mechanics') && stats.includes('University Modern Physics'), 'the stats name all five courses');
   const status = await p.locator('.status-card').innerText();
-  expect(status.includes('A.3 Work, energy and power: 12 questions'), 'status lists A.3 with 12 questions');
+  expect(status.includes('A.3 Work, energy and power: 13 questions'), 'status lists A.3 with 13 questions (12 plus the Sankey diagram from round 6)');
   expect(status.includes('Unit 3 Work, Energy, and Power (10 questions)') && status.includes('Topic 3 Work, energy and power (10 questions'), 'status lists the two trial units');
 
   console.log('Course menu: grouped IB, AP and University');
@@ -48,11 +48,11 @@ const UP_T3 = ['dot-product-3d', 'exponential-force', 'nonlinear-spring', 'pumpi
   expect((await p.locator('.q-card').count()) === 10, `University Topic 3: 10 questions (${await p.locator('.q-card').count()})`);
   await go('#/bank?course=ib-physics-sl&topic=ibp.A.3');
   await selectAll();
-  expect((await p.locator('.q-card').count()) === 12, `IB SL A.3: 12 questions (${await p.locator('.q-card').count()})`);
+  expect((await p.locator('.q-card').count()) === 13, `IB SL A.3: 13 questions (${await p.locator('.q-card').count()})`);
   expect((await p.locator('.later-toggle').innerText()).includes('IB guide'), 'the later-topics note explains IB order');
   await go('#/bank?course=ib-physics-hl&topic=ibp.A.3');
   await selectAll();
-  expect((await p.locator('.q-card').count()) === 12, 'IB HL A.3: the same 12 questions');
+  expect((await p.locator('.q-card').count()) === 13, 'IB HL A.3: the same 13 questions');
 
   console.log('Every new question renders cleanly (with solutions and markschemes)');
   const bad = [];

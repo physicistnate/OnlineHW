@@ -54,7 +54,7 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   console.log('Builder: settings and save');
   await p.screenshot({ path: 'shots3/builder-chips.png', fullPage: false });
   await p.getByRole('button', { name: 'Add all shown' }).click();
-  expect((await p.locator('.selection-summary').innerText()).includes('11 questions selected'), '11 questions selected');
+  expect((await p.locator('.selection-summary').innerText()).includes('11 questions'), '11 questions in "Your assignment"');
   await p.getByLabel('Assignment title').fill('Round3 HW');
   await p.locator('.settings-form select').first().selectOption('2');
   await p.locator('.settings-form input[type="datetime-local"]').fill('2026-11-25T10:06');
