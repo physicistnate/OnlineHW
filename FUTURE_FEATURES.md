@@ -54,6 +54,24 @@ Still needed:
 - The chart for each student, and the class average plus individual students for the teacher (with the Phase 3 gradebook).
 - A colour-blind-safe chart that is readable on phones, with the numbers shown on or under the bars.
 
+### 5. Applications to other IB subjects
+Choose an application area from another IB subject and get physics problems set in that context. Examples:
+- **Biology:** forces in muscles and joints, blood flow, the terminal speed of falling seeds.
+- **Chemistry:** gas laws, energy in reactions.
+- **Sports, exercise and health science:** impulse in a kick or a landing, projectile angles in sport, power output.
+- **Environmental systems and societies:** energy resources and efficiency.
+- **Design technology:** forces in structures, materials and springs.
+- **Geography:** river flow, earthquakes.
+- **Mathematics:** modelling with graphs.
+
+Still needed:
+- An "application" tag on each question (one or more IB subjects), alongside its topic and standards.
+- A builder filter for it, which can be combined with topics, like the combined-topics mode.
+- New questions written for each context.
+
+### 6. Your own teaching order
+The "leave out questions that need later topics" option uses the IB guide's order (A.1, A.2, A.3, …, E.5). Because the IB lets schools teach topics in any order, a teacher could set their own order for each class, and "later topics" would follow it.
+
 ## Suggested earlier in this project
 
 - **Written (typed) answers**, such as "explain" and "describe" parts. These are left out for now: every part is marked by the computer. When they return, the teacher marks them, with optional **AI marking against the markscheme**. Estimated cost for 150 students: about $2–7 a month with Claude Haiku 5.5, or $33–130 with Sonnet 5.5.

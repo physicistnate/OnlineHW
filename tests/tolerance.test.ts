@@ -54,6 +54,23 @@ describe('accepting typed answers (cell rule)', () => {
     expect(checkNumeric(s, r).status).toBe('incorrect');
   });
 
+  it('accepts a right answer padded with zeros (2.0000000000 for 2.0)', () => {
+    const r = range(2, 1.99, 2.01);
+    for (const typed of ['2', '2.0', '2.00', '2.0000000000', '2.00000000000000000000', '02.0', '+2.0', '2.', '2.0000e0', '2.000000 m']) {
+      expect(checkNumeric(typed, r, { unit: 'm' }).status, typed).toBe('correct');
+    }
+    // An answer that rounds to 2.0 (exact 2.04, written to 2 s.f.) may be padded with zeros too.
+    const r2 = range(2.04, 2.03, 2.05);
+    expect(checkNumeric('2.0', r2).status).toBe('correct');
+    expect(checkNumeric('2.000000', r2).status).toBe('correct');
+    // Zeros do not rescue a wrong answer.
+    expect(checkNumeric('2.2000000', r2).status).toBe('incorrect');
+    expect(checkNumeric('0.000000', range(0, 0, 0)).status).toBe('correct');
+    // Large and small answers written out in full, with or without trailing zeros.
+    expect(checkNumeric('300000000.0000', range(3e8, 2.99e8, 3.01e8)).status).toBe('correct');
+    expect(checkNumeric('0.00000000200000', range(2e-9, 1.99e-9, 2.01e-9)).status).toBe('correct');
+  });
+
   it('reads 1-s.f. answers as at least 2 s.f.', () => {
     // 0.5 is treated as 0.50, so it is not accepted for 0.48.
     expect(checkNumeric('0.5', range(0.48, 0.4776, 0.4824)).status).toBe('incorrect');

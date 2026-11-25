@@ -1,4 +1,4 @@
-import { ASSIGNMENT_DEFAULTS, SITE, TOLERANCE } from '../config/site';
+import { ASSIGNMENT_DEFAULTS, SITE } from '../config/site';
 import { IB_PHYSICS_HL, IB_PHYSICS_SL, allTopics } from '../content/catalog';
 import { ALL_QUESTIONS, questionsForTopic } from '../content/registry';
 import { Logo } from '../components/Layout';
@@ -63,10 +63,6 @@ export function HomePage() {
             <div className="stat-label">
               {withQuestions.length} of {topics.length} SL topics started · {hlOnly} HL-only topics to come
             </div>
-          </div>
-          <div className="stat">
-            <div className="stat-num">{TOLERANCE.carrySigFigs.join(' or ')} s.f.</div>
-            <div className="stat-label">intermediate rounding accepted in multi-step answers</div>
           </div>
         </div>
       </section>

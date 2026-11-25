@@ -22,13 +22,17 @@ const SUPERSCRIPT: Record<string, string> = {
   '⁻': '-', '⁺': '+',
 };
 
+/**
+ * Significant figures in a typed number. sfMin leaves out trailing zeros, after the
+ * decimal point as well as in whole numbers: typing 2.0000000000 for an answer of 2.0
+ * (or 2.0 padded with zeros for any answer that rounds to it) must never make the
+ * answer stricter than typing 2.0. Significant figures are not penalized.
+ */
 function sigFigs(mantissa: string): { sfMin: number; sfMax: number } {
-  const hasPoint = mantissa.includes('.');
   const digits = mantissa.replace('.', '').replace(/^0+/, '');
   if (digits === '') return { sfMin: 1, sfMax: 1 }; // the value zero
-  if (hasPoint) return { sfMin: digits.length, sfMax: digits.length };
   const withoutTrailingZeros = digits.replace(/0+$/, '');
-  return { sfMin: withoutTrailingZeros.length, sfMax: digits.length };
+  return { sfMin: Math.max(1, withoutTrailingZeros.length), sfMax: digits.length };
 }
 
 const NOT_A_NUMBER = 'That doesn\'t look like a number. Try a form such as 13.8 or 3.0e8.';
