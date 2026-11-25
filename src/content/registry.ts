@@ -16,10 +16,12 @@ import ibPhysicsA3 from './ib-physics/a3-work-energy-power';
 import ibPhysicsE1 from './ib-physics/e1-structure-of-the-atom';
 import ibPhysicsE2 from './ib-physics/e2-quantum-physics';
 import ibPhysicsE3 from './ib-physics/e3-radioactive-decay';
+import ibPhysicsE4 from './ib-physics/e4-fission';
+import ibPhysicsE5 from './ib-physics/e5-fusion-and-stars';
 import apPhysicsCMechU3 from './ap-physics-c-mech/u3-work-energy-power';
 import universityPhysics1T3 from './university-physics-1/t3-work-energy-power';
 
-export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1, ...ibPhysicsA2, ...ibPhysicsA3, ...ibPhysicsE1, ...ibPhysicsE2, ...ibPhysicsE3, ...apPhysicsCMechU3, ...universityPhysics1T3];
+export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1, ...ibPhysicsA2, ...ibPhysicsA3, ...ibPhysicsE1, ...ibPhysicsE2, ...ibPhysicsE3, ...ibPhysicsE4, ...ibPhysicsE5, ...apPhysicsCMechU3, ...universityPhysics1T3];
 
 const byId = new Map(ALL_QUESTIONS.map((q) => [q.id, q]));
 const archived = new Map(ARCHIVED_REVISIONS.map((q) => [`${q.id}@v${q.version}`, q]));

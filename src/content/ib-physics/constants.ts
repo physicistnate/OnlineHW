@@ -29,4 +29,10 @@ export const IB = {
   /** Parsec and light year, m. */
   pc: 3.09e16,
   ly: 9.46e15,
+  /** Luminosity, radius and mass of the Sun: W, m and kg. */
+  Lsun: 3.83e26,
+  Rsun: 6.96e8,
+  Msun: 1.99e30,
+  /** Mass of a proton (kg), for counting hydrogen nuclei. */
+  mp: 1.673e-27,
 } as const;
