@@ -345,6 +345,11 @@ main {
   border-color: rgba(138, 180, 255, 0.3);
   color: var(--text);
 }
+.banner-warn {
+  background: var(--warn-soft);
+  border-color: rgba(245, 184, 74, 0.35);
+  color: var(--text);
+}
 .success-msg {
   color: var(--ok);
   font-size: 0.9rem;
@@ -438,7 +443,7 @@ h4.next {
 
 .bank-layout {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 280px minmax(0, 1fr);
   gap: 22px;
   align-items: start;
 }
@@ -506,10 +511,14 @@ h4.next {
 }
 .filters .search {
   flex: 1 1 200px;
+  min-width: 0;
 }
+/* Long option labels must not widen the page: let selects shrink and truncate. */
 .filters select {
-  flex: 0 1 auto;
+  flex: 1 1 220px;
+  min-width: 0;
   max-width: 100%;
+  text-overflow: ellipsis;
 }
 .q-list {
   display: grid;
@@ -1342,14 +1351,15 @@ h4.next {
   .feature-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  /* minmax(0, 1fr), not 1fr: a plain 1fr column grows to fit its widest child. */
   .builder-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 820px) {
   .bank-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .sidebar {
     position: static;
@@ -1417,8 +1427,21 @@ h4.next {
   .mcq-row .mcq-cell + .mcq-cell {
     grid-column: 3;
   }
+  /* The table header is hidden on phones, so label each cell instead. */
   .mcq-header {
     display: none;
+  }
+  .mcq-cell[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .filters > * {
+    flex-basis: 100%;
   }
   .toolbar-right {
     margin-left: 0;

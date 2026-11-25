@@ -24,7 +24,9 @@ export function App() {
       title = 'Question bank';
       break;
     case 'q':
-      page = <PreviewPage key={id} id={id ?? ''} query={route.query} />;
+      // Keyed by the whole address, so following a link to another student's version
+      // (or other reveal settings) of the same question starts fresh.
+      page = <PreviewPage key={`${id}?${route.query.toString()}`} id={id ?? ''} query={route.query} />;
       title = 'Question preview';
       break;
     case 'builder':

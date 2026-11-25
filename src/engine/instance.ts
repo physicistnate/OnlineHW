@@ -2,7 +2,7 @@
  * Turns a template into one student's version of the question.
  */
 import { TOLERANCE } from '../config/site';
-import { computeAnswerRanges, primaryConstants } from './calc';
+import { answerRange, computeAnswerRanges, computeDisplayPath, primaryConstants } from './calc';
 import { baseParams, displayParams, generateParams } from './params';
 import { rngFromString, shuffled } from './rng';
 import type { AnyTemplate, Ctx, GraphSpec, McqOptionInstance, PartInstance, QuestionInstance, ResponseInstance } from './types';
@@ -38,19 +38,28 @@ function startPoints(axes: GraphSpec, count: number, snap: { x: number; y: numbe
  *              otherwise a seed string from seedFor().
  */
 export function instantiate(template: AnyTemplate, seed: string | null): QuestionInstance {
-  let params: Record<string, number | string>;
-  let usedFallbackParams = false;
-  if (seed === null) {
-    params = baseParams(template.params);
-  } else {
-    const generated = generateParams(template.params, rngFromString(seed), template.constraint);
-    params = generated.values;
-    usedFallbackParams = generated.fellBack;
-  }
+  if (seed === null) return buildInstance(template, baseParams(template.params), null);
+  const generated = generateParams(template.params, rngFromString(seed), template.constraint);
+  return buildInstance(template, generated.values, seed, generated.fellBack);
+}
 
+/**
+ * Builds a question instance from explicit parameter values. Used by instantiate(),
+ * by the tests (every parameter combination), and later for numbers saved per student.
+ * `seed` only affects the order of multiple-choice options (null = printed order).
+ */
+export function buildInstance(
+  template: AnyTemplate,
+  params: Record<string, number | string>,
+  seed: string | null = null,
+  usedFallbackParams = false,
+): QuestionInstance {
   const display = displayParams(template.params, params);
   const report = computeAnswerRanges(template.compute, params, template.style);
-  const ctx: Ctx<any, any> = { p: params, d: display, r: report.exact, g: primaryConstants(template.style).g };
+  // Worked solutions and markschemes use the results as a student working from the displayed
+  // (guard-digit) values would get them, so every displayed step adds up. Marking uses `report`.
+  const shown = computeDisplayPath(template.compute, params, template.style);
+  const ctx: Ctx<any, any> = { p: params, d: display, r: shown, g: primaryConstants(template.style).g };
 
   const parts: PartInstance[] = template.parts.map((part) => {
     const id = partId(part.label);
@@ -59,12 +68,19 @@ export function instantiate(template: AnyTemplate, seed: string | null): Questio
 
     switch (spec.kind) {
       case 'numeric': {
-        const raw = report.ranges[spec.answer];
+        const raw = answerRange(report, spec.answer);
         if (!raw) throw new Error(`${template.id} ${part.label}: compute() has no result named "${spec.answer}"`);
         const rel = spec.tolerance?.rel ?? TOLERANCE.relFloor;
         const abs = spec.tolerance?.abs ?? 0;
         const pad = rel * Math.abs(raw.exact) + abs;
-        response = { kind: 'numeric', answer: spec.answer, symbol: spec.symbol, unit: spec.unit, range: { exact: raw.exact, lo: raw.min - pad, hi: raw.max + pad } };
+        response = {
+          kind: 'numeric',
+          answer: spec.answer,
+          symbol: spec.symbol,
+          unit: spec.unit,
+          positive: spec.positive,
+          range: { exact: raw.exact, lo: raw.min - pad, hi: raw.max + pad },
+        };
         break;
       }
       case 'mcq': {

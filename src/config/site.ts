@@ -43,7 +43,7 @@ export interface ConstantPolicy {
 
 /**
  * Physical constants by exam style.
- * IB: one copy of the 2025 data booklet we found lists g = 9.8 m s^-2; older
+ * IB: the IB Physics data booklet (first assessment 2025) gives g = 9.8 m s^-2; older
  * booklets used 9.81, so both are accepted. AP also accepts g = 10 m s^-2.
  */
 export const CONSTANTS: Record<Style, Record<ConstantName, ConstantPolicy>> = {

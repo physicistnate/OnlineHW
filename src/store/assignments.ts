@@ -39,7 +39,8 @@ export function getAssignment(id: string): Assignment | undefined {
   return listAssignments().find((a) => a.id === id);
 }
 
-export function createAssignment(title: string, courseId: string, questionIds: string[]): Assignment {
+/** Saves a new assignment. Returns null if the browser refused to store it. */
+export function createAssignment(title: string, courseId: string, questionIds: string[]): Assignment | null {
   const a: Assignment = {
     id: `hw-${Date.now().toString(36)}`,
     title: title.trim() || 'Untitled assignment',
@@ -48,8 +49,7 @@ export function createAssignment(title: string, courseId: string, questionIds: s
     createdAt: new Date().toISOString(),
     releaseSolutions: false,
   };
-  writeJson('assignments', [...readJson<Assignment[]>('assignments', []), a]);
-  return a;
+  return writeJson('assignments', [...readJson<Assignment[]>('assignments', []), a]) ? a : null;
 }
 
 export function setReleaseSolutions(id: string, release: boolean): void {

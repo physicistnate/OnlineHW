@@ -31,7 +31,8 @@ export function clearWork(studentKey: string, assignmentKey: string, questionId:
   removeKey(workKey(studentKey, assignmentKey, questionId));
 }
 
-export type WorkUpdater = (partId: string, patch: Partial<PartWork>) => void;
+/** Saves changes to one or more parts at once: { partId: patch, ... }. */
+export type WorkUpdater = (patches: Record<string, Partial<PartWork>>) => void;
 
 /** React hook: the saved work for one question, plus an updater that saves immediately. */
 export function useQuestionWork(studentKey: string, assignmentKey: string, questionId: string) {
@@ -43,10 +44,12 @@ export function useQuestionWork(studentKey: string, assignmentKey: string, quest
   }, [studentKey, assignmentKey, questionId]);
 
   const update: WorkUpdater = useCallback(
-    (partId, patch) => {
-      const current = loadWork(studentKey, assignmentKey, questionId);
-      const prev = current[partId] ?? { attempts: 0 };
-      const next: QuestionWork = { ...current, [partId]: { ...prev, ...patch, updatedAt: new Date().toISOString() } };
+    (patches) => {
+      const next: QuestionWork = { ...loadWork(studentKey, assignmentKey, questionId) };
+      const now = new Date().toISOString();
+      for (const [partId, patch] of Object.entries(patches)) {
+        next[partId] = { ...(next[partId] ?? { attempts: 0 }), ...patch, updatedAt: now };
+      }
       saveWork(studentKey, assignmentKey, questionId, next);
       setWork(next);
     },

@@ -1,10 +1,10 @@
 import { defineQuestion } from '../../../engine/define';
-import { fmt } from '../../../engine/numbers';
+import { fmtA, fmtW } from '../../../engine/numbers';
 import { Q, knowns, tex, unitTex as u } from '../../../engine/units';
 
 export default defineQuestion({
   id: 'ibp-a1-train-acceleration',
-  version: 1,
+  version: 2,
   title: 'Uniformly accelerating train',
   courses: ['ib-physics-sl'],
   topic: 'ibp.A.1',
@@ -24,7 +24,10 @@ export default defineQuestion({
   compute: (p, c) => {
     const a = (p.v ** 2 - p.u ** 2) / (2 * p.s);
     const t = (p.v - p.u) / c.carry(a, 'a');
-    return { a, t };
+    // Alternative method shown in the solution: average speed ½(u + v), then t = s / v̄.
+    const vavg = (p.u + p.v) / 2;
+    const t__avg = p.s / c.carry(vavg);
+    return { a, t, vavg, t__avg };
   },
 
   stem: ({ d }) =>
@@ -38,7 +41,7 @@ export default defineQuestion({
       response: { kind: 'numeric', answer: 'a', symbol: 'a', unit: 'm s-2' },
       solution: ({ d, r }) => [
         {
-          text: 'The acceleration is uniform, so the equations of motion apply. List what is known and what is wanted.',
+          text: 'The acceleration is uniform, so the equations of motion apply. Take the direction of motion as positive, and list what is known and what is wanted.',
           math: knowns([['u', d.u, 'm s-1'], ['v', d.v, 'm s-1'], ['s', d.s, 'm'], ['a', '?']]),
         },
         {
@@ -51,12 +54,12 @@ export default defineQuestion({
         },
         {
           text: 'Evaluate. The acceleration is positive because the train speeds up in its direction of motion.',
-          math: tex`a = ${fmt(r.a)}\ ${u('m s-2')}`,
+          math: tex`a = ${fmtW(r.a)} \approx ${fmtA(r.a)}\ ${u('m s-2')}`,
         },
       ],
       markscheme: ({ r }) => [
         { mark: 'Use of $v^2 = u^2 + 2as$' },
-        { mark: tex`$a = ${fmt(r.a)}\ ${u('m s-2')}$` },
+        { mark: tex`$a = ${fmtA(r.a)}\ ${u('m s-2')}$` },
         { note: 'Award [2] for a bald correct answer.' },
       ],
     },
@@ -64,28 +67,28 @@ export default defineQuestion({
       label: '(b)',
       marks: 2,
       prompt: ({ d }) => `Calculate the time taken for the speed of the train to increase from ${Q(d.u, 'm s-1')} to ${Q(d.v, 'm s-1')}.`,
-      response: { kind: 'numeric', answer: 't', symbol: 't', unit: 's' },
-      solution: ({ p, d, r }) => [
+      response: { kind: 'numeric', answer: 't', symbol: 't', unit: 's', positive: true },
+      solution: ({ d, r }) => [
         {
           text: 'The acceleration is now known, so use the equation linking $u$, $v$, $a$ and $t$ and rearrange it for $t$.',
           math: tex`v = u + at \quad\Rightarrow\quad t = \frac{v - u}{a}`,
         },
         {
-          text: 'Substitute, using the acceleration from (a).',
-          math: tex`t = \frac{${d.v} - ${d.u}}{${fmt(r.a)}}`,
+          text: 'Substitute the acceleration from (a), keeping an extra significant figure so the final answer is not affected by rounding.',
+          math: tex`t = \frac{${d.v} - ${d.u}}{${fmtW(r.a)}}`,
         },
         {
           text: 'Evaluate.',
-          math: tex`t = ${fmt(r.t)}\ ${u('s')}`,
+          math: tex`t = ${fmtA(r.t)}\ ${u('s')}`,
         },
         {
-          text: 'Check with an equation that does not use the answer to (a). For uniform acceleration the average velocity is $\\tfrac{1}{2}(u+v)$, so $s = \\tfrac{1}{2}(u+v)\\,t$.',
-          math: tex`t = \frac{2s}{u + v} = \frac{2 \times ${d.s}}{${d.u} + ${d.v}} = ${fmt((2 * p.s) / (p.u + p.v))}\ ${u('s')}`,
+          text: 'Check with a method that does not use the answer to (a). For uniform acceleration the average speed is $\\tfrac{1}{2}(u+v)$, and time = distance ÷ average speed.',
+          math: tex`\bar{v} = \tfrac{1}{2}(${d.u} + ${d.v}) = ${fmtW(r.vavg)}\ ${u('m s-1')}, \qquad t = \frac{${d.s}}{${fmtW(r.vavg)}} = ${fmtA(r.t__avg)}\ ${u('s')}`,
         },
       ],
       markscheme: ({ r }) => [
         { mark: 'Use of $v = u + at$ **or** $s = \\tfrac{1}{2}(u+v)\\,t$' },
-        { mark: tex`$t = ${fmt(r.t)}\ ${u('s')}$` },
+        { mark: tex`$t = ${fmtA(r.t)}\ ${u('s')}$` },
         { note: 'Allow ECF from (a).' },
       ],
     },

@@ -8,9 +8,13 @@
  * full precision, rounded to 3 s.f. or rounded to 2 s.f. (in every combination),
  * and with every accepted value of each physical constant (e.g. g = 9.8 or 9.81).
  * The smallest and largest result for each answer define its accepted range.
+ *
+ * Alternative methods: a result named "<answer>__<anything>" (e.g. "t__avg") is
+ * another way a student might calculate <answer>; its range is merged into the
+ * accepted range for <answer> (see answerRange()).
  */
 import { CONSTANTS, TOLERANCE, type ConstantName, type Style } from '../config/site';
-import { roundSig } from './numbers';
+import { exactSigFigs, roundSig, workingValue } from './numbers';
 
 export interface Calc {
   /**
@@ -26,8 +30,11 @@ export interface Calc {
 
 export type Results = Record<string, number>;
 
-/** Carry mode for one carried value: null = full precision, n = rounded to n s.f. */
-type CarryMode = number | null;
+/**
+ * Carry mode for one carried value: null = full precision, n = rounded to n s.f.,
+ * 'display' = the value as worked solutions show it (fmtW: exact, else 4 s.f.).
+ */
+type CarryMode = number | null | 'display';
 
 class RunCalc implements Calc {
   carries = 0;
@@ -43,7 +50,12 @@ class RunCalc implements Calc {
     const index = this.carries++;
     if (name !== undefined && name in this.overrides) return this.overrides[name];
     const mode = this.modes[index] ?? null;
-    return mode === null ? x : roundSig(x, mode);
+    if (mode === null) return x;
+    if (mode === 'display') return workingValue(x);
+    // Values that are exact to 3 s.f. or fewer (10.5, 0.48, 84) are written down as
+    // they are; only longer values (11.5702...) get rounded by students.
+    if (exactSigFigs(x, 3) !== null) return x;
+    return roundSig(x, mode);
   }
 
   get g(): number {
@@ -60,6 +72,14 @@ export function primaryConstants(style: Style): Record<ConstantName, number> {
 /** Runs compute once with full precision and the primary constants. */
 export function computeExact<P, R extends Results>(compute: (p: P, c: Calc) => R, params: P, style: Style): R {
   return compute(params, new RunCalc(primaryConstants(style)));
+}
+
+/**
+ * Runs compute with every carried value as the worked solution displays it (fmtW).
+ * Used by the tests to check that displayed working reproduces displayed answers.
+ */
+export function computeDisplayPath<P, R extends Results>(compute: (p: P, c: Calc) => R, params: P, style: Style): R {
+  return compute(params, new RunCalc(primaryConstants(style), Array(64).fill('display')));
 }
 
 export interface RawRange {
@@ -154,4 +174,17 @@ export function computeAnswerRanges<P, R extends Results>(
     }
   }
   return { exact, ranges: ranges as Record<keyof R & string, RawRange>, runs, carries: n };
+}
+
+/** The range for an answer, merged with the ranges of its alternative methods ("<key>__..."). */
+export function answerRange(report: RangeReport<Results>, key: string): RawRange | undefined {
+  const main = report.ranges[key];
+  if (!main) return undefined;
+  const merged = { ...main };
+  for (const [k, r] of Object.entries(report.ranges)) {
+    if (!k.startsWith(`${key}__`)) continue;
+    merged.min = Math.min(merged.min, r.min);
+    merged.max = Math.max(merged.max, r.max);
+  }
+  return merged;
 }

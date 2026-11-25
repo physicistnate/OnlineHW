@@ -31,7 +31,8 @@ export interface Ctx<PS extends ParamSpecs, R extends Results> {
   p: Params<PS>;
   /** Parameters exactly as printed (fixed decimal places). */
   d: Display<PS>;
-  /** Exact results of compute(). */
+  /** Results of compute() as the worked solution shows them: carried values at
+   *  their displayed precision (fmtW), so displayed working reproduces displayed answers. */
   r: R;
   /** Value of g used in worked solutions for this course's style. */
   g: number;
@@ -87,6 +88,20 @@ export interface NumericResponseSpec<R> {
   unit?: string;
   /** Widen the accepted range for this answer (on top of the rounding analysis). */
   tolerance?: { rel?: number; abs?: number };
+  /**
+   * The quantity cannot be negative (a time, distance, height or speed). Negative
+   * answers are never accepted, including by error carried forward.
+   */
+  positive?: boolean;
+  /**
+   * Error carried forward from an earlier answer that is not a number (e.g. a graph
+   * the student drew). `value` works out what this answer would be from the
+   * student's earlier responses; `from` names it in feedback ("your graph in (a)").
+   */
+  followThrough?: {
+    from: string;
+    value: (responses: Record<string, PartResponse | undefined>) => number | undefined;
+  };
 }
 
 export interface McqOptionSpec {
@@ -177,7 +192,7 @@ export interface McqOptionInstance {
 }
 
 export type ResponseInstance =
-  | { kind: 'numeric'; answer: string; symbol?: string; unit?: string; range: AnswerRange }
+  | { kind: 'numeric'; answer: string; symbol?: string; unit?: string; positive?: boolean; range: AnswerRange }
   | { kind: 'mcq'; columns?: string[]; options: McqOptionInstance[] }
   | { kind: 'text'; lines: number }
   | {

@@ -1,5 +1,5 @@
 import { defineQuestion } from '../../../engine/define';
-import { fmt } from '../../../engine/numbers';
+import { fmtA, fmtW } from '../../../engine/numbers';
 import { Q, tex, unitTex as u } from '../../../engine/units';
 import type { GraphSpec } from '../../../engine/types';
 
@@ -29,7 +29,7 @@ const graph = (p: P): GraphSpec => {
 
 export default defineQuestion({
   id: 'ibp-a1-vt-graph-cyclist',
-  version: 1,
+  version: 2,
   title: 'Velocity–time graph for a cyclist',
   courses: ['ib-physics-sl'],
   topic: 'ibp.A.1',
@@ -71,55 +71,60 @@ export default defineQuestion({
       response: { kind: 'numeric', answer: 'a', symbol: 'a', unit: 'm s-2' },
       solution: ({ p, r }) => [
         {
-          text: 'Acceleration is the rate of change of velocity, which is the gradient of a velocity–time graph.',
+          text: 'Acceleration is the rate of change of velocity, which is the gradient of a velocity–time graph. Take the direction of motion as positive.',
           math: tex`a = \frac{\Delta v}{\Delta t}`,
         },
         {
           text: `Read the graph: the velocity rises from ${Q(p.v0, 'm s-1')} at $t = 0$ to ${Q(p.v1, 'm s-1')} at $t = ${p.t1}\\ \\mathrm{s}$.`,
           math: tex`a = \frac{${p.v1} - ${p.v0}}{${p.t1} - 0}`,
         },
-        { text: 'Evaluate.', math: tex`a = ${fmt(r.a)}\ ${u('m s-2')}` },
+        { text: 'Evaluate.', math: tex`a = ${fmtA(r.a)}\ ${u('m s-2')}` },
       ],
       markscheme: ({ r }) => [
-        { mark: 'Use of gradient, $a = \\frac{\\Delta v}{\\Delta t}$' },
-        { mark: tex`$a = ${fmt(r.a)}\ ${u('m s-2')}$` },
+        { mark: 'Use of gradient, $a = \\Delta v / \\Delta t$' },
+        { mark: tex`$a = ${fmtA(r.a)}\ ${u('m s-2')}$` },
       ],
     },
     {
       label: '(b)',
       marks: 2,
       prompt: ({ r }) => `Determine the distance travelled by the cyclist in the ${Q(r.T, 's')} shown on the graph.`,
-      response: { kind: 'numeric', answer: 'dist', symbol: 's', unit: 'm' },
-      solution: ({ p, r }) => [
-        {
-          text: 'The area under a velocity–time graph is the displacement. The velocity is never negative, so here this is also the distance travelled.',
-        },
-        {
-          text: `Split the area into three shapes: a trapezium (0 to ${p.t1} s), a rectangle (${p.t1} to ${p.t1 + p.t2} s) and a triangle (${p.t1 + p.t2} to ${r.T} s).`,
-          math: tex`s = \tfrac{1}{2}(${p.v0} + ${p.v1})(${p.t1}) + (${p.v1})(${p.t2}) + \tfrac{1}{2}(${p.v1})(${p.t3})`,
-        },
-        {
-          text: 'Add the three areas.',
-          math: tex`s = ${fmt(r.area1)} + ${fmt(r.area2)} + ${fmt(r.area3)} = ${fmt(r.dist)}\ ${u('m')}`,
-        },
-      ],
+      response: { kind: 'numeric', answer: 'dist', symbol: 's', unit: 'm', positive: true },
+      solution: ({ p, r }) => {
+        // From rest the first region is a triangle; otherwise it is a trapezium.
+        const first = p.v0 === 0 ? 'a triangle' : 'a trapezium';
+        const firstArea = p.v0 === 0 ? tex`\tfrac{1}{2}(${p.v1})(${p.t1})` : tex`\tfrac{1}{2}(${p.v0} + ${p.v1})(${p.t1})`;
+        return [
+          {
+            text: 'The area under a velocity–time graph is the displacement. The velocity is never negative, so here this is also the distance travelled.',
+          },
+          {
+            text: `Split the area into three shapes: ${first} (0 to ${p.t1} s), a rectangle (${p.t1} to ${p.t1 + p.t2} s) and a triangle (${p.t1 + p.t2} to ${r.T} s).`,
+            math: tex`s = ${firstArea} + (${p.v1})(${p.t2}) + \tfrac{1}{2}(${p.v1})(${p.t3})`,
+          },
+          {
+            text: 'Add the three areas.',
+            math: tex`s = ${fmtW(r.area1)} + ${fmtW(r.area2)} + ${fmtW(r.area3)} = ${fmtA(r.dist)}\ ${u('m')}`,
+          },
+        ];
+      },
       markscheme: ({ r }) => [
         { mark: 'Recognition that distance is the area under the graph' },
-        { mark: tex`$s = ${fmt(r.dist)}\ ${u('m')}$` },
+        { mark: tex`$s = ${fmtA(r.dist)}\ ${u('m')}$` },
       ],
     },
     {
       label: '(c)',
       marks: 1,
       prompt: ({ r }) => `Calculate the average speed of the cyclist over the ${Q(r.T, 's')}.`,
-      response: { kind: 'numeric', answer: 'avg', symbol: '\\bar{v}', unit: 'm s-1' },
+      response: { kind: 'numeric', answer: 'avg', symbol: '\\bar{v}', unit: 'm s-1', positive: true },
       solution: ({ r }) => [
         {
           text: 'Average speed is the total distance travelled divided by the total time taken.',
-          math: tex`\bar{v} = \frac{${fmt(r.dist)}}{${r.T}} = ${fmt(r.avg)}\ ${u('m s-1')}`,
+          math: tex`\bar{v} = \frac{${fmtW(r.dist)}}{${r.T}} = ${fmtA(r.avg)}\ ${u('m s-1')}`,
         },
       ],
-      markscheme: ({ r }) => [{ mark: tex`$\bar{v} = ${fmt(r.avg)}\ ${u('m s-1')}$` }, { note: 'Allow ECF from (b).' }],
+      markscheme: ({ r }) => [{ mark: tex`$\bar{v} = ${fmtA(r.avg)}\ ${u('m s-1')}$` }, { note: 'Allow ECF from (b).' }],
     },
   ],
 });

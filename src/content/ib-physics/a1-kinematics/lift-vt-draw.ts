@@ -1,5 +1,6 @@
 import { defineQuestion } from '../../../engine/define';
-import { fmt } from '../../../engine/numbers';
+import { areaUnderPoints } from '../../../engine/grading';
+import { fmt, fmtA, fmtW } from '../../../engine/numbers';
 import { Q, tex, unitTex as u } from '../../../engine/units';
 import type { GraphSpec } from '../../../engine/types';
 
@@ -29,7 +30,7 @@ const axes = (p: P): GraphSpec => {
 
 export default defineQuestion({
   id: 'ibp-a1-lift-vt-draw',
-  version: 1,
+  version: 2,
   title: 'Drawing a velocity–time graph for a lift',
   courses: ['ib-physics-sl'],
   topic: 'ibp.A.1',
@@ -69,7 +70,7 @@ export default defineQuestion({
       prompt: () => 'On the axes, draw a graph to show how the velocity $v$ of the lift varies with time $t$, from $t = 0$ until the lift comes to rest.',
       response: { kind: 'graph', axes: ({ p }) => axes(p), expected: ({ p }) => vertices(p) },
       solution: ({ p, d, r }) => [
-        { text: 'The lift starts from rest, so the graph starts at the origin.' },
+        { text: 'Take upwards as positive. The lift starts from rest, so the graph starts at the origin.' },
         {
           text: `Uniform acceleration gives a straight line. Find the velocity reached after ${Q(d.t1, 's')}:`,
           math: tex`v = u + at = 0 + ${d.a} \times ${d.t1} = ${fmt(r.v, 2)}\ ${u('m s-1')}`,
@@ -86,30 +87,44 @@ export default defineQuestion({
         { mark: tex`Straight line from the origin to $v = ${fmt(r.v, 2)}\ ${u('m s-1')}$ at $t = ${p.t1}\ \mathrm{s}$` },
         { mark: tex`Horizontal line at $v = ${fmt(r.v, 2)}\ ${u('m s-1')}$ until $t = ${r.tEnd1}\ \mathrm{s}$` },
         { mark: tex`Straight line down to $v = 0$ at $t = ${r.T}\ \mathrm{s}$` },
-        { note: 'Online: one mark is lost for each vertex out of place (3 marks for all four vertices correct).' },
+        { note: 'Online: each of the three line segments earns its mark when both of its ends are in the right place.' },
       ],
     },
     {
       label: '(b)',
       marks: 2,
       prompt: () => 'Determine the total distance travelled by the lift.',
-      response: { kind: 'numeric', answer: 'dist', symbol: 's', unit: 'm' },
+      response: {
+        kind: 'numeric',
+        answer: 'dist',
+        symbol: 's',
+        unit: 'm',
+        positive: true,
+        // ECF: the area under the graph the student drew in (a).
+        followThrough: {
+          from: 'your graph in (a)',
+          value: (responses) => {
+            const g = responses['a'];
+            return g?.kind === 'graph' ? areaUnderPoints(g.points) : undefined;
+          },
+        },
+      },
       solution: ({ p, r }) => [
         { text: 'The distance travelled is the area under the velocity–time graph (the velocity is never negative).' },
         {
           text: 'Add the areas of the two triangles and the rectangle.',
           math: tex`s = \tfrac{1}{2}(${fmt(r.v, 2)})(${p.t1}) + (${fmt(r.v, 2)})(${p.t2}) + \tfrac{1}{2}(${fmt(r.v, 2)})(${p.t3})`,
         },
-        { text: 'Evaluate.', math: tex`s = ${fmt(r.s1)} + ${fmt(r.s2)} + ${fmt(r.s3)} = ${fmt(r.dist)}\ ${u('m')}` },
+        { text: 'Evaluate.', math: tex`s = ${fmtW(r.s1)} + ${fmtW(r.s2)} + ${fmtW(r.s3)} = ${fmtA(r.dist)}\ ${u('m')}` },
         {
           text: 'Alternatively, treat the whole shape as one trapezium with parallel sides equal to the time at constant velocity and the total time.',
-          math: tex`s = \tfrac{1}{2}(${p.t2} + ${r.T}) \times ${fmt(r.v, 2)} = ${fmt(r.dist)}\ ${u('m')}`,
+          math: tex`s = \tfrac{1}{2}(${p.t2} + ${r.T}) \times ${fmt(r.v, 2)} = ${fmtA(r.dist)}\ ${u('m')}`,
         },
       ],
       markscheme: ({ r }) => [
         { mark: 'Area under the velocity–time graph used' },
-        { mark: tex`$s = ${fmt(r.dist)}\ ${u('m')}$` },
-        { note: 'Allow ECF from the graph drawn in (a).' },
+        { mark: tex`$s = ${fmtA(r.dist)}\ ${u('m')}$` },
+        { note: 'Allow ECF from the graph drawn in (a) (applied online: the area under the student’s own graph is accepted).' },
       ],
     },
   ],

@@ -1,10 +1,10 @@
 import { defineQuestion } from '../../../engine/define';
-import { cosD, fmt, sinD } from '../../../engine/numbers';
+import { cosD, fmtA, fmtW, sinD } from '../../../engine/numbers';
 import { Q, knowns, tex, unitTex as u } from '../../../engine/units';
 
 export default defineQuestion({
   id: 'ibp-a1-projectile-kick',
-  version: 1,
+  version: 2,
   title: 'Ball kicked across level ground',
   courses: ['ib-physics-sl'],
   topic: 'ibp.A.1',
@@ -36,37 +36,37 @@ export default defineQuestion({
       label: '(a)(i)',
       marks: 1,
       prompt: () => 'Calculate the horizontal component of the initial velocity.',
-      response: { kind: 'numeric', answer: 'vx', symbol: 'v_x', unit: 'm s-1' },
+      response: { kind: 'numeric', answer: 'vx', symbol: 'v_x', unit: 'm s-1', positive: true },
       solution: ({ d, r }) => [
         {
           text: 'Resolve the initial velocity. The horizontal component is adjacent to the angle, so use cosine.',
-          math: tex`v_x = v\cos\theta = ${d.v}\cos ${d.theta}^{\circ} = ${fmt(r.vx)}\ ${u('m s-1')}`,
+          math: tex`v_x = v\cos\theta = ${d.v}\cos ${d.theta}^{\circ} = ${fmtW(r.vx)} \approx ${fmtA(r.vx)}\ ${u('m s-1')}`,
         },
       ],
-      markscheme: ({ r }) => [{ mark: tex`$v_x = ${fmt(r.vx)}\ ${u('m s-1')}$` }],
+      markscheme: ({ r }) => [{ mark: tex`$v_x = ${fmtA(r.vx)}\ ${u('m s-1')}$` }],
     },
     {
       label: '(a)(ii)',
       marks: 1,
       prompt: () => 'Calculate the vertical component of the initial velocity.',
-      response: { kind: 'numeric', answer: 'vy', symbol: 'v_y', unit: 'm s-1' },
+      response: { kind: 'numeric', answer: 'vy', symbol: 'v_y', unit: 'm s-1', positive: true },
       solution: ({ d, r }) => [
         {
           text: 'The vertical component is opposite the angle, so use sine.',
-          math: tex`v_y = v\sin\theta = ${d.v}\sin ${d.theta}^{\circ} = ${fmt(r.vy)}\ ${u('m s-1')}`,
+          math: tex`v_y = v\sin\theta = ${d.v}\sin ${d.theta}^{\circ} = ${fmtW(r.vy)} \approx ${fmtA(r.vy)}\ ${u('m s-1')}`,
         },
       ],
-      markscheme: ({ r }) => [{ mark: tex`$v_y = ${fmt(r.vy)}\ ${u('m s-1')}$` }],
+      markscheme: ({ r }) => [{ mark: tex`$v_y = ${fmtA(r.vy)}\ ${u('m s-1')}$` }],
     },
     {
       label: '(b)',
       marks: 2,
       prompt: () => 'Calculate the maximum height reached by the ball.',
-      response: { kind: 'numeric', answer: 'H', symbol: 'h', unit: 'm' },
+      response: { kind: 'numeric', answer: 'H', symbol: 'h', unit: 'm', positive: true },
       solution: ({ r, g }) => [
         {
-          text: 'Consider the vertical motion only. Taking upwards as positive, the vertical velocity falls from $v_y$ to zero at the top, with acceleration $-g$.',
-          math: knowns([['u', fmt(r.vy), 'm s-1'], ['v', '0'], ['a', `-${g}`, 'm s-2'], ['s', 'h = ?']]),
+          text: 'Consider the vertical motion only. Taking upwards as positive, the vertical velocity falls from $v_y$ to zero at the top, with acceleration $-g$. Keep an extra significant figure in $v_y$ so the final answer is not affected by rounding.',
+          math: knowns([['u', fmtW(r.vy), 'm s-1'], ['v', '0'], ['a', `-${g}`, 'm s-2'], ['s', 'h = ?']]),
         },
         {
           text: 'Use the equation of motion without $t$ and rearrange for $h$.',
@@ -74,12 +74,12 @@ export default defineQuestion({
         },
         {
           text: 'Substitute and evaluate.',
-          math: tex`h = \frac{${fmt(r.vy)}^2}{2 \times ${g}} = ${fmt(r.H)}\ ${u('m')}`,
+          math: tex`h = \frac{${fmtW(r.vy)}^2}{2 \times ${g}} = ${fmtA(r.H)}\ ${u('m')}`,
         },
       ],
       markscheme: ({ r }) => [
         { mark: 'Use of $v^2 = u^2 + 2as$ with the vertical component and $v = 0$ at the top' },
-        { mark: tex`$h = ${fmt(r.H)}\ ${u('m')}$` },
+        { mark: tex`$h = ${fmtA(r.H)}\ ${u('m')}$` },
         { note: 'Allow ECF from (a)(ii).' },
       ],
     },
@@ -87,28 +87,28 @@ export default defineQuestion({
       label: '(c)',
       marks: 3,
       prompt: () => 'Determine the horizontal distance travelled by the ball before it lands.',
-      response: { kind: 'numeric', answer: 'R', symbol: 'R', unit: 'm' },
+      response: { kind: 'numeric', answer: 'R', symbol: 'R', unit: 'm', positive: true },
       solution: ({ r, g }) => [
         {
-          text: 'First find the time of flight from the vertical motion. The ball lands at the same height it started from, so its vertical displacement is zero.',
-          math: tex`s = ut + \tfrac{1}{2}at^2 \;\Rightarrow\; 0 = v_y t - \tfrac{1}{2}g t^2 \;\Rightarrow\; t = \frac{2v_y}{g}`,
+          text: 'First find the time of flight from the vertical motion. The ball lands at the same height it started from, so its vertical displacement is zero. The equation has two roots: $t = 0$ is the moment of the kick, and the non-zero root is the landing time.',
+          math: tex`0 = v_y t - \tfrac{1}{2}g t^2 = t\left(v_y - \tfrac{1}{2}g t\right) \;\Rightarrow\; t = \frac{2v_y}{g}`,
         },
         {
-          text: 'Substitute.',
-          math: tex`t = \frac{2 \times ${fmt(r.vy)}}{${g}} = ${fmt(r.tf)}\ ${u('s')}`,
+          text: 'Substitute, keeping an extra significant figure.',
+          math: tex`t = \frac{2 \times ${fmtW(r.vy)}}{${g}} = ${fmtW(r.tf)}\ ${u('s')}`,
         },
         {
           text: 'The horizontal velocity is constant (no horizontal force), so horizontal distance = horizontal velocity × time.',
-          math: tex`R = v_x t = ${fmt(r.vx)} \times ${fmt(r.tf)} = ${fmt(r.R)}\ ${u('m')}`,
+          math: tex`R = v_x t = ${fmtW(r.vx)} \times ${fmtW(r.tf)} = ${fmtA(r.R)}\ ${u('m')}`,
         },
         {
-          text: `Check: by symmetry the ball takes half the flight time, ${Q(fmt(r.tUp), 's')}, to reach its highest point.`,
+          text: `Check: by symmetry the ball takes half the flight time, ${Q(fmtA(r.tUp), 's')}, to reach its highest point.`,
         },
       ],
       markscheme: ({ r }) => [
-        { mark: 'Time of flight from vertical motion, $t = \\frac{2v_y}{g}$ (or twice the time to the top)' },
-        { mark: tex`$t = ${fmt(r.tf)}\ ${u('s')}$` },
-        { mark: tex`$R = ${fmt(r.R)}\ ${u('m')}$` },
+        { mark: 'Time of flight from the vertical motion, $t = 2v_y / g$ (or twice the time to the top)' },
+        { mark: tex`$t = ${fmtA(r.tf)}\ ${u('s')}$` },
+        { mark: tex`$R = ${fmtA(r.R)}\ ${u('m')}$` },
         { note: 'Allow ECF from (a). Award [3] for a bald correct answer.' },
       ],
     },
@@ -116,7 +116,7 @@ export default defineQuestion({
       label: '(d)',
       marks: 2,
       prompt: () =>
-        'In practice, air resistance acting on the ball is not negligible. Outline how air resistance affects the maximum height reached and the horizontal distance travelled by the ball.',
+        'In practice, air resistance acting on the ball is not negligible. Explain how air resistance affects the maximum height reached and the horizontal distance travelled by the ball.',
       response: { kind: 'text', lines: 5 },
       solution: () => [
         {

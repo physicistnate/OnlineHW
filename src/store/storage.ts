@@ -18,13 +18,32 @@ export function readJson<T>(key: string, fallback: T): T {
   }
 }
 
-export function writeJson(key: string, value: unknown): void {
+/**
+ * Saves a value. Returns false if the browser refused (storage blocked or full),
+ * so callers can tell the user instead of pretending it worked.
+ * `notify: false` skips change notifications (for drafts typed key by key).
+ */
+export function writeJson(key: string, value: unknown, notify = true): boolean {
+  let ok = true;
   try {
     window.localStorage.setItem(`${PREFIX}:${key}`, JSON.stringify(value));
   } catch {
-    /* storage unavailable: the page still works, it just won't remember */
+    ok = false; // storage unavailable: the page still works, it just won't remember
   }
-  listeners.forEach((fn) => fn());
+  if (notify) listeners.forEach((fn) => fn());
+  return ok;
+}
+
+/** True if this browser lets the site save data (false in some private windows). */
+export function storageAvailable(): boolean {
+  try {
+    const k = `${PREFIX}:__test`;
+    window.localStorage.setItem(k, '1');
+    window.localStorage.removeItem(k);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function removeKey(key: string): void {

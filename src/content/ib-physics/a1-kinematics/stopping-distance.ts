@@ -1,10 +1,10 @@
 import { defineQuestion } from '../../../engine/define';
-import { fmt } from '../../../engine/numbers';
+import { fmtA, fmtW } from '../../../engine/numbers';
 import { Q, knowns, tex, unitTex as u } from '../../../engine/units';
 
 export default defineQuestion({
   id: 'ibp-a1-stopping-distance',
-  version: 1,
+  version: 2,
   title: 'Reaction time and stopping distance',
   courses: ['ib-physics-sl'],
   topic: 'ibp.A.1',
@@ -26,7 +26,7 @@ export default defineQuestion({
     const total = c.carry(s1, 's1') + c.carry(s2, 's2');
     // For the worked solution of (d) only:
     const s1Double = 2 * p.v * p.tr;
-    const totalDouble = s1Double + s2;
+    const totalDouble = c.carry(s1Double) + c.carry(s2);
     return { s1, s2, total, s1Double, totalDouble };
   },
 
@@ -38,20 +38,20 @@ export default defineQuestion({
       label: '(a)',
       marks: 1,
       prompt: () => 'Calculate the distance travelled by the car during the reaction time.',
-      response: { kind: 'numeric', answer: 's1', symbol: 's_1', unit: 'm' },
+      response: { kind: 'numeric', answer: 's1', symbol: 's_1', unit: 'm', positive: true },
       solution: ({ d, r }) => [
         {
           text: 'During the reaction time the brakes have not yet been applied, so the car keeps moving at constant speed. Distance = speed × time.',
-          math: tex`s_1 = v\,t_r = ${d.v} \times ${d.tr} = ${fmt(r.s1)}\ ${u('m')}`,
+          math: tex`s_1 = v\,t_r = ${d.v} \times ${d.tr} = ${fmtA(r.s1)}\ ${u('m')}`,
         },
       ],
-      markscheme: ({ r }) => [{ mark: tex`$s_1 = ${fmt(r.s1)}\ ${u('m')}$` }],
+      markscheme: ({ r }) => [{ mark: tex`$s_1 = ${fmtA(r.s1)}\ ${u('m')}$` }],
     },
     {
       label: '(b)',
       marks: 2,
       prompt: () => 'Calculate the distance travelled by the car while it is braking.',
-      response: { kind: 'numeric', answer: 's2', symbol: 's_2', unit: 'm' },
+      response: { kind: 'numeric', answer: 's2', symbol: 's_2', unit: 'm', positive: true },
       solution: ({ d, r }) => [
         {
           text: 'Take the direction of motion as positive. The car is slowing down, so its acceleration is negative. It finishes at rest.',
@@ -63,12 +63,12 @@ export default defineQuestion({
         },
         {
           text: 'Substitute and evaluate. The two negative signs cancel, giving a positive distance.',
-          math: tex`s_2 = \frac{0 - ${d.v}^2}{2 \times (-${d.a})} = ${fmt(r.s2)}\ ${u('m')}`,
+          math: tex`s_2 = \frac{0 - ${d.v}^2}{2 \times (-${d.a})} = ${fmtA(r.s2)}\ ${u('m')}`,
         },
       ],
       markscheme: ({ r }) => [
         { mark: 'Use of $v^2 = u^2 + 2as$ with $v = 0$' },
-        { mark: tex`$s_2 = ${fmt(r.s2)}\ ${u('m')}$` },
+        { mark: tex`$s_2 = ${fmtA(r.s2)}\ ${u('m')}$` },
         { note: 'Award [2] for a bald correct answer.' },
       ],
     },
@@ -76,14 +76,14 @@ export default defineQuestion({
       label: '(c)',
       marks: 1,
       prompt: () => 'Determine the total stopping distance of the car.',
-      response: { kind: 'numeric', answer: 'total', symbol: 's', unit: 'm' },
+      response: { kind: 'numeric', answer: 'total', symbol: 's', unit: 'm', positive: true },
       solution: ({ r }) => [
         {
           text: 'The stopping distance is the reaction (thinking) distance plus the braking distance.',
-          math: tex`s = s_1 + s_2 = ${fmt(r.s1)} + ${fmt(r.s2)} = ${fmt(r.total)}\ ${u('m')}`,
+          math: tex`s = s_1 + s_2 = ${fmtW(r.s1)} + ${fmtW(r.s2)} = ${fmtA(r.total)}\ ${u('m')}`,
         },
       ],
-      markscheme: ({ r }) => [{ mark: tex`$s = ${fmt(r.total)}\ ${u('m')}$` }, { note: 'Allow ECF from (a) and (b).' }],
+      markscheme: ({ r }) => [{ mark: tex`$s = ${fmtA(r.total)}\ ${u('m')}$` }, { note: 'Allow ECF from (a) and (b).' }],
     },
     {
       label: '(d)',
@@ -93,20 +93,20 @@ export default defineQuestion({
       response: { kind: 'text', lines: 4 },
       solution: ({ r }) => [
         {
-          text: `Only the reaction distance depends on the reaction time. Since $s_1 = v\\,t_r$, it is proportional to $t_r$, so it doubles from $${fmt(r.s1)}$ m to $${fmt(r.s1Double)}$ m.`,
+          text: `Only the reaction distance depends on the reaction time. Since $s_1 = v\\,t_r$, it is proportional to $t_r$, so it doubles from $${fmtA(r.s1)}$ m to $${fmtA(r.s1Double)}$ m.`,
         },
         {
-          text: `The braking distance $s_2 = \\frac{u^2}{2a}$ depends only on the speed and the deceleration, so it stays at $${fmt(r.s2)}$ m.`,
+          text: `The braking distance $s_2 = \\frac{u^2}{2|a|}$ depends only on the speed and the size of the deceleration, so it stays at $${fmtA(r.s2)}$ m.`,
         },
         {
-          text: `The new stopping distance is $${fmt(r.totalDouble)}$ m, which is less than double the original ($2 \\times ${fmt(r.total)} = ${fmt(2 * r.total)}$ m).`,
-          math: tex`s_{\text{new}} = ${fmt(r.s1Double)} + ${fmt(r.s2)} = ${fmt(r.totalDouble)}\ ${u('m')}`,
+          text: `The new stopping distance is $${fmtA(r.totalDouble)}$ m, which is less than double the original ($2 \\times ${fmtW(r.total)} = ${fmtW(2 * r.total)}$ m).`,
+          math: tex`s_{\text{new}} = ${fmtW(r.s1Double)} + ${fmtW(r.s2)} = ${fmtA(r.totalDouble)}\ ${u('m')}`,
         },
       ],
       markscheme: () => [
         { mark: 'The reaction (thinking) distance doubles / is proportional to the reaction time' },
         { mark: 'The braking distance is unchanged / does not depend on the reaction time' },
-        { note: 'Accept a correct numerical argument. Award [1 max] for "the distance increases but not by double" without a reason.' },
+        { note: 'Accept a correct numerical argument. Each mark needs a reason: only restating that the distance does not double earns no marks.' },
       ],
     },
   ],

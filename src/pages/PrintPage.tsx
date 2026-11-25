@@ -3,7 +3,7 @@
  * "Save as PDF" produces the file. Layout is white paper with exam-style answer space.
  */
 import { useMemo } from 'react';
-import { SITE } from '../config/site';
+import { CONSTANTS, SITE } from '../config/site';
 import { findCourse } from '../content/catalog';
 import { getQuestion } from '../content/registry';
 import { Graph } from '../components/Graph';
@@ -79,6 +79,19 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
           )}
         </header>
 
+        {course && course.printInstructions.length > 0 && (
+          <div className="paper-instructions">
+            <strong>Instructions</strong>
+            <ul>
+              {course.printInstructions.map((line) => (
+                <li key={line}>
+                  <Tex text={line.replace('{g}', String(CONSTANTS[course.style].g.primary))} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {items.length === 0 && <p>No questions selected.</p>}
 
         {items.map(({ template, instance }, i) => (
@@ -131,6 +144,17 @@ function PrintQuestion({ number, template, instance }: { number: number; templat
   );
 }
 
+/** Ruled lines drawn as borders (backgrounds are dropped when "Background graphics" is off). */
+function Lines({ count, className }: { count: number; className: string }) {
+  return (
+    <div className={className} aria-hidden="true">
+      {Array.from({ length: count }, (_, i) => (
+        <span key={i} />
+      ))}
+    </div>
+  );
+}
+
 function PrintPart({ part }: { part: PartInstance }) {
   const r = part.response;
   return (
@@ -143,13 +167,17 @@ function PrintPart({ part }: { part: PartInstance }) {
         </div>
       )}
       {r.kind === 'numeric' && (
-        <div className="answer-line">
-          {r.symbol && <Tex text={`$${r.symbol} =$`} />}
-          <span className="dots" />
-          {r.unit && <Tex text={`$${unitTex(r.unit)}$`} />}
-        </div>
+        <>
+          {/* Space for working on multi-mark calculations (one more line than marks). */}
+          {part.marks > 1 && <Lines count={part.marks + 1} className="working-lines" />}
+          <div className="answer-line">
+            {r.symbol && <Tex text={`$${r.symbol} =$`} />}
+            <span className="dots" />
+            {r.unit && <Tex text={`$${unitTex(r.unit)}$`} />}
+          </div>
+        </>
       )}
-      {r.kind === 'text' && <div className="writing-lines" style={{ height: `${r.lines * 2.1}em` }} />}
+      {r.kind === 'text' && <Lines count={r.lines} className="writing-lines" />}
       {r.kind === 'graph' && <Graph spec={r.axes} className="graph-print" />}
       {r.kind === 'mcq' && (
         <table className="mcq-print">

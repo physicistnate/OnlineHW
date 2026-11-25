@@ -93,13 +93,22 @@ Question types implemented:
   Short answer /    Free text, saved as typed, "Submit for marking". Marked by
   long response     the teacher for now (AI marking is deliberately left out).
 
-Marking rules (IB conventions):
-  - A correct final answer earns full marks for that part ("bald answer").
-  - Error carried forward (ECF): if a student gets (a) wrong but uses their
-    wrong value correctly in (b), (b) is marked correct and says so.
+Marking rules:
+  - Online, a correct final answer earns full marks for that part. This is a
+    homework policy: the computer cannot see working. On IB papers, "show
+    that" questions and some multi-step calculations need working, so the
+    printed papers say "show your working" and leave space for it.
+  - Error carried forward (ECF), as in IB markschemes: if a student gets (a)
+    wrong but uses their wrong value correctly in (b), (b) is marked correct
+    and says so. This also works from a drawn graph (the lift question's
+    distance is accepted if it matches the area under the student's graph).
+  - ECF credit is re-checked whenever an earlier answer changes: correcting
+    (a) removes ECF credit that (b) had earned from the old answer.
+  - A re-worked answer that is physically impossible (e.g. a negative time or
+    distance) never earns ECF credit; positive-only quantities are marked so.
   - Feedback hints: wrong sign, or out by a power of ten (units/prefixes).
-  - Unreadable input is reported as unreadable, not as wrong, and does not
-    use up an attempt.
+  - Unreadable input (including a wrong unit typed after the number) is
+    reported as unreadable, not as wrong, and does not use up an attempt.
 
 The 7 IB Physics SL · A.1 Kinematics questions:
   1. Uniformly accelerating train           calculation (suvat), 4 marks
@@ -132,16 +141,24 @@ projectile question before it is used to find the maximum height.
 
 The system then re-runs the whole calculation many times:
   - each carried value kept at full precision, rounded to 3 s.f., or rounded
-    to 2 s.f., in every combination (3 options per carried value), and
+    to 2 s.f., in every combination (3 options per carried value). Values
+    that are already exact to 3 s.f. or fewer (10.5, 0.48, 84) are carried as
+    written, because nobody rounds an exact 10.5 to 11;
   - with every accepted value of each physical constant: for IB, g = 9.8 and
-    9.81 m s⁻²; for AP, also g = 10.
+    9.81 m s⁻²; for AP, also g = 10;
+  - by every method the worked solution shows. For example, the train's time
+    can come from t = (v − u)/a or from distance ÷ average speed, each with
+    its own rounding.
   The smallest and largest results form the range. A small extra allowance of
   0.5% of the exact answer is added to each end, to cover calculator and
-  rounding quirks that a single path cannot capture.
+  rounding quirks that a single path cannot capture. Rounding is done the way
+  a person does it (halves round up), not the way binary floating point does.
 
 For a one-step answer, nothing is carried, so the range is just the exact
 answer ± 0.5%. For multi-step answers the range widens by exactly as much as
-rounding mid-calculation can change the result.
+rounding mid-calculation can change the result. Across every allowed set of
+numbers in the current questions, the widest range is about −9%: the
+projectile's maximum height when v_y ≈ 11.5 is rounded to 11 and then squared.
 
 STAGE 2: COMPARING WHAT THE STUDENT TYPED (no significant-figure penalty)
 
@@ -158,9 +175,12 @@ what they typed. In practice:
     could mean 1, 2 or 3 s.f.).
 
 Accepted input formats: 13.8, -0.48, .5, 3.0e8, 3.0x10^8, 3.0*10^8,
-3.0×10⁸, a decimal comma (1,5), and a trailing unit is ignored ("13.8 m").
-"1,500" is rejected as ambiguous, and fractions such as 1/3 are rejected, each
-with a message explaining why.
+3.0×10⁸ and a decimal comma (1,5). A unit may be typed after the number only
+if it is the expected one, in any common form ("4 m/s", "4 m s^-1", "4 m s⁻¹");
+any other unit ("13.8 km" when metres are expected) is refused with a message,
+so a wrong unit is never silently ignored. Malformed entries such as "0.48e",
+"0.48x2" or "0.48m+999" are refused, as are the ambiguous "1,500" and
+fractions such as 1/3, each with a message explaining why.
 
 ERROR CARRIED FORWARD (ECF)
 
@@ -169,7 +189,18 @@ an earlier part wrong. If so, it re-runs the whole calculation (with all the
 rounding options above) using the student's own earlier answer in place of
 the correct carried value. If the later answer then falls in range, it is
 marked correct, with the message "Correct, using your answer to (a) (error
-carried forward)".
+carried forward)". A question can also define ECF from a non-numeric answer,
+such as the area under a graph the student drew. Later parts are re-marked
+automatically whenever an earlier answer is edited, and ECF never rescues a
+physically impossible value (a negative time, distance or speed).
+
+WORKED SOLUTIONS AND ROUNDING
+Worked solutions write intermediate values with one guard digit (4 s.f.)
+unless they are exact (0.48, 104.5), and each displayed answer is the one that
+working produces, so every displayed step adds up. In rare cases this differs
+from the full-precision answer by one in the last digit; both are accepted.
+The tests check, for every allowed set of numbers, that each worked
+solution's own displayed answer is marked correct.
 
 WORKED EXAMPLES (base versions)
 
@@ -192,10 +223,12 @@ WORKED EXAMPLES (base versions)
 
 OTHER ANSWER TYPES
   Multiple choice   exact choice.
-  Graph drawing     each point must be within half a grid square of the
-                    correct vertex (points snap to the grid anyway). Marks are
-                    proportional, rounded down: losing one vertex in a 3-mark,
-                    4-point graph gives 2 marks.
+  Graph drawing     marked line segment by line segment, like the markscheme:
+                    a segment earns its mark when both of its ends are on the
+                    correct vertices (within half a grid square) and nothing
+                    else sits between them. Points are matched to vertices in
+                    any order, so one misplaced point only costs the segments
+                    it touches (e.g. 2/3 for a wrong starting point).
   Written answers   saved and shown as "submitted"; the teacher marks them.
 
 SETTINGS (src/config/site.ts)
@@ -205,9 +238,10 @@ SETTINGS (src/config/site.ts)
   CONSTANTS.IB.g          primary 9.8, also accepts 9.81
   A single answer can be widened in its template with tolerance: { rel, abs }.
 
-The markscheme panel shows the range used for every numeric part ("Online
-marking accepts 6.79 to 7.38 m"), so you can see exactly what will be
-accepted.
+The markscheme panel shows the range for every numeric part ("Online marking:
+accepts any value from 6.79 to 7.38 m, or that value rounded to 2 or more
+significant figures"). Because of the second stage, an answer such as 7.4
+(a 2 s.f. rounding of 7.38) is accepted even though it is above 7.38.
 
 
 -------------------------------------------------------------------------------
@@ -272,19 +306,27 @@ src/engine: the question engine (no user interface code)
                             choices, base values, constraints, display strings.
   calc.ts                   The calculation context (carry() and g) and the
                             rounding-tolerance engine (section 4, stage 1),
-                            including overrides used for ECF.
-  numbers.ts                Reads typed numbers (formats, significant figures)
-                            and formats numbers for display (fmt), plus
-                            trigonometry in degrees.
-  grading.ts                Marks each part: numeric (stage 2 + ECF + hints),
-                            multiple choice, graph points, written answers.
-                            Also per-question score summaries.
+                            including alternative methods ("t__avg"), the
+                            overrides used for ECF, and the "display path"
+                            that worked solutions are built from.
+  numbers.ts                Reads typed numbers (formats, significant figures,
+                            typed units), rounds like a person (halves up), and
+                            formats numbers: fmt (fixed s.f.), fmtW (working
+                            values with a guard digit), fmtA (final answers);
+                            plus trigonometry in degrees.
+  grading.ts                Marks each part: numeric (stage 2, unit check,
+                            positive-only quantities, ECF, hints), multiple
+                            choice, graphs (segment by segment), written
+                            answers. Re-marks later parts when an earlier answer
+                            changes. Also per-question score summaries.
   instance.ts               Builds one student's version of a question: draws
-                            the numbers, runs the tolerance engine, shuffles
-                            options, sets up graph inputs, fills in text.
+                            the numbers (or takes given ones), runs the
+                            tolerance engine, shuffles options, sets up graph
+                            inputs, fills in text.
   units.ts                  Writes units IB-style in LaTeX ("m s-2" → m s⁻²),
-                            Q() for quantities in sentences, tex`` for LaTeX,
-                            knowns() for the "list what you know" step.
+                            checks units typed by students, Q() for quantities
+                            in sentences, tex`` for LaTeX, knowns() for the
+                            "list what you know" step.
   markup.ts                 Splits question text into plain text and $maths$,
                             and formats **bold**. Shared by the site and tests.
 
@@ -292,6 +334,7 @@ src/content: questions and the syllabus they are tagged with
   catalog.ts                Courses, themes, topics and standards. IB Physics SL
                             with all SL topics; A.1 standards paraphrase the IB
                             guide's understandings (numbering A.1.1–A.1.7 is ours).
+                            Also the instructions printed at the top of PDFs.
   registry.ts               The list of every question; lookups by id, topic,
                             course. Add new topic folders here.
   ib-physics/a1-kinematics/
@@ -323,7 +366,10 @@ src/pages: one file per screen
   PreviewPage.tsx           Single-question preview with version/solution
                             controls and "Teacher details".
   BuilderPage.tsx           Assignment builder, print options, saved assignments.
-  PrintPage.tsx             Printable paper and answer key ("Download PDF").
+                            Keeps an unsaved draft when you visit other pages.
+  PrintPage.tsx             Printable paper and answer key ("Download PDF"):
+                            instructions, working space for calculations,
+                            ruled writing lines, blank graph grids.
   StudentPage.tsx           Student sign-in, assignment list, assignment page.
 
 src/store: saved data (browser storage now, Supabase in Phase 3)
@@ -353,8 +399,13 @@ tests (run with: npm test)
                             one correct and no duplicate options, that graph
                             points sit on the grid, that all LaTeX renders, and
                             that numbers are deterministic and varied.
-  tolerance.test.ts         The acceptance rule, rounding ranges, constants,
-                            hints and error carried forward.
+  sweep.test.ts             For EVERY question and EVERY allowed set of numbers
+                            (about 19,000): valid answers and options, and each
+                            worked solution's own displayed answer is accepted.
+  tolerance.test.ts         The acceptance rule, typed units, malformed input,
+                            rounding ranges, constants, alternative methods,
+                            ECF (including re-marking and negative values) and
+                            segment-by-segment graph marking.
   numbers.test.ts           Reading and formatting numbers; random generator.
 
 
@@ -368,12 +419,20 @@ tests (run with: npm test)
      Add a constraint if some combinations make no sense.
   3. Write compute(p, c): calculate every answer from p. Wrap any value a
      student would write down and reuse in c.carry(value, 'name'), using the
-     name of the earlier part's answer to enable ECF. Use c.g for g.
+     name of the earlier part's answer to enable ECF. Use c.g for g. If the
+     solution shows a second method, return it as "<answer>__<name>" (e.g.
+     t__avg) so its rounding is accepted too.
   4. Write the stem and parts: prompt, marks, response type, worked solution
      steps ({ text, math }) and markscheme lines ({ mark } or { note }).
+     State the sign convention ("take upwards as positive"). Show values that
+     are substituted into later steps with fmtW() and final answers with
+     fmtA(); the solution then displays exactly what its working gives.
+     Mark times, distances and speeds with positive: true. For ECF from a
+     drawn graph or other non-numeric answer, add followThrough.
   5. Add the question to the topic's index.ts, then run: npm test
      The tests will report LaTeX errors, impossible numbers, ranges that are
-     too wide, duplicate MCQ options and graph points off the grid.
+     too wide, duplicate MCQ options, graph points off the grid, and any
+     worked solution whose own answer would be marked wrong.
   6. Look at it in the browser: npm run dev, then Question bank → Preview,
      and try a few students' versions with solutions turned on.
 
@@ -383,9 +442,11 @@ tests (run with: npm test)
 -------------------------------------------------------------------------------
 
 Phase 2: content (IB Physics SL first)
-  [ ] A.1 Kinematics: 3 more questions to reach 10, e.g. a horizontal launch
-      from a cliff, distance vs displacement on a circular track, and a
-      displacement–time graph with instantaneous velocity from a tangent.
+  [ ] A.1 Kinematics: 3+ more questions to cover the rest of the topic: a
+      horizontal (or downward) launch from a cliff, terminal speed / the
+      effect of fluid resistance, and a displacement–time graph with
+      instantaneous velocity from a tangent (distance vs displacement could be
+      a fourth).
   [ ] The remaining SL topics, about 10 questions each (~180 more): A.2, A.3,
       B.1, B.2, B.3, B.5, C.1–C.5, D.1–D.3, E.1, E.3–E.5.
       Each batch: write, npm test, review in the browser, then commit.
@@ -422,9 +483,12 @@ Phase 3: accounts and the gradebook (Supabase, free tier)
 
 Deployment
   [ ] GitHub Pages (free for public repositories, which this one is):
-      repository Settings → Pages → Source: "GitHub Actions"; then Actions →
-      "Deploy to GitHub Pages" → Run workflow. The site will appear at
-      https://<username>.github.io/<repository>/
+      1. Merge this work into main first. GitHub only offers "Run workflow"
+         for hand-started workflows that exist on the default branch, and the
+         Pages environment only accepts deployments from it.
+      2. Repository Settings → Pages → Source: "GitHub Actions".
+      3. Actions → "Deploy to GitHub Pages" → Run workflow.
+      The site will appear at https://physicistnate.github.io/OnlineHW/
       (Change the workflow to run on every push to main once you're happy.)
   [ ] Before real student data is stored (Phase 3), check your school's
       student-data privacy rules. Collect as little as possible: class code,
@@ -442,16 +506,19 @@ Later
 9. DECISIONS TO REVIEW
 -------------------------------------------------------------------------------
 
-  - How lenient the rounding allowance is. Students may round carried values
-    to 2 s.f., which is generous when a value is squared or has a leading 1
-    (projectile example in section 4: 7.4 m is accepted for an exact 6.83 m).
-    For a stricter "keep at least 3 s.f. in working" policy, set
+  - How lenient the rounding allowance is (kept lenient on purpose). Students
+    may round carried values to 2 s.f., which is generous when a value is
+    squared or has a leading 1 (projectile example in section 4: 7.4 m is
+    accepted for an exact 6.83 m; the widest case in the current bank is about
+    −9%). For a stricter "keep at least 3 s.f. in working" policy, set
     TOLERANCE.carrySigFigs to [3] in src/config/site.ts; the same example then
     accepts 6.789 to 6.899 m (6.8 and 6.9 accepted, 7.0 and above rejected).
-  - The value of g. Solutions show g = 9.8 m s⁻²; 9.81 is accepted too. One copy
-    of the IB 2025 data booklet found online lists 9.8, but the official PDF
-    could not be checked from here. Please confirm against your copy and
-    change CONSTANTS.IB.g.primary in src/config/site.ts if needed.
+  - Full credit online for a correct final answer is a homework policy (the
+    computer cannot see working). Printed papers ask for working and leave
+    space for it, for teachers marking by hand with the markscheme.
+  - The value of g. Solutions show g = 9.8 m s⁻², the value in the IB Physics
+    data booklet (first assessment 2025); 9.81 is accepted too. It is set by
+    CONSTANTS.IB.g.primary in src/config/site.ts.
   - Standards numbering. A.1.1–A.1.7 are short labels for the IB guide's
     understandings; the numbering is ours, because the IB lists them as bullets.
   - The organization name is set to "Rice Education" (SITE.orgName in

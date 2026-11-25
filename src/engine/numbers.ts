@@ -10,6 +10,8 @@ export interface ParsedNumber {
    */
   sfMin: number;
   sfMax: number;
+  /** Unit text typed after the number ("m/s"), or "" if none. Checked by the grader. */
+  unit?: string;
 }
 
 export type ParseResult = ({ ok: true } & ParsedNumber) | { ok: false; error: string };
@@ -29,9 +31,14 @@ function sigFigs(mantissa: string): { sfMin: number; sfMax: number } {
   return { sfMin: withoutTrailingZeros.length, sfMax: digits.length };
 }
 
+const NOT_A_NUMBER = 'That doesn\'t look like a number. Try a form such as 13.8 or 3.0e8.';
+
 /**
  * Accepts forms such as: 13.8, -0.48, .5, 3.0e8, 3.0E-8, 3.0x10^8, 3.0*10^-8,
- * 3.0×10⁸, 1,5 (decimal comma), and ignores a trailing unit ("13.8 m", "4 m/s").
+ * 3.0×10⁸ and 1,5 (decimal comma). Text after the number is returned as `unit`
+ * only if it looks like a unit ("13.8 m", "4 m/s"); the grader then checks it
+ * against the expected unit. Anything else ("0.48e", "0.48x2", "0.48m+999") is
+ * rejected as unreadable.
  */
 export function parseNumber(raw: string): ParseResult {
   let s = raw.trim();
@@ -52,24 +59,39 @@ export function parseNumber(raw: string): ParseResult {
   }
 
   const m = s.match(/^([+-]?)(\d+(?:\.\d*)?|\.\d+)(?:[eE]([+-]?\d+)|[xX*]10(?:\^|\*\*)[({]?([+-]?\d+)[)}]?)?(.*)$/);
-  if (!m) return { ok: false, error: 'That doesn\'t look like a number. Try a form such as 13.8 or 3.0e8.' };
+  if (!m) return { ok: false, error: NOT_A_NUMBER };
 
   const [, sign, mantissa, expE, expTen, rest] = m;
   if (rest !== '') {
     if (rest.startsWith('/')) return { ok: false, error: 'Enter the value as a decimal (for example 0.333), not a fraction.' };
-    if (!/^[a-zA-Zµμ°%Ω]/.test(rest)) return { ok: false, error: 'That doesn\'t look like a number. Try a form such as 13.8 or 3.0e8.' };
+    // An unfinished exponent ("0.48e", "0.48e-") — but not units such as eV.
+    if (/^[eE][+-]?\d*$/.test(rest) || /^[eE][+-]/.test(rest)) {
+      return { ok: false, error: 'Finish the power of ten, for example 3.0e8 or 3.0e-8.' };
+    }
+    if (/^[xX*]/.test(rest)) return { ok: false, error: 'Write powers of ten as 3.0x10^8 or 3.0e8.' };
+    // A unit: starts with a letter (or µ ° Ω %), then letters, exponents, "/", "^", "-", "·", ".".
+    if (!/^[a-zA-Zµμ°%Ω][a-zA-Zµμ°%Ω0-9^\-/.()⁰¹²³⁴⁵⁶⁷⁸⁹⁻]*$/.test(rest)) return { ok: false, error: NOT_A_NUMBER };
   }
 
   const exponent = expE ?? expTen ?? '0';
   const value = Number(`${sign}${mantissa}e${exponent}`);
   if (!Number.isFinite(value)) return { ok: false, error: 'That number is too large to read.' };
-  return { ok: true, value, ...sigFigs(mantissa) };
+  return { ok: true, value, ...sigFigs(mantissa), unit: rest };
 }
 
-/** Rounds to a number of significant figures. */
+/**
+ * Rounds to a number of significant figures, halves away from zero — the way a
+ * person rounds. A tiny relative nudge stops binary floating-point noise from
+ * flipping exact decimal halves: 7.5 + 20.45 is stored as 27.9499999…, but it
+ * is 27.95 and rounds to 28.0, not 27.9.
+ */
 export function roundSig(x: number, sf: number): number {
   if (!Number.isFinite(x) || x === 0) return x;
-  return Number(x.toPrecision(sf));
+  const shift = sf - 1 - exponentOf(x);
+  const scaled = Math.abs(x) * 10 ** shift;
+  const rounded = Math.round(scaled * (1 + 1e-12));
+  const out = shift >= 0 ? rounded / 10 ** shift : rounded * 10 ** -shift;
+  return Math.sign(x) * Number(out.toPrecision(15));
 }
 
 /** Power of ten of the leading digit: 0.048 -> -2, 13.8 -> 1. */
@@ -96,6 +118,38 @@ export function fmt(x: number, sf = 3): string {
 /** Same as fmt() but as plain text (used outside maths, e.g. SVG labels). */
 export function fmtPlain(x: number, sf = 3): string {
   return fmt(x, sf).replace('\\times 10^{', ' × 10^').replace('}', '');
+}
+
+/**
+ * The fewest significant figures (up to maxSf) that represent x exactly, or null.
+ * 0.48 -> 2, 104.5 -> 4, 33.333... -> null.
+ */
+export function exactSigFigs(x: number, maxSf = 4): number | null {
+  if (!Number.isFinite(x)) return null;
+  if (x === 0) return 1;
+  for (let sf = 1; sf <= maxSf; sf++) {
+    if (Math.abs(roundSig(x, sf) - x) <= 1e-9 * Math.abs(x)) return sf;
+  }
+  return null;
+}
+
+/**
+ * A value used in working (substituted into a later step): exact values as they
+ * are (0.48, 84, 104.5), otherwise 4 s.f. — one guard digit beyond the 3 s.f.
+ * answers, so the displayed arithmetic reproduces the displayed result.
+ */
+export function fmtW(x: number): string {
+  return fmt(x, exactSigFigs(x) ?? 4);
+}
+
+/** A final answer: exact values as they are (0.48, 22.5, 104.5), otherwise 3 s.f. */
+export function fmtA(x: number): string {
+  return fmt(x, exactSigFigs(x) ?? 3);
+}
+
+/** The value a carried quantity has when it is displayed with fmtW(). */
+export function workingValue(x: number): number {
+  return exactSigFigs(x) === null ? roundSig(x, 4) : x;
 }
 
 /** Formats an accepted range so that the two ends are visibly different. */

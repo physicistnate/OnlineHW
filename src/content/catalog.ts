@@ -31,6 +31,8 @@ export interface Course {
   name: string;
   shortName: string;
   style: Style;
+  /** Instructions printed at the top of PDFs. "{g}" is replaced by the course's value of g. */
+  printInstructions: string[];
   themes: Theme[];
 }
 
@@ -48,6 +50,12 @@ export const IB_PHYSICS_SL: Course = {
   name: 'IB Physics SL',
   shortName: 'IB Phys SL',
   style: 'IB',
+  printInstructions: [
+    'Answer all questions in the spaces provided.',
+    'Show your working. In calculations, marks are awarded for the method as well as for the final answer.',
+    'A calculator and the IB Physics data booklet may be used.',
+    'Take $g = {g}\\ \\mathrm{m\\,s^{-2}}$.',
+  ],
   themes: [
     {
       code: 'A',

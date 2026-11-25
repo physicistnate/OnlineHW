@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IB_PHYSICS_SL, findStandard, findTopic } from '../content/catalog';
 import { getQuestion, questionsForTopic } from '../content/registry';
 import { PageHeader } from '../components/Layout';
@@ -6,18 +6,49 @@ import { Difficulty, TypeChips, marksLabel, marksOf } from './BankPage';
 import { href } from '../router';
 import { createAssignment, deleteAssignment, setReleaseSolutions, useAssignments, type Assignment } from '../store/assignments';
 import { studentKey } from '../store/session';
+import { readJson, removeKey, writeJson } from '../store/storage';
+
+/** The unsaved selection, kept so that opening Preview or Print and coming back loses nothing. */
+interface Draft {
+  topicId: string;
+  standard: string;
+  selected: string[];
+  title: string;
+}
+const DRAFT_KEY = 'builder-draft';
+
+function initialDraft(preselect: string | null): Draft {
+  const saved = readJson<Draft | null>(DRAFT_KEY, null);
+  const draft: Draft = {
+    topicId: saved?.topicId && findTopic(saved.topicId) ? saved.topicId : 'ibp.A.1',
+    standard: saved?.standard ?? '',
+    selected: (saved?.selected ?? []).filter((id) => getQuestion(id)),
+    title: saved?.title ?? '',
+  };
+  const q = preselect ? getQuestion(preselect) : undefined;
+  if (q) {
+    draft.topicId = q.topic;
+    draft.standard = '';
+    if (!draft.selected.includes(q.id)) draft.selected = [...draft.selected, q.id];
+  }
+  return draft;
+}
 
 export function BuilderPage({ query }: { query: URLSearchParams }) {
   const course = IB_PHYSICS_SL;
-  const preselect = query.get('add');
-  const initialTopic = (preselect && getQuestion(preselect)?.topic) || 'ibp.A.1';
+  const [initial] = useState(() => initialDraft(query.get('add')));
 
-  const [topicId, setTopicId] = useState(initialTopic);
-  const [standard, setStandard] = useState('');
-  const [selected, setSelected] = useState<string[]>(preselect && getQuestion(preselect) ? [preselect] : []);
-  const [title, setTitle] = useState('');
+  const [topicId, setTopicId] = useState(initial.topicId);
+  const [standard, setStandard] = useState(initial.standard);
+  const [selected, setSelected] = useState<string[]>(initial.selected);
+  const [title, setTitle] = useState(initial.title);
   const [savedMsg, setSavedMsg] = useState('');
+  const [saveError, setSaveError] = useState('');
   const assignments = useAssignments();
+
+  useEffect(() => {
+    writeJson(DRAFT_KEY, { topicId, standard, selected, title } satisfies Draft, false);
+  }, [topicId, standard, selected, title]);
 
   const topic = findTopic(topicId)!;
   const questions = questionsForTopic(topicId).filter((q) => !standard || q.standards.includes(standard));
@@ -27,9 +58,16 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
 
   const save = () => {
     const a = createAssignment(title || `${topic.code} ${topic.name} homework`, course.id, selected);
+    if (!a) {
+      setSavedMsg('');
+      setSaveError('Could not save: this browser is blocking storage (for example in a private window). Your selection has been kept.');
+      return;
+    }
+    setSaveError('');
     setSavedMsg(`Saved “${a.title}”. Students can now open it in the student view.`);
     setSelected([]);
     setTitle('');
+    removeKey(DRAFT_KEY);
   };
 
   return (
@@ -130,6 +168,11 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
               Save assignment
             </button>
             {savedMsg && <p className="success-msg">{savedMsg}</p>}
+            {saveError && (
+              <p className="error-msg" role="alert">
+                {saveError}
+              </p>
+            )}
           </section>
 
           <PrintPanel selected={selected} title={title || `${topic.code} ${topic.name} homework`} assignments={assignments} />

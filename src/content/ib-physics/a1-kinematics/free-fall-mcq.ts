@@ -4,7 +4,7 @@ import { Q, tex, unitTex as u } from '../../../engine/units';
 
 export default defineQuestion({
   id: 'ibp-a1-free-fall-mcq',
-  version: 1,
+  version: 2,
   title: 'Speed of a falling object',
   courses: ['ib-physics-sl'],
   topic: 'ibp.A.1',
@@ -15,7 +15,8 @@ export default defineQuestion({
   difficulty: 1,
 
   params: {
-    h: { min: 4, max: 60, step: 1, base: 20 },
+    // 157 possible heights, so students rarely share numbers.
+    h: { min: 2, max: 80, step: 0.5, base: 20, dp: 1 },
   },
 
   compute: (p, c) => {
@@ -47,8 +48,8 @@ export default defineQuestion({
       },
       solution: ({ d, r, g }) => [
         {
-          text: 'The object starts from rest and accelerates uniformly at $g$. The time of the fall is not needed, so use the equation of motion without $t$.',
-          math: tex`v^2 = u^2 + 2as \quad\text{with}\quad u = 0,\; a = g,\; s = h`,
+          text: 'Take downwards as positive. The object starts from rest and accelerates uniformly at $g$. The time of the fall is not needed, so use the equation of motion without $t$.',
+          math: tex`\begin{gathered} v^2 = u^2 + 2as \\ u = 0,\quad a = g,\quad s = h \end{gathered}`,
         },
         {
           text: 'Rearrange for $v$ and substitute.',

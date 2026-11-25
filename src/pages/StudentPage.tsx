@@ -14,7 +14,16 @@ import { href } from '../router';
 import { getAssignment, useAssignments, type Assignment } from '../store/assignments';
 import { loadWork, useQuestionWork } from '../store/progress';
 import { signIn, signOut, studentKey, useSession } from '../store/session';
-import { subscribe } from '../store/storage';
+import { storageAvailable, subscribe } from '../store/storage';
+
+function StorageWarning() {
+  if (storageAvailable()) return null;
+  return (
+    <div className="banner banner-warn" role="alert">
+      This browser is blocking storage (for example in a private window), so your answers will not be saved. Open the site in a normal window.
+    </div>
+  );
+}
 
 function useStorageTick(): number {
   const [tick, setTick] = useState(0);
@@ -112,6 +121,7 @@ export function StudentHome() {
       >
         Your assignments. Answers are saved as you work, and your numbers stay the same every time you sign in.
       </PageHeader>
+      <StorageWarning />
       <div className="assignment-grid">
         {assignments.map((a) => {
           const p = assignmentProgress(a, sKey);
@@ -200,6 +210,7 @@ export function StudentAssignment({ id }: { id: string }) {
           </div>
         </div>
       </div>
+      <StorageWarning />
       {assignment.releaseSolutions && <div className="banner banner-info">Your teacher has released the worked solutions and markscheme for this assignment. They use your numbers.</div>}
       {templates.map((t, i) => (
         <StudentQuestion key={t.id} template={t} number={i + 1} sKey={sKey} assignment={assignment} />

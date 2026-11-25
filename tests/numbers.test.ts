@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fmt, parseNumber, roundSig } from '../src/engine/numbers';
+import { fmt, fmtA, fmtW, parseNumber, roundSig } from '../src/engine/numbers';
 import { rngFromString } from '../src/engine/rng';
 
 function parsed(s: string) {
@@ -35,8 +35,28 @@ describe('parseNumber', () => {
     expect(r.sfMax).toBe(sfMax);
   });
 
-  it.each(['', 'abc', '1/3', '1,500', '12..3', '--4', '5 + 2'])('rejects %j', (input) => {
+  it.each(['', 'abc', '1/3', '1,500', '12..3', '--4', '5 + 2', '0.48e', '0.48e-', '0.48x2', '0.48m+999', '0.48*2'])('rejects %j', (input) => {
     expect(parseNumber(input).ok).toBe(false);
+  });
+
+  it('returns typed unit text for the grader to check', () => {
+    expect(parsed('13.8 m').unit).toBe('m');
+    expect(parsed('4 m/s').unit).toBe('m/s');
+    expect(parsed('1.6 eV').unit).toBe('eV'); // "e" followed by letters is a unit, not an exponent
+    expect(parsed('13.8').unit).toBe('');
+  });
+});
+
+describe('working and answer display', () => {
+  it.each([
+    [0.48, '0.48', '0.48'],
+    [104.5, '104.5', '104.5'],
+    [11.570215, '11.57', '11.6'],
+    [33.3333333, '33.33', '33.3'],
+    [14.000000000000002, '14', '14'], // float noise from 20 × 0.70
+  ])('%s → working %s, answer %s', (x, w, a) => {
+    expect(fmtW(x)).toBe(w);
+    expect(fmtA(x)).toBe(a);
   });
 });
 

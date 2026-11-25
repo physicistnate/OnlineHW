@@ -2,9 +2,9 @@
  * One question, interactive: answer inputs, checking and feedback, and (when
  * enabled) worked solutions and IB-style markschemes for the same numbers.
  */
-import type { CSSProperties } from 'react';
+import { useId, type CSSProperties } from 'react';
 import { findCourse, findTopic } from '../content/catalog';
-import { gradePart, graphPointStatus, summarize } from '../engine/grading';
+import { gradePart, markGraph, remarkLaterParts, summarize } from '../engine/grading';
 import { fmtRange } from '../engine/numbers';
 import { unitTex } from '../engine/units';
 import type { AnyTemplate, MarkLine, PartInstance, PartResponse, PartResult, QuestionInstance, SolutionStep } from '../engine/types';
@@ -33,11 +33,18 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
   const results: Record<string, PartResult | undefined> = Object.fromEntries(instance.parts.map((p) => [p.id, work[p.id]?.result]));
   const summary = summarize(instance, results);
 
-  const change = (part: PartInstance, response: PartResponse) => onWork(part.id, { response, result: undefined });
+  // Editing an answer clears its own result and re-marks later parts that already
+  // have one, since error-carried-forward credit depends on earlier answers.
+  const change = (part: PartInstance, response: PartResponse) => {
+    const next = { ...responses, [part.id]: response };
+    const patches: Record<string, Partial<PartWork>> = { [part.id]: { response, result: undefined } };
+    for (const [id, result] of Object.entries(remarkLaterParts(template, instance, part.id, next, results))) patches[id] = { result };
+    onWork(patches);
+  };
   const check = (part: PartInstance) => {
     const result = gradePart(template, instance, part, responses);
     const attempts = work[part.id]?.attempts ?? 0;
-    onWork(part.id, result.status === 'invalid' ? { result } : { result, attempts: attempts + 1 });
+    onWork({ [part.id]: result.status === 'invalid' ? { result } : { result, attempts: attempts + 1 } });
   };
 
   return (
@@ -109,6 +116,7 @@ function PartBlock({ part, work, onChange, onCheck, showSolutions, showMarkschem
 }
 
 function PartAnswer({ part, work, onChange, onCheck }: { part: PartInstance; work?: PartWork; onChange: (r: PartResponse) => void; onCheck: () => void }) {
+  const uid = useId();
   const r = part.response;
   const response = work?.response;
   const labelText = part.label ? `part ${part.label}` : 'this question';
@@ -143,7 +151,7 @@ function PartAnswer({ part, work, onChange, onCheck }: { part: PartInstance; wor
 
     case 'mcq': {
       const choice = response?.kind === 'mcq' ? response.choice : '';
-      const name = `mcq-${part.id}-${r.options.map((o) => o.key).join('')}`;
+      const name = `mcq-${uid}`; // unique per question, so two MCQs on one page never share a radio group
       const cols = { '--mcq-cols': r.columns?.length ?? 1 } as CSSProperties;
       return (
         <div className="mcq" style={cols}>
@@ -163,7 +171,11 @@ function PartAnswer({ part, work, onChange, onCheck }: { part: PartInstance; wor
               <input type="radio" name={name} checked={choice === o.key} onChange={() => onChange({ kind: 'mcq', choice: o.key })} />
               <span className="mcq-letter">{o.letter}</span>
               {o.cells ? (
-                o.cells.map((c, i) => <Tex key={i} className="mcq-cell" text={c} />)
+                o.cells.map((c, i) => (
+                  <span key={i} className="mcq-cell" data-label={r.columns?.[i]}>
+                    <Tex text={c} />
+                  </span>
+                ))
               ) : (
                 <Tex className="mcq-cell" text={o.text ?? ''} />
               )}
@@ -202,7 +214,7 @@ function PartAnswer({ part, work, onChange, onCheck }: { part: PartInstance; wor
 
     case 'graph': {
       const points = response?.kind === 'graph' ? response.points : r.start;
-      const status = work?.result ? graphPointStatus(points, r.expected, r.tolerance) : undefined;
+      const status = work?.result ? markGraph(points, r.expected, r.tolerance).pointOk : undefined;
       return (
         <div className="graph-answer">
           <Graph
@@ -214,7 +226,7 @@ function PartAnswer({ part, work, onChange, onCheck }: { part: PartInstance; wor
             title={`Drawing area: ${r.axes.y.label} against ${r.axes.x.label}`}
           />
           <p className="muted small">
-            Drag the {r.start.length} points into place; they snap to the grid and are joined in order of time. Keyboard: Tab to a point, then use the arrow keys.
+            Drag the {r.start.length} points into place; they snap to the grid and are joined in order of time. Each straight section is marked separately. Keyboard: Tab to a point, then use the arrow keys.
           </p>
           <div className="answer-row">
             <button className="btn btn-primary btn-sm" onClick={onCheck}>
@@ -298,7 +310,7 @@ export function Markscheme({ part }: { part: PartInstance }) {
   if (r.kind === 'numeric') {
     const [lo, hi] = fmtRange(r.range.lo, r.range.hi);
     const unit = r.unit ? `\\ ${unitTex(r.unit)}` : '';
-    extra.push({ note: `Online marking accepts $${lo}$ to $${hi}${unit}$ (rounding allowance, any number of significant figures).` });
+    extra.push({ note: `Online marking: accepts any value from $${lo}$ to $${hi}${unit}$, or that value rounded to 2 or more significant figures.` });
   }
   const lines = [...(r.kind === 'mcq' ? extra : []), ...part.markscheme, ...(r.kind === 'numeric' ? extra : [])];
   return (
