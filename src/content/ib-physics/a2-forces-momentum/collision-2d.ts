@@ -2,14 +2,22 @@ import { defineQuestion } from '../../../engine/define';
 import { atanD, cosD, fmtA, fmtW, sinD } from '../../../engine/numbers';
 import { Q, tex, unitTex as u } from '../../../engine/units';
 
-/** Momentum of B after the collision, from the given data (used by the constraint). */
+/**
+ * The outcome of the collision, from the given data (used by the constraint). Smooth
+ * pucks push on each other only along the line joining their centres, so B (which
+ * starts at rest) moves off along that line, at the angle phi below A's original
+ * direction. Along that line the pucks must separate after the collision: the
+ * coefficient of restitution e = separation speed / approach speed is between 0 and 1.
+ */
 function after(p: { mA: number; mB: number; uA: number; vA: number; th: number }) {
   const bx = p.mA * (p.uA - p.vA * cosD(p.th));
   const by = p.mA * p.vA * sinD(p.th);
   const vB = Math.hypot(bx, by) / p.mB;
+  const phi = atanD(by / bx);
+  const e = (vB - p.vA * cosD(p.th + phi)) / (p.uA * cosD(phi));
   const keBefore = 0.5 * p.mA * p.uA ** 2;
   const keAfter = 0.5 * p.mA * p.vA ** 2 + 0.5 * p.mB * vB ** 2;
-  return { bx, by, phi: atanD(by / bx), ratio: keAfter / keBefore };
+  return { bx, by, phi, e, ratio: keAfter / keBefore };
 }
 
 export default defineQuestion({
@@ -20,6 +28,7 @@ export default defineQuestion({
   level: 'HL',
   topic: 'ibp.A.2',
   standards: ['ibp.A.2.10', 'ibp.A.2.6'],
+  uses: ['ibp.A.3.3'],
   style: 'IB',
   paper: 'Paper 2 style',
   types: ['long-response', 'calculation', 'multiple-choice'],
@@ -32,10 +41,11 @@ export default defineQuestion({
     vA: { min: 0.6, max: 4.0, step: 0.2, base: 2.4, dp: 1 },
     th: { min: 20, max: 60, step: 5, base: 35 },
   },
-  // B moves forwards at a clear angle, and the collision loses some kinetic energy (as real ones do).
+  // B moves forwards at a clear angle, the pucks separate along the line of centres
+  // (0.3 ≤ e ≤ 0.95), and the collision loses some kinetic energy, as real ones do.
   constraint: (p) => {
     const a = after(p);
-    return a.bx >= 0.15 * p.mA * p.uA && a.phi >= 10 && a.phi <= 75 && a.ratio <= 0.92 && a.ratio >= 0.4;
+    return a.bx >= 0.15 * p.mA * p.uA && a.phi >= 10 && a.phi <= 75 && a.e >= 0.3 && a.e <= 0.95 && a.ratio <= 0.92 && a.ratio >= 0.4;
   },
 
   compute: (p, c) => {
@@ -54,7 +64,7 @@ export default defineQuestion({
   },
 
   stem: ({ d }) =>
-    `On a horizontal air table, where friction is negligible, puck A of mass ${Q(d.mA, 'kg')} moves at ${Q(d.uA, 'm s-1')} towards puck B of mass ${Q(d.mB, 'kg')}, which is at rest. After the collision, A moves at ${Q(d.vA, 'm s-1')} in a direction at ${Q(d.th, 'deg')} to its original direction of motion. B moves off on the other side of the line along which A was moving.`,
+    `On a horizontal air table, where friction is negligible, puck A of mass ${Q(d.mA, 'kg')} moves at ${Q(d.uA, 'm s-1')} towards puck B of mass ${Q(d.mB, 'kg')}, which is at rest. After the collision, A moves at ${Q(d.vA, 'm s-1')} in a direction at ${Q(d.th, 'deg')} to its original direction of motion. B moves off on the other side of the line along which A was moving. The pucks are smooth, so they push on each other only along the line joining their centres.`,
 
   parts: [
     {

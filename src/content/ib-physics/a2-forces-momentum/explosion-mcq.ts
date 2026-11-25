@@ -9,6 +9,7 @@ export default defineQuestion({
   courses: ['ib-physics-sl'],
   topic: 'ibp.A.2',
   standards: ['ibp.A.2.8', 'ibp.A.2.6'],
+  uses: ['ibp.A.3.3'],
   style: 'IB',
   paper: 'Paper 1A style (multiple choice)',
   types: ['multiple-choice'],

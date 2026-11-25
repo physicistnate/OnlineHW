@@ -28,6 +28,7 @@ export default defineQuestion({
   courses: ['ib-physics-sl'],
   topic: 'ibp.A.1',
   standards: ['ibp.A.1.7', 'ibp.A.1.5'],
+  uses: ['ibp.A.2.1', 'ibp.A.2.2'],
   style: 'IB',
   paper: 'Paper 1A and 2 style',
   types: ['graph-reading', 'multiple-choice'],

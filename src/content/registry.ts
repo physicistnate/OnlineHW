@@ -7,7 +7,7 @@
  * (see the note there), then edit the original and increase its `version`.
  * Assignments made earlier keep resolving to the archived revision.
  */
-import { courseOrDefault, findCourse } from './catalog';
+import { allTopics, courseOrDefault, findCourse, topicOf } from './catalog';
 import type { AnyTemplate } from '../engine/types';
 import { ARCHIVED_REVISIONS } from './archive';
 import ibPhysicsA1 from './ib-physics/a1-kinematics';
@@ -49,6 +49,32 @@ export function questionsForCourse(courseId: string): AnyTemplate[] {
   const ids = courseIds(courseId);
   const isSL = courseOrDefault(courseId).level === 'SL';
   return ALL_QUESTIONS.filter((q) => q.courses.some((c) => ids.includes(c)) && !(isSL && q.level === 'HL'));
+}
+
+/** Every topic a question involves: its own topic first, then the topics of the ideas it also uses. */
+export function topicsOfQuestion(q: AnyTemplate): string[] {
+  const used = (q.uses ?? []).map((id) => topicOf(id)?.id).filter((id): id is string => !!id && id !== q.topic);
+  return [q.topic, ...new Set(used)];
+}
+
+/**
+ * Topics the question uses that come after its own topic in the course's order (the IB
+ * guide's order: A.1, A.2, ..., E.5), e.g. kinetic energy (A.3) in an A.2 question.
+ */
+export function laterTopicsUsed(q: AnyTemplate, courseId: string): string[] {
+  const order = allTopics(courseOrDefault(courseId)).map((t) => t.id);
+  const own = order.indexOf(q.topic);
+  return topicsOfQuestion(q)
+    .slice(1)
+    .filter((id) => order.indexOf(id) > own);
+}
+
+/** Questions that involve every one of the given topics (as their own topic or as an idea they use). */
+export function questionsCombining(topicIds: string[], courseId: string): AnyTemplate[] {
+  return questionsForCourse(courseId).filter((q) => {
+    const involved = topicsOfQuestion(q);
+    return topicIds.every((id) => involved.includes(id));
+  });
 }
 
 /** Questions for one topic, optionally limited to a course. */

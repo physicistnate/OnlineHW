@@ -81,7 +81,15 @@ const T = {
     ['A.2.9', 'Circular motion: centripetal acceleration and force, angular velocity and period'],
     ['A.2.10', 'Collisions and explosions in two dimensions (HL)', 'HL'],
   ]),
-  A3: topic('A.3', 'Work, energy and power'),
+  A3: topic('A.3', 'Work, energy and power', [
+    ['A.3.1', 'Conservation of energy; energy transfers and Sankey diagrams'],
+    ['A.3.2', 'Work done by a constant force, W = Fs cos θ, and the change in energy it causes'],
+    ['A.3.3', 'Kinetic, gravitational potential and elastic potential energy'],
+    ['A.3.4', 'Conservation of mechanical energy when there are no resistive forces'],
+    ['A.3.5', 'Power as the rate of doing work or transferring energy, P = ΔW/Δt = Fv'],
+    ['A.3.6', 'Efficiency'],
+    ['A.3.7', 'Energy density of fuel sources'],
+  ]),
   A4: topic('A.4', 'Rigid body mechanics', [], true),
   A5: topic('A.5', 'Galilean and special relativity', [], true),
   B1: topic('B.1', 'Thermal energy transfers'),
@@ -157,6 +165,11 @@ export const ALL_TOPICS: Topic[] = Object.values(T);
 /** A topic with all of its standards, including HL-only ones. */
 export function findTopic(topicId: string): Topic | undefined {
   return ALL_TOPICS.find((t) => t.id === topicId);
+}
+
+/** The topic a topic id or standard id ('ibp.A.3' or 'ibp.A.3.3') belongs to. */
+export function topicOf(id: string): Topic | undefined {
+  return findTopic(id) ?? ALL_TOPICS.find((t) => t.standards.some((s) => s.id === id));
 }
 
 /** A topic as a course sees it (SL courses leave out HL-only standards). */

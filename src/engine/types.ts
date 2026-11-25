@@ -166,6 +166,13 @@ export interface QuestionTemplate<PS extends ParamSpecs = ParamSpecs, R extends 
   difficulty: 1 | 2 | 3;
   /** 'HL' for higher-level-only content (shown in HL courses only). Default 'SL'. */
   level?: 'SL' | 'HL';
+  /**
+   * Ideas from other topics that the question also needs, as topic ids ('ibp.A.3') or
+   * standard ids ('ibp.A.3.3'), e.g. a collision question that asks for kinetic energy.
+   * Used to leave out questions that need topics not yet taught, and to find questions
+   * that combine topics.
+   */
+  uses?: string[];
   params: PS;
   constraint?: (p: Params<PS>) => boolean;
   compute: (p: Params<PS>, c: Calc) => R;
