@@ -4,12 +4,13 @@
  * then save it for students or print it.
  */
 import { useEffect, useState } from 'react';
-import { COURSES, allTopics, courseOrDefault, courseTopic, findStandard, type Course } from '../content/catalog';
-import { getQuestion, questionsForCourse, questionsForTopic } from '../content/registry';
+import { COURSES, allTopics, courseOrDefault, courseTopic, findStandard, findTopic, type Course } from '../content/catalog';
+import { getQuestion, questionsCombining, questionsForCourse, questionsForTopic } from '../content/registry';
 import { PageHeader } from '../components/Layout';
 import { Dialog } from '../components/Modal';
 import { SettingsForm } from '../components/SettingsForm';
 import { StandardPicker, countByStandard } from '../components/StandardPicker';
+import { CombineTopics, LaterTopicsToggle, ModeSwitch, UsesChips, filterLater, type ChooseMode } from '../components/TopicFilters';
 import { formatDue } from '../components/time';
 import { Difficulty, TypeChips, marksLabel, marksOf } from './BankPage';
 import { href } from '../router';
@@ -31,8 +32,14 @@ import { assignmentTemplates } from '../store/studentData';
 /** The unsaved assignment, kept so that opening Preview or Print and coming back loses nothing. */
 interface Draft {
   courseId: string;
+  /** "One topic" (the default) or "Combine topics". */
+  mode: ChooseMode;
   topicId: string;
   standards: string[];
+  /** Include questions that use ideas from later topics (off by default). */
+  includeLater: boolean;
+  /** Topics chosen in "Combine topics" mode. */
+  combine: string[];
   selected: string[];
   title: string;
   settings: AssignmentSettings;
@@ -42,6 +49,10 @@ const DRAFT_KEY = 'builder-draft';
 function firstTopicWithQuestions(course: Course): string {
   const topics = allTopics(course);
   return (topics.find((t) => questionsForTopic(t.id, course.id).length > 0) ?? topics[0]).id;
+}
+
+function laterNeeded(q: Parameters<typeof filterLater>[0][number], courseId: string): boolean {
+  return filterLater([q], courseId, false).hidden > 0;
 }
 
 function inCourse(courseId: string, questionId: string): boolean {
@@ -55,8 +66,12 @@ function initialDraft(query: URLSearchParams): Draft {
   // A question added from the bank switches course only if the current one does not contain it.
   if (added && !inCourse(course.id, added.id)) course = courseOrDefault(query.get('course') ?? added.courses[0]);
 
+  const inThisCourse = (id: string) => allTopics(course).some((t) => t.id === id);
   const draft: Draft = {
     courseId: course.id,
+    mode: saved?.mode === 'combine' ? 'combine' : 'topic',
+    includeLater: saved?.includeLater === true,
+    combine: Array.isArray(saved?.combine) ? saved.combine.filter(inThisCourse) : [],
     topicId: saved?.topicId && allTopics(course).some((t) => t.id === saved.topicId) ? saved.topicId : firstTopicWithQuestions(course),
     standards: Array.isArray(saved?.standards) ? saved.standards.filter((s) => findStandard(s)) : [],
     selected: Array.isArray(saved?.selected) ? saved.selected.filter((id) => inCourse(course.id, id)) : [],
@@ -64,10 +79,12 @@ function initialDraft(query: URLSearchParams): Draft {
     settings: { ...DEFAULT_SETTINGS, ...(saved?.settings ?? {}) },
   };
   if (added && inCourse(course.id, added.id)) {
+    draft.mode = 'topic';
     if (draft.topicId !== added.topic) draft.standards = [];
     draft.topicId = added.topic;
     draft.standards = [...new Set([...draft.standards, ...added.standards])]; // so the added question is visible
     if (!draft.selected.includes(added.id)) draft.selected = [...draft.selected, added.id];
+    if (laterNeeded(added, course.id)) draft.includeLater = true; // so the added question is visible
   }
   const topic = courseTopic(course, draft.topicId);
   draft.standards = (topic?.standards ?? []).map((s) => s.id).filter((s) => draft.standards.includes(s));
@@ -79,6 +96,9 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
   const [courseId, setCourseId] = useState(initial.courseId);
   const [topicId, setTopicId] = useState(initial.topicId);
   const [standards, setStandards] = useState<string[]>(initial.standards);
+  const [mode, setMode] = useState<ChooseMode>(initial.mode);
+  const [includeLater, setIncludeLater] = useState(initial.includeLater);
+  const [combine, setCombine] = useState<string[]>(initial.combine);
   const [selected, setSelected] = useState<string[]>(initial.selected);
   const [title, setTitle] = useState(initial.title);
   const [settings, setSettings] = useState<AssignmentSettings>(initial.settings);
@@ -88,8 +108,8 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
   const assignments = useAssignments();
 
   useEffect(() => {
-    writeJson(DRAFT_KEY, { courseId, topicId, standards, selected, title, settings } satisfies Draft, false);
-  }, [courseId, topicId, standards, selected, title, settings]);
+    writeJson(DRAFT_KEY, { courseId, mode, topicId, standards, includeLater, combine, selected, title, settings } satisfies Draft, false);
+  }, [courseId, mode, topicId, standards, includeLater, combine, selected, title, settings]);
 
   // "Add to assignment" links (?add=...) are applied once, then dropped from the
   // address, so coming back to this page later does not re-add a removed question.
@@ -99,12 +119,21 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
 
   const course = courseOrDefault(courseId);
   const topic = courseTopic(course, topicId) ?? courseTopic(course, firstTopicWithQuestions(course))!;
-  const topicQuestions = questionsForTopic(topic.id, course.id);
-  const shown = topicQuestions.filter((q) => q.standards.some((s) => standards.includes(s)));
+  const topicAll = questionsForTopic(topic.id, course.id);
+  const { visible: topicQuestions, hidden: hiddenLater } = filterLater(topicAll, course.id, includeLater);
+  const shown =
+    mode === 'combine'
+      ? combine.length >= 2
+        ? questionsCombining(combine, course.id)
+        : []
+      : topicQuestions.filter((q) => q.standards.some((s) => standards.includes(s)));
   const toggle = (id: string) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   const selectedTemplates = selected.map((id) => getQuestion(id)).filter((q) => q !== undefined);
   const totalMarks = selectedTemplates.reduce((s, q) => s + marksOf(q), 0);
-  const defaultTitle = `${topic.code} ${topic.name} homework`;
+  const defaultTitle =
+    mode === 'combine' && combine.length >= 2
+      ? `${combine.map((id) => findTopic(id)?.code ?? id).join(' + ')} homework`
+      : `${topic.code} ${topic.name} homework`;
 
   const changeCourse = (id: string) => {
     const next = courseOrDefault(id);
@@ -117,6 +146,7 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
       setTopicId(firstTopicWithQuestions(next));
       setStandards([]);
     }
+    setCombine((ids) => ids.filter((id) => allTopics(next).some((t) => t.id === id)));
   };
   const changeTopic = (id: string) => {
     setTopicId(id);
@@ -157,70 +187,94 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
                 </button>
               ))}
             </div>
-            <select value={topic.id} onChange={(e) => changeTopic(e.target.value)} aria-label="Topic">
-              {course.themes.map((theme) => (
-                <optgroup key={theme.code} label={`${theme.code} · ${theme.name}`}>
-                  {theme.topics.map((t) => {
-                    const n = questionsForTopic(t.id, course.id).length;
-                    return (
-                      <option key={t.id} value={t.id} disabled={n === 0}>
-                        {t.code} {t.name}
-                        {t.hlOnly ? ' (HL)' : ''} ({n || 'coming soon'})
-                      </option>
-                    );
-                  })}
-                </optgroup>
-              ))}
-            </select>
+            <ModeSwitch mode={mode} onChange={setMode} />
           </div>
           {notice && <p className="muted small">{notice}</p>}
 
-          {topic.standards.length === 0 || topicQuestions.length === 0 ? (
-            <div className="empty-inline">No questions for this topic yet.</div>
-          ) : (
+          {mode === 'topic' ? (
             <>
-              <StandardPicker topic={topic} selected={standards} onChange={setStandards} counts={countByStandard(topicQuestions)} />
-              {standards.length > 0 && (
+              <div className="filters">
+                <select value={topic.id} onChange={(e) => changeTopic(e.target.value)} aria-label="Topic">
+                  {course.themes.map((theme) => (
+                    <optgroup key={theme.code} label={`${theme.code} · ${theme.name}`}>
+                      {theme.topics.map((t) => {
+                        const n = questionsForTopic(t.id, course.id).length;
+                        return (
+                          <option key={t.id} value={t.id} disabled={n === 0}>
+                            {t.code} {t.name}
+                            {t.hlOnly ? ' (HL)' : ''} ({n || 'coming soon'})
+                          </option>
+                        );
+                      })}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+              {topic.standards.length === 0 || topicAll.length === 0 ? (
+                <div className="empty-inline">No questions for this topic yet.</div>
+              ) : (
                 <>
-                  <div className="pick-actions">
-                    <span className="muted small">
-                      {shown.length} question{shown.length === 1 ? '' : 's'} for the chosen standard{standards.length === 1 ? '' : 's'}
-                    </span>
-                    <button className="btn btn-sm btn-ghost" onClick={() => setSelected((s) => [...new Set([...s, ...shown.map((q) => q.id)])])} disabled={shown.length === 0}>
-                      Add all shown
-                    </button>
-                    <button className="btn btn-sm btn-ghost" onClick={() => setSelected([])} disabled={selected.length === 0}>
-                      Clear selection
-                    </button>
-                  </div>
-                  <ul className="pick-list">
-                    {shown.map((q) => (
-                      <li key={q.id} className={selected.includes(q.id) ? 'is-picked' : ''}>
-                        <label>
-                          <input type="checkbox" checked={selected.includes(q.id)} onChange={() => toggle(q.id)} />
-                          <span className="pick-main">
-                            <span className="pick-title">
-                              {q.title}
-                              {q.level === 'HL' && <span className="chip chip-small chip-hl">HL</span>}
-                            </span>
-                            <span className="pick-meta">
-                              <TypeChips types={q.types} />
-                              <span className="std-codes">{q.standards.map((s) => findStandard(s)?.code ?? s).join(', ')}</span>
-                            </span>
-                          </span>
-                          <span className="pick-side">
-                            <span className="muted small">{marksLabel(marksOf(q))}</span>
-                            <Difficulty level={q.difficulty} />
-                          </span>
-                        </label>
-                        <a className="pick-preview" href={href(`/q/${q.id}`)} title="Preview this question">
-                          Preview
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                  {shown.length === 0 && <div className="empty-inline">No questions for these standards yet.</div>}
+                  <StandardPicker topic={topic} selected={standards} onChange={setStandards} counts={countByStandard(topicQuestions)} />
+                  <LaterTopicsToggle checked={includeLater} onChange={setIncludeLater} hidden={hiddenLater} />
                 </>
+              )}
+              <p className="muted small mode-hint">
+                Want questions that mix topics, such as forces with energy?{' '}
+                <button className="link-btn" onClick={() => setMode('combine')}>
+                  Use Combine topics
+                </button>
+                .
+              </p>
+            </>
+          ) : (
+            <CombineTopics course={course} selected={combine} onChange={setCombine} />
+          )}
+
+          {(mode === 'topic' ? standards.length > 0 : combine.length >= 2) && (
+            <>
+              <div className="pick-actions">
+                <span className="muted small">
+                  {shown.length} question{shown.length === 1 ? '' : 's'}{' '}
+                  {mode === 'topic' ? `for the chosen standard${standards.length === 1 ? '' : 's'}` : 'that combine every chosen topic'}
+                </span>
+                <button className="btn btn-sm btn-ghost" onClick={() => setSelected((s) => [...new Set([...s, ...shown.map((q) => q.id)])])} disabled={shown.length === 0}>
+                  Add all shown
+                </button>
+                <button className="btn btn-sm btn-ghost" onClick={() => setSelected([])} disabled={selected.length === 0}>
+                  Clear selection
+                </button>
+              </div>
+              <ul className="pick-list">
+                {shown.map((q) => (
+                  <li key={q.id} className={selected.includes(q.id) ? 'is-picked' : ''}>
+                    <label>
+                      <input type="checkbox" checked={selected.includes(q.id)} onChange={() => toggle(q.id)} />
+                      <span className="pick-main">
+                        <span className="pick-title">
+                          {q.title}
+                          {q.level === 'HL' && <span className="chip chip-small chip-hl">HL</span>}
+                        </span>
+                        <span className="pick-meta">
+                          <TypeChips types={q.types} />
+                          <span className="std-codes">{q.standards.map((s) => findStandard(s)?.code ?? s).join(', ')}</span>
+                          <UsesChips q={q} courseId={course.id} />
+                        </span>
+                      </span>
+                      <span className="pick-side">
+                        <span className="muted small">{marksLabel(marksOf(q))}</span>
+                        <Difficulty level={q.difficulty} />
+                      </span>
+                    </label>
+                    <a className="pick-preview" href={href(`/q/${q.id}`)} title="Preview this question">
+                      Preview
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              {shown.length === 0 && (
+                <div className="empty-inline">
+                  {mode === 'topic' ? 'No questions for these standards yet.' : 'No questions combine all of these topics yet. Try choosing fewer topics.'}
+                </div>
               )}
             </>
           )}

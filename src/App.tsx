@@ -27,6 +27,9 @@ export function App() {
           courseId={route.query.get('course')}
           topicId={route.query.get('topic') ?? undefined}
           standards={(route.query.get('std') ?? '').split(',').filter(Boolean)}
+          includeLater={route.query.get('later') === '1'}
+          mode={route.query.get('mode') === 'combine' ? 'combine' : 'topic'}
+          combine={(route.query.get('topics') ?? '').split(',').filter(Boolean)}
         />
       );
       title = 'Question bank';
