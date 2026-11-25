@@ -118,11 +118,53 @@ const T = {
   D2: topic('D.2', 'Electric and magnetic fields'),
   D3: topic('D.3', 'Motion in electromagnetic fields'),
   D4: topic('D.4', 'Induction', [], true),
-  E1: topic('E.1', 'Structure of the atom'),
-  E2: topic('E.2', 'Quantum physics', [], true),
-  E3: topic('E.3', 'Radioactive decay'),
-  E4: topic('E.4', 'Fission'),
-  E5: topic('E.5', 'Fusion and stars'),
+  // Theme E standards paraphrase the IB guide's understandings (numbering ours). E.2 is
+  // an HL-only topic; E.1 and E.3 have HL-only understandings, marked 'HL'.
+  E1: topic('E.1', 'Structure of the atom', [
+    ['E.1.1', 'The Geiger–Marsden–Rutherford experiment and the discovery of the nucleus'],
+    ['E.1.2', 'Nuclear notation: nucleon number A, proton number Z, isotopes'],
+    ['E.1.3', 'Emission and absorption spectra as evidence for discrete atomic energy levels'],
+    ['E.1.4', 'Photons emitted and absorbed in atomic transitions; E = hf for the energy difference'],
+    ['E.1.5', 'Spectra as evidence of the chemical composition of gases and stars'],
+    ['E.1.6', 'Nuclear radius R = R₀A^(1/3) and nuclear density (HL)', 'HL'],
+    ['E.1.7', 'Distance of closest approach in head-on scattering; deviations from Rutherford scattering (HL)', 'HL'],
+    ['E.1.8', 'The Bohr model of hydrogen: mvr = nh/2π and E = −13.6/n² eV (HL)', 'HL'],
+  ]),
+  E2: topic(
+    'E.2',
+    'Quantum physics',
+    [
+      ['E.2.1', 'The photoelectric effect as evidence for the particle nature of light; threshold frequency'],
+      ['E.2.2', 'Einstein’s photoelectric equation E_max = hf − Φ and the work function'],
+      ['E.2.3', 'Matter waves: diffraction of particles and the de Broglie wavelength λ = h/p'],
+      ['E.2.4', 'Compton scattering: Δλ = (h/mₑc)(1 − cos θ) as evidence for photon momentum'],
+    ],
+    true,
+  ),
+  E3: topic('E.3', 'Radioactive decay', [
+    ['E.3.1', 'Mass defect, nuclear binding energy and E = mc²'],
+    ['E.3.2', 'Binding energy per nucleon and its variation with nucleon number'],
+    ['E.3.3', 'The strong nuclear force; the random and spontaneous nature of decay'],
+    ['E.3.4', 'Alpha, beta (β⁻ and β⁺) and gamma decay: decay equations, neutrinos and antineutrinos'],
+    ['E.3.5', 'Penetration and ionizing ability of alpha, beta and gamma radiation'],
+    ['E.3.6', 'Activity, count rate and half-life (whole numbers of half-lives); background radiation'],
+    ['E.3.7', 'Nuclear stability and the neutron–proton ratio; alpha and gamma spectra and nuclear energy levels; the beta spectrum and the neutrino (HL)', 'HL'],
+    ['E.3.8', 'The decay constant: N = N₀e^(−λt), A = λN, T½ = ln 2/λ; measuring half-lives (HL)', 'HL'],
+  ]),
+  E4: topic('E.4', 'Fission', [
+    ['E.4.1', 'Energy released in spontaneous and neutron-induced fission'],
+    ['E.4.2', 'Chain reactions and critical mass'],
+    ['E.4.3', 'Nuclear power: control rods, moderator, heat exchanger and shielding'],
+    ['E.4.4', 'Properties of the products of fission and their management'],
+  ]),
+  E5: topic('E.5', 'Fusion and stars', [
+    ['E.5.1', 'Stellar stability: outward radiation pressure balances inward gravity'],
+    ['E.5.2', 'Fusion as the energy source of stars; the conditions of density and temperature it needs'],
+    ['E.5.3', 'The effect of stellar mass on the evolution of a star'],
+    ['E.5.4', 'The Hertzsprung–Russell diagram: its main regions and the properties of their stars'],
+    ['E.5.5', 'Stellar parallax: d (parsec) = 1/p (arc-second)'],
+    ['E.5.6', 'Luminosity L = σ4πR²T⁴, apparent brightness b = L/4πd², Wien’s law and stellar radii'],
+  ]),
 };
 
 const IB_PHYSICS_THEMES: Theme[] = [
