@@ -6,7 +6,7 @@ import { tex, unitTex as u } from '../../../engine/units';
 const HOME_KWH = 10400;
 
 export default defineQuestion({
-  id: 'up1-t3-data-centre-ramp',
+  id: 'up1-t3-data-center-ramp',
   version: 1,
   title: 'Energy used while a data center powers up, compared with cities',
   courses: ['university-physics-1'],

@@ -383,3 +383,7 @@
   font-style: italic;
   white-space: nowrap;
 }
+.key-style {
+  font-weight: normal;
+  color: #4b5563;
+}

@@ -736,7 +736,7 @@ src/content: questions and the syllabus they are tagged with
                             up1.3.1–up1.3.6)
     dot-product-3d, exponential-force, nonlinear-spring, pumping-tank,
     potential-well, spring-incline, ramp-variable-friction, constant-power-car,
-    data-centre-ramp, home-load-profile.
+    data-center-ramp, home-load-profile.
 
 src/components: reusable pieces of the interface
   Tex.tsx                   Renders text with KaTeX maths (cached).

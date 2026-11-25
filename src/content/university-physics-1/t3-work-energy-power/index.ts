@@ -7,7 +7,7 @@ import potentialWell from './potential-well';
 import springIncline from './spring-incline';
 import rampVariableFriction from './ramp-variable-friction';
 import constantPowerCar from './constant-power-car';
-import dataCentreRamp from './data-centre-ramp';
+import dataCenterRamp from './data-center-ramp';
 import homeLoadProfile from './home-load-profile';
 
 export default [
@@ -19,6 +19,6 @@ export default [
   springIncline,
   rampVariableFriction,
   constantPowerCar,
-  dataCentreRamp,
+  dataCenterRamp,
   homeLoadProfile,
 ];

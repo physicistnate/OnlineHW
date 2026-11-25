@@ -87,7 +87,7 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   console.log('Builder keeps an unsaved draft when you leave and come back');
   await go('#/builder');
   await p.getByRole('button', { name: 'Select all', exact: true }).click().catch(() => {});
-  await p.getByRole('button', { name: 'Clear selection' }).click().catch(() => {});
+  await p.getByRole('button', { name: 'Remove all' }).click({ timeout: 2000 }).catch(() => {});
   await p.locator('.pick-list input[type=checkbox]').nth(1).check();
   await p.locator('.pick-list input[type=checkbox]').nth(3).check();
   await p.getByLabel('Assignment title').fill('Draft HW');

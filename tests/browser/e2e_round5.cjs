@@ -9,7 +9,7 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
 
 const IB_A3 = ['sledge-pull', 'rough-ramp', 'force-extension-area', 'spring-launcher', 'roller-coaster', 'car-power', 'motor-efficiency', 'home-energy', 'data-centre', 'hydroelectric', 'power-station', 'energy-density'].map((x) => `ibp-a3-${x}`);
 const AP_U3 = ['variable-force', 'force-position-graph', 'dot-product', 'incline-friction', 'spring-friction', 'bungee-jump', 'potential-function', 'loop-the-loop', 'power-time-force', 'elevator-power'].map((x) => `apcm-u3-${x}`);
-const UP_T3 = ['dot-product-3d', 'exponential-force', 'nonlinear-spring', 'pumping-tank', 'potential-well', 'spring-incline', 'ramp-variable-friction', 'constant-power-car', 'data-centre-ramp', 'home-load-profile'].map((x) => `up1-t3-${x}`);
+const UP_T3 = ['dot-product-3d', 'exponential-force', 'nonlinear-spring', 'pumping-tank', 'potential-well', 'spring-incline', 'ramp-variable-friction', 'constant-power-car', 'data-center-ramp', 'home-load-profile'].map((x) => `up1-t3-${x}`);
 
 (async () => {
   const b = await chromium.launch();

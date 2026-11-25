@@ -88,7 +88,7 @@ export function SettingsForm({ value, onChange }: { value: AssignmentSettings; o
           <input type="radio" name={`${id}-key`} checked={value.solutions === 'released'} onChange={() => set({ solutions: 'released' })} /> Open now
         </label>
         <span className="hint">
-          Worked solutions and the markscheme, with each student’s own numbers.{value.dueAt ? '' : ' Set a due date to open the key automatically after it.'}
+          Worked solutions and the marking key (IB markscheme, AP scoring guidelines or university grading rubric), with each student’s own numbers.{value.dueAt ? '' : ' Set a due date to open the key automatically after it.'}
         </span>
       </fieldset>
 

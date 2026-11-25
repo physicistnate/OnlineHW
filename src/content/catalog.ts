@@ -246,6 +246,29 @@ export const UNIVERSITY_PHYSICS_1: Course = {
 };
 
 export const COURSES: Course[] = [IB_PHYSICS_SL, IB_PHYSICS_HL, AP_PHYSICS_C_MECH, UNIVERSITY_PHYSICS_1];
+
+/** The course a question belongs to, for labels: an HL-level IB question shows as IB Physics HL. */
+export function courseOfQuestion(q: { courses: string[]; level?: 'SL' | 'HL' }): Course {
+  if (q.level === 'HL' && q.courses.includes(IB_PHYSICS_SL.id)) return IB_PHYSICS_HL;
+  return COURSES.find((c) => c.id === q.courses[0]) ?? IB_PHYSICS_SL;
+}
+
+/** Instructions for a paper mixing IB, AP and university questions. */
+const MIXED_PRINT_INSTRUCTIONS = [
+  'Answer all questions in the spaces provided. Each question is labelled with its course.',
+  'Show your working, including any integrals or derivatives. If a final answer is wrong, correct working can still earn marks.',
+  'A calculator and the data booklet or equation sheet for each course may be used.',
+  'Take $g = {g}\\ \\mathrm{m\\,s^{-2}}$ (9.81 is also accepted, and 10 for AP questions).',
+];
+
+/** The instructions printed on a paper with questions from these courses. */
+export function printInstructionsFor(courses: Course[]): string[] {
+  const unique = [...new Map(courses.map((c) => [c.id, c])).values()];
+  if (unique.length === 0) return IB_PHYSICS_SL.printInstructions;
+  // IB SL and HL share their instructions.
+  if (unique.length === 1 || unique.every((c) => c.family === 'IB')) return unique[0].printInstructions;
+  return MIXED_PRINT_INSTRUCTIONS;
+}
 export const DEFAULT_COURSE_ID = IB_PHYSICS_SL.id;
 
 /** Courses grouped for menus: IB, AP, University. */

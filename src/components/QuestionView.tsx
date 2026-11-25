@@ -14,6 +14,7 @@ import { fmtRange } from '../engine/numbers';
 import { unitTex } from '../engine/units';
 import type { AnyTemplate, MarkLine, PartInstance, PartResponse, PartResult, QuestionInstance, SolutionStep } from '../engine/types';
 import type { PartWork, QuestionWork, WorkUpdater } from '../store/progress';
+import { KEY_NAMES } from '../config/site';
 import { Figure } from './Figure';
 import { Graph } from './Graph';
 import { MathBlock, Tex } from './Tex';
@@ -190,6 +191,7 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
           onCheck={() => check(part)}
           showSolutions={showSolutions}
           showMarkscheme={showMarkscheme}
+          keyName={KEY_NAMES[template.style]}
         />
       ))}
 
@@ -205,7 +207,11 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
                 <Tex className="part-prompt" text={x.prompt} />
                 <span className="part-marks">[{x.marks}]</span>
               </div>
-              {showMarkscheme ? <MarkschemeList marks={x.marks} lines={x.markscheme} /> : <p className="muted small">Turn on “Markscheme” to see its marking points.</p>}
+              {showMarkscheme ? (
+                <MarkschemeList marks={x.marks} lines={x.markscheme} title={KEY_NAMES[template.style]} />
+              ) : (
+                <p className="muted small">Turn on “{KEY_NAMES[template.style]}” to see its marking points.</p>
+              )}
             </div>
           ))}
         </details>
@@ -224,9 +230,10 @@ interface PartBlockProps {
   onCheck: () => void;
   showSolutions?: boolean;
   showMarkscheme?: boolean;
+  keyName: string;
 }
 
-function PartBlock({ part, work, state, showTries, onChange, onClear, onCheck, showSolutions, showMarkscheme }: PartBlockProps) {
+function PartBlock({ part, work, state, showTries, onChange, onClear, onCheck, showSolutions, showMarkscheme, keyName }: PartBlockProps) {
   return (
     <section className={`part${part.label || part.prompt ? '' : ' part-single'}${state.locked ? ' is-locked' : ''}`}>
       {(part.label || part.prompt) && (
@@ -242,7 +249,7 @@ function PartBlock({ part, work, state, showTries, onChange, onClear, onCheck, s
         {(showSolutions || showMarkscheme) && (
           <div className="reveal">
             {showSolutions && <SolutionSteps steps={part.solution} />}
-            {showMarkscheme && <Markscheme part={part} />}
+            {showMarkscheme && <Markscheme part={part} title={keyName} />}
           </div>
         )}
       </div>
@@ -475,7 +482,7 @@ export function SolutionSteps({ steps }: { steps: SolutionStep[] }) {
   );
 }
 
-export function Markscheme({ part }: { part: PartInstance }) {
+export function Markscheme({ part, title }: { part: PartInstance; title?: string }) {
   const r = part.response;
   const extra: MarkLine[] = [];
   if (r.kind === 'mcq') {
@@ -498,15 +505,18 @@ export function Markscheme({ part }: { part: PartInstance }) {
     extra.push({ note: `Online marking: ${what}${alt}${rounding}.` });
   }
   const lines = [...(r.kind === 'mcq' ? extra : []), ...part.markscheme, ...(r.kind === 'numeric' ? extra : [])];
-  return <MarkschemeList marks={part.marks} lines={lines} />;
+  return <MarkschemeList marks={part.marks} lines={lines} title={title} />;
 }
 
-/** IB-style markscheme lines: a tick per marking point, notes in italics. */
-export function MarkschemeList({ marks, lines }: { marks: number; lines: MarkLine[] }) {
+/**
+ * Marking-key lines: a tick per marking point, notes in italics. The title is what the
+ * question's exam style calls its key (Markscheme, Scoring guidelines, Grading rubric).
+ */
+export function MarkschemeList({ marks, lines, title = 'Markscheme' }: { marks: number; lines: MarkLine[]; title?: string }) {
   return (
     <div className="markscheme">
       <div className="panel-title">
-        Markscheme <span className="muted">[{marks}]</span>
+        {title} <span className="muted">[{marks}]</span>
       </div>
       <ul>
         {lines.map((line, i) =>

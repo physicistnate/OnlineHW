@@ -3,8 +3,8 @@
  * "Save as PDF" produces the file. Layout is white paper with exam-style answer space.
  */
 import { useMemo } from 'react';
-import { CONSTANTS, SITE } from '../config/site';
-import { courseOrDefault } from '../content/catalog';
+import { CONSTANTS, KEY_NAMES, SITE, sharedKeyName } from '../config/site';
+import { courseOfQuestion, courseOrDefault, printInstructionsFor } from '../content/catalog';
 import { getQuestion } from '../content/registry';
 import { Figure } from '../components/Figure';
 import { Graph } from '../components/Graph';
@@ -49,6 +49,12 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
   const extMarks = (inst: QuestionInstance) => (withExtensions ? inst.extensions.reduce((s, x) => s + x.marks, 0) : 0);
   const marks = items.reduce((s, it) => s + it.instance.totalMarks + extMarks(it.instance), 0);
   const course = courseOrDefault(assignment?.courseId ?? query.get('course') ?? items[0]?.template.courses[0]);
+  // A paper can mix courses: name them all, and print instructions that suit them all.
+  const courses = items.map((it) => courseOfQuestion(it.template));
+  const courseNames = [...new Set(courses.map((c) => c.name))].join(' + ') || course.name;
+  const instructions = items.length > 0 ? printInstructionsFor(courses) : course.printInstructions;
+  // One name for the key when every question has the same exam style; otherwise each question's own.
+  const sharedKey = sharedKeyName(items.map((it) => it.template.style));
 
   return (
     <div className="print-page">
@@ -77,7 +83,7 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
           </div>
           <h1>{title}</h1>
           <div className="paper-meta">
-            {course.name} · {items.length} question{items.length === 1 ? '' : 's'} · {marksLabel(marks)}
+            {courseNames} · {items.length} question{items.length === 1 ? '' : 's'} · {marksLabel(marks)}
             {assignment?.settings.dueAt ? ` · due ${formatDue(assignment.settings.dueAt)}` : ''}
           </div>
           {student ? (
@@ -96,11 +102,11 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
           )}
         </header>
 
-        {course.printInstructions.length > 0 && (
+        {instructions.length > 0 && (
           <div className="paper-instructions">
             <strong>Instructions</strong>
             <ul>
-              {course.printInstructions.map((line) => (
+              {instructions.map((line) => (
                 <li key={line}>
                   <Tex text={line.replace('{g}', String(CONSTANTS[course.style].g.primary))} />
                 </li>
@@ -117,24 +123,25 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
 
         {(withSolutions || withMarkscheme) && items.length > 0 && (
           <section className="paper-key">
-            <h2>{withSolutions ? 'Worked solutions' : 'Markscheme'}{withSolutions && withMarkscheme ? ' and markscheme' : ''}</h2>
+            <h2>{keyHeading(withSolutions, withMarkscheme, sharedKey)}</h2>
             {items.map(({ template, instance }, i) => (
               <div key={template.id} className="key-question">
                 <h3>
                   Question {i + 1}: {template.title}
+                  {withMarkscheme && sharedKey === null && <span className="key-style"> ({KEY_NAMES[template.style]})</span>}
                 </h3>
                 {instance.parts.map((part) => (
                   <div key={part.id} className="key-part">
                     {part.label && <div className="key-label">{part.label}</div>}
                     {withSolutions && <SolutionSteps steps={part.solution} />}
-                    {withMarkscheme && <Markscheme part={part} />}
+                    {withMarkscheme && <Markscheme part={part} title={KEY_NAMES[template.style]} />}
                   </div>
                 ))}
                 {withExtensions &&
                   instance.extensions.map((x, j) => (
                     <div key={`ext${j}`} className="key-part">
                       <div className="key-label">{instance.extensions.length > 1 ? `Extension ${j + 1}` : 'Extension'}</div>
-                      <MarkschemeList marks={x.marks} lines={x.markscheme} />
+                      <MarkschemeList marks={x.marks} lines={x.markscheme} title={KEY_NAMES[template.style]} />
                     </div>
                   ))}
               </div>
@@ -245,4 +252,11 @@ function PrintPart({ part }: { part: PartInstance }) {
       )}
     </div>
   );
+}
+
+/** "Worked solutions", "Scoring guidelines", "Worked solutions and markscheme", or for a mix of styles "… marking keys". */
+function keyHeading(solutions: boolean, keys: boolean, shared: string | null): string {
+  const keyName = shared ?? 'Marking keys';
+  if (solutions && keys) return `Worked solutions and ${keyName.toLowerCase()}`;
+  return solutions ? 'Worked solutions' : keyName;
 }
