@@ -10,6 +10,7 @@ export function unitTex(unit: string): string {
   const u = unit.trim();
   if (u === '') return '';
   if (u === 'deg' || u === '°') return '^{\\circ}';
+  if (u === '%') return '\\%'; // "%" starts a comment in LaTeX
   const parts = u.split(/\s+/).map((tok) => {
     const m = tok.match(/^([A-Za-zΩµμ]+)(-?\d+)?$/);
     if (!m) return tok;
@@ -28,14 +29,19 @@ export function unitPlain(unit: string): string {
   return unit.replace(/(-?\d+)/g, (e) => [...e].map((ch) => SUP[ch] ?? ch).join(''));
 }
 
+/** "m s-2" -> m¹ s⁻²; a slash divides, so "m/s" is the same unit as "m s-1". */
 function parseUnit(unit: string): { sym: string; exp: number }[] {
-  return unit
-    .trim()
-    .split(/\s+/)
-    .map((tok) => {
-      const m = tok.match(/^([A-Za-zΩµμ]+)(-?\d+)?$/);
-      return m ? { sym: m[1], exp: m[2] ? Number(m[2]) : 1 } : { sym: tok, exp: 1 };
-    });
+  const [num, ...dens] = unit.trim().split('/');
+  const tokens = (text: string, sign: number) =>
+    text
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((tok) => {
+        const m = tok.match(/^([A-Za-zΩµμ]+)\^?(-?\d+)?$/);
+        return m ? { sym: m[1], exp: sign * (m[2] ? Number(m[2]) : 1) } : { sym: tok, exp: sign };
+      });
+  return [...tokens(num, 1), ...dens.flatMap((den) => tokens(den, -1))];
 }
 
 /** Normalizes typed unit text for comparison: "m s⁻²", "m/s^2", "m·s^-2" -> "ms-2" / "m/s2". */

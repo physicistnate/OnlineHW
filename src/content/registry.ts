@@ -12,8 +12,10 @@ import type { AnyTemplate } from '../engine/types';
 import { ARCHIVED_REVISIONS } from './archive';
 import ibPhysicsA1 from './ib-physics/a1-kinematics';
 import ibPhysicsA2 from './ib-physics/a2-forces-momentum';
+import ibPhysicsA3 from './ib-physics/a3-work-energy-power';
+import apPhysicsCMechU3 from './ap-physics-c-mech/u3-work-energy-power';
 
-export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1, ...ibPhysicsA2];
+export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1, ...ibPhysicsA2, ...ibPhysicsA3, ...apPhysicsCMechU3];
 
 const byId = new Map(ALL_QUESTIONS.map((q) => [q.id, q]));
 const archived = new Map(ARCHIVED_REVISIONS.map((q) => [`${q.id}@v${q.version}`, q]));
