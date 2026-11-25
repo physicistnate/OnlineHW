@@ -20,8 +20,9 @@ import ibPhysicsE4 from './ib-physics/e4-fission';
 import ibPhysicsE5 from './ib-physics/e5-fusion-and-stars';
 import apPhysicsCMechU3 from './ap-physics-c-mech/u3-work-energy-power';
 import universityPhysics1T3 from './university-physics-1/t3-work-energy-power';
+import universityModernPhysics from './university-modern-physics';
 
-export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1, ...ibPhysicsA2, ...ibPhysicsA3, ...ibPhysicsE1, ...ibPhysicsE2, ...ibPhysicsE3, ...ibPhysicsE4, ...ibPhysicsE5, ...apPhysicsCMechU3, ...universityPhysics1T3];
+export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1, ...ibPhysicsA2, ...ibPhysicsA3, ...ibPhysicsE1, ...ibPhysicsE2, ...ibPhysicsE3, ...ibPhysicsE4, ...ibPhysicsE5, ...apPhysicsCMechU3, ...universityPhysics1T3, ...universityModernPhysics];
 
 const byId = new Map(ALL_QUESTIONS.map((q) => [q.id, q]));
 const archived = new Map(ARCHIVED_REVISIONS.map((q) => [`${q.id}@v${q.version}`, q]));

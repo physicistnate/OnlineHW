@@ -45,7 +45,7 @@ export default defineQuestion({
   },
 
   stem: ({ d }) =>
-    `A crate of mass ${Q(d.m, 'kg')} is released from rest at the top of a straight ramp of length ${Q(d.L, 'm')}, inclined at ${Q(d.theta, 'deg')} to the horizontal. The ramp gets rougher further down: the coefficient of kinetic friction is $\\mu_k(s) = \\mu_0 + cs$, where $s$ is the distance travelled down the ramp, $\\mu_0 = ${d.mu0}$ and $c = ${d.cc}\\ \\mathrm{m^{-1}}$.`,
+    `A crate of mass ${Q(d.m, 'kg')} is released from rest at the top of a straight ramp of length ${Q(d.L, 'm')}, inclined at ${Q(d.theta, 'deg')} to the horizontal. The ramp gets rougher further down: the coefficient of kinetic friction is $\\mu_k(s) = \\mu_0 + cs$, where $s$ is the distance traveled down the ramp, $\\mu_0 = ${d.mu0}$ and $c = ${d.cc}\\ \\mathrm{m^{-1}}$.`,
 
   parts: [
     {

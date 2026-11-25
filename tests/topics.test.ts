@@ -2,7 +2,7 @@
  * Leaving out questions that need later topics, and finding questions that combine topics.
  */
 import { describe, expect, it } from 'vitest';
-import { AP_PHYSICS_C_MECH, IB_PHYSICS_HL, IB_PHYSICS_SL, UNIVERSITY_PHYSICS_1, courseTopic, topicOf, type Course } from '../src/content/catalog';
+import { AP_PHYSICS_C_MECH, IB_PHYSICS_HL, IB_PHYSICS_SL, UNIVERSITY_MODERN_PHYSICS, UNIVERSITY_PHYSICS_1, allTopics, courseTopic, topicOf, type Course } from '../src/content/catalog';
 import { ALL_QUESTIONS, getQuestion, laterTopicsUsed, questionsCombining, questionsForCourse, questionsForTopic, topicsOfQuestion } from '../src/content/registry';
 import { filterLater } from '../src/components/TopicFilters';
 
@@ -57,16 +57,51 @@ describe('questions that use ideas from other topics', () => {
     }
   });
 
+  it('has a question for every Theme E standard, in SL and in HL, without later topics', () => {
+    for (const course of [IB_PHYSICS_SL, IB_PHYSICS_HL]) {
+      const themeE = allTopics(course).filter((t) => t.id.startsWith('ibp.E.'));
+      // SL leaves out the HL-only topic E.2.
+      expect(themeE.map((t) => t.code)).toEqual(course === IB_PHYSICS_SL ? ['E.1', 'E.3', 'E.4', 'E.5'] : ['E.1', 'E.2', 'E.3', 'E.4', 'E.5']);
+      for (const topic of themeE) {
+        const { visible } = filterLater(questionsForTopic(topic.id, course.id), course.id, false);
+        expect(visible.length, `${course.id} ${topic.code}`).toBeGreaterThanOrEqual(4);
+        for (const s of topic.standards) {
+          expect(visible.some((q) => q.standards.includes(s.id)), `${course.id} ${s.code} has no question that avoids later topics`).toBe(true);
+        }
+      }
+    }
+    // HL-only questions stay out of SL.
+    expect(questionsForCourse(SL).some((q) => q.level === 'HL')).toBe(false);
+    expect(questionsForTopic('ibp.E.2', SL)).toEqual([]);
+  });
+
+  it('has a question for every standard of the University Modern Physics topics that have questions', () => {
+    const course = UNIVERSITY_MODERN_PHYSICS;
+    const withStandards = allTopics(course).filter((t) => t.standards.length > 0);
+    expect(withStandards.map((t) => t.code)).toEqual(['Topic 2', 'Topic 3', 'Topic 4', 'Topic 5', 'Topic 6', 'Topic 7']);
+    for (const topic of withStandards) {
+      const { visible } = filterLater(questionsForTopic(topic.id, course.id), course.id, false);
+      expect(visible.length, topic.code).toBeGreaterThanOrEqual(1);
+      for (const s of topic.standards) {
+        expect(visible.some((q) => q.standards.includes(s.id)), `${s.code} has no question that avoids later topics`).toBe(true);
+      }
+    }
+  });
+
   it('keeps each course’s questions to that course', () => {
     const ap = questionsForCourse(AP_PHYSICS_C_MECH.id);
     const uni = questionsForCourse(UNIVERSITY_PHYSICS_1.id);
+    const modern = questionsForCourse(UNIVERSITY_MODERN_PHYSICS.id);
     expect(ap.length).toBe(10);
     expect(uni.length).toBe(10);
+    expect(modern.length).toBe(12);
     expect(ap.every((q) => q.style === 'AP' && q.topic.startsWith('apcm.'))).toBe(true);
     expect(uni.every((q) => q.style === 'General' && q.topic.startsWith('up1.'))).toBe(true);
+    expect(modern.every((q) => q.style === 'General' && q.topic.startsWith('ump.'))).toBe(true);
     for (const id of [IB_PHYSICS_SL.id, IB_PHYSICS_HL.id]) {
-      expect(questionsForCourse(id).some((q) => q.topic.startsWith('apcm.') || q.topic.startsWith('up1.')), id).toBe(false);
+      expect(questionsForCourse(id).some((q) => !q.topic.startsWith('ibp.')), id).toBe(false);
     }
+    expect(uni.some((q) => q.topic.startsWith('ump.'))).toBe(false);
   });
 
   it('only names real topics or standards other than the question’s own', () => {

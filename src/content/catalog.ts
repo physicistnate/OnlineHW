@@ -10,8 +10,10 @@
  *
  * AP Physics C: Mechanics follows the College Board course and exam description
  * (units 1–7, effective fall 2024); topic numbers 3.1–3.5 are the CED's. University
- * Physics I is a typical first-semester calculus-based course; its outline and
- * numbering are ours. Both have questions for work, energy and power only so far.
+ * Physics I is a typical first-semester calculus-based course, and University Modern
+ * Physics a typical calculus-based modern physics course; their outlines and numbering
+ * are ours. AP and University Physics I have questions for work, energy and power only
+ * so far; University Modern Physics has questions for the ideas of IB Theme E.
  */
 import type { Style } from '../config/site';
 
@@ -287,7 +289,98 @@ export const UNIVERSITY_PHYSICS_1: Course = {
   themes: [{ code: 'I', name: 'Mechanics', topics: Object.values(UNIVERSITY_1_TOPICS) }],
 };
 
-export const COURSES: Course[] = [IB_PHYSICS_SL, IB_PHYSICS_HL, AP_PHYSICS_C_MECH, UNIVERSITY_PHYSICS_1];
+// ---------- University Modern Physics (calculus-based) ----------
+
+const UNIVERSITY_MODERN_TOPICS = {
+  T1: makeTopic('ump', 'Topic 1', 'Special relativity', [], false, '1'),
+  T2: makeTopic(
+    'ump',
+    'Topic 2',
+    'The particle nature of light',
+    [
+      ['2.1', 'The photoelectric effect: eV_s = hf − φ, work functions and Millikan’s measurement of h'],
+      ['2.2', 'Compton scattering: photon momentum, Δλ = (h/mₑc)(1 − cos θ) and electron recoil'],
+    ],
+    false,
+    '2',
+  ),
+  T3: makeTopic(
+    'ump',
+    'Topic 3',
+    'Atomic structure',
+    [
+      ['3.1', 'Rutherford scattering: closest approach, impact parameter and scattering angle'],
+      ['3.2', 'The Bohr model of hydrogen-like atoms: quantized angular momentum, radii, speeds and energy levels'],
+      ['3.3', 'Line spectra: photon energies and wavelengths of transitions'],
+    ],
+    false,
+    '3',
+  ),
+  T4: makeTopic(
+    'ump',
+    'Topic 4',
+    'Matter waves and quantum mechanics',
+    [
+      ['4.1', 'De Broglie waves and standing matter waves'],
+      ['4.2', 'The infinite square well: energy levels, normalized wave functions and probabilities'],
+      ['4.3', 'Zero-point energy and the uncertainty principle'],
+    ],
+    false,
+    '4',
+  ),
+  T5: makeTopic(
+    'ump',
+    'Topic 5',
+    'Radioactive decay',
+    [
+      ['5.1', 'The decay law from dN/dt = −λN: activity, half-life and mean life'],
+      ['5.2', 'Counting decays by integrating the activity, including over all time'],
+      ['5.3', 'Decay chains: parent and daughter activities and transient equilibrium'],
+    ],
+    false,
+    '5',
+  ),
+  T6: makeTopic(
+    'ump',
+    'Topic 6',
+    'Nuclear reactions: fission and fusion',
+    [
+      ['6.1', 'Q-values from atomic masses; how the products share the kinetic energy'],
+      ['6.2', 'Fission and nuclear reactors: fission rates, fuel use and mass–energy conversion'],
+      ['6.3', 'Fusion: the Coulomb barrier, plasma temperatures and fusion reactions'],
+    ],
+    false,
+    '6',
+  ),
+  T7: makeTopic(
+    'ump',
+    'Topic 7',
+    'Stars and stellar energy',
+    [
+      ['7.1', 'Blackbody radiation from stars and planets: L = 4πR²σT⁴ and equilibrium temperatures'],
+      ['7.2', 'The gravitational potential energy of a star and the Kelvin–Helmholtz timescale'],
+      ['7.3', 'Nuclear fusion as the energy source of stars; nuclear timescales'],
+    ],
+    false,
+    '7',
+  ),
+};
+
+export const UNIVERSITY_MODERN_PHYSICS: Course = {
+  id: 'university-modern-physics',
+  name: 'University Modern Physics (calculus-based)',
+  shortName: 'Modern Phys',
+  family: 'University',
+  style: 'General',
+  printInstructions: [
+    'Show all working, including any integrals or derivatives.',
+    'Calculators are allowed. Give answers to 3 significant figures unless stated otherwise.',
+    'Physical constants are given in each question.',
+  ],
+  themes: [{ code: 'M', name: 'Modern physics', topics: Object.values(UNIVERSITY_MODERN_TOPICS) }],
+};
+
+export const COURSES: Course[] = [IB_PHYSICS_SL, IB_PHYSICS_HL, AP_PHYSICS_C_MECH, UNIVERSITY_PHYSICS_1, UNIVERSITY_MODERN_PHYSICS];
 
 /** The course a question belongs to, for labels: an HL-level IB question shows as IB Physics HL. */
 export function courseOfQuestion(q: { courses: string[]; level?: 'SL' | 'HL' }): Course {
@@ -325,7 +418,12 @@ export function allTopics(course: Course): Topic[] {
 }
 
 /** Every topic with all of its standards (IB SL and HL, AP, university). */
-export const ALL_TOPICS: Topic[] = [...Object.values(T), ...Object.values(AP_C_MECH_TOPICS), ...Object.values(UNIVERSITY_1_TOPICS)];
+export const ALL_TOPICS: Topic[] = [
+  ...Object.values(T),
+  ...Object.values(AP_C_MECH_TOPICS),
+  ...Object.values(UNIVERSITY_1_TOPICS),
+  ...Object.values(UNIVERSITY_MODERN_TOPICS),
+];
 
 /** A topic with all of its standards, including HL-only ones. */
 export function findTopic(topicId: string): Topic | undefined {
