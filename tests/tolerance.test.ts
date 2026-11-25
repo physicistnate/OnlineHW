@@ -28,6 +28,15 @@ describe('accepting typed answers (cell rule)', () => {
     ['0.48 m/s2', 'm s-2'],
     ['0.48 m·s⁻²', 'm s-2'],
     ['0.48 m*s^-2', 'm s-2'],
+    // Expected units written with a slash (AP and university questions): both forms match.
+    ['4 m/s', 'm/s'],
+    ['4 m s-1', 'm/s'],
+    ['4 m s⁻¹', 'm/s'],
+    ['250 N/m', 'N/m'],
+    ['250 N m-1', 'N/m'],
+    ['3.2 kW h', 'kW h'],
+    ['3.2 kWh', 'kW h'],
+    ['64 %', '%'],
   ])('recognises %j as the unit %j', (s, unit) => {
     const value = Number.parseFloat(s);
     expect(checkNumeric(s, range(value, value, value), { unit }).status).toBe('correct');
@@ -37,6 +46,8 @@ describe('accepting typed answers (cell rule)', () => {
     ['13.8 km', 'm'],
     ['13.8 ms', 's'],
     ['13.8 m', undefined],
+    ['13.8 m/s', 'm/s^2'],
+    ['13.8 s/m', 'm/s'],
   ])('rejects a wrong or unexpected unit %j (expected %j) as unreadable, not wrong', (s, unit) => {
     expect(checkNumeric(s, r, { unit }).status).toBe('invalid');
   });

@@ -43,30 +43,31 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   await p.locator('.combine .std-chip', { hasText: 'A.2 Forces and momentum' }).click();
   await p.locator('.combine .std-chip', { hasText: 'A.3 Work, energy and power' }).click();
   t = await titles();
-  expect(t.length === 2 && t.some((x) => x.includes('trolleys')) && !t.some((x) => x.includes('lift')), `A.2 + A.3 gives the 2 questions that use both (${t.join(' | ')})`);
+  // Two A.2 questions use energy (A.3), and four A.3 questions use forces (A.2).
+  expect(t.length === 6 && t.some((x) => x.includes('trolleys')) && t.some((x) => x.includes('sledge')) && !t.some((x) => x.includes('lift')), `A.2 + A.3 gives the 6 questions that use both (${t.join(' | ')})`);
   await p.locator('.combine .std-chip', { hasText: 'A.3 Work, energy and power' }).click();
   await p.locator('.combine .std-chip', { hasText: 'A.1 Kinematics' }).click();
   t = await titles();
   expect(t.some((x) => x.includes('skydiver')) && t.some((x) => x.includes('Mars')), `A.1 + A.2 gives the skydiver and Mars lander (${t.join(' | ')})`);
-  await p.locator('.segmented button', { hasText: 'IB Physics HL' }).click();
+  await p.selectOption('select[aria-label="Course"]', 'ib-physics-hl');
   await p.locator('.combine .std-chip', { hasText: 'A.1 Kinematics' }).click();
   await p.locator('.combine .std-chip', { hasText: 'A.3 Work, energy and power' }).click();
   t = await titles();
-  expect(t.length === 3 && t.some((x) => x.includes('glancing')), `HL A.2 + A.3 adds the HL collision (${t.length})`);
+  expect(t.length === 7 && t.some((x) => x.includes('glancing')), `HL A.2 + A.3 adds the HL collision (${t.length})`);
   await p.locator('.segmented button', { hasText: 'One topic' }).click();
   expect(await p.locator('select[aria-label="Topic"]').isVisible(), 'back to One topic');
-  await p.locator('.segmented button', { hasText: 'IB Physics SL' }).click();
+  await p.selectOption('select[aria-label="Course"]', 'ib-physics-sl');
 
   console.log('Bank: Combine topics, kept in the address');
   await go('#/bank?course=ib-physics-sl&topic=ibp.A.2');
   await p.locator('.bank-mode .segmented button', { hasText: 'Combine topics' }).click();
   await p.locator('.combine .std-chip', { hasText: 'A.2 Forces and momentum' }).click();
   await p.locator('.combine .std-chip', { hasText: 'A.3 Work, energy and power' }).click();
-  expect((await p.locator('.q-card').count()) === 2, `2 cards for A.2 + A.3 (${await p.locator('.q-card').count()})`);
+  expect((await p.locator('.q-card').count()) === 6, `6 cards for A.2 + A.3 (${await p.locator('.q-card').count()})`);
   expect(p.url().includes('mode=combine') && p.url().includes('topics='), 'choice kept in the address');
   await p.reload();
   await p.waitForSelector('.combine');
-  expect((await p.locator('.q-card').count()) === 2, 'still 2 after reloading');
+  expect((await p.locator('.q-card').count()) === 6, 'still 6 after reloading');
 
   console.log('Follow-through only from checked answers (preview)');
   await go('#/q/ibp-a1-train-acceleration');

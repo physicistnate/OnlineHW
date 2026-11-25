@@ -2,8 +2,8 @@
  * Leaving out questions that need later topics, and finding questions that combine topics.
  */
 import { describe, expect, it } from 'vitest';
-import { IB_PHYSICS_HL, IB_PHYSICS_SL, courseTopic, topicOf } from '../src/content/catalog';
-import { ALL_QUESTIONS, getQuestion, laterTopicsUsed, questionsCombining, questionsForTopic, topicsOfQuestion } from '../src/content/registry';
+import { AP_PHYSICS_C_MECH, IB_PHYSICS_HL, IB_PHYSICS_SL, UNIVERSITY_PHYSICS_1, courseTopic, topicOf, type Course } from '../src/content/catalog';
+import { ALL_QUESTIONS, getQuestion, laterTopicsUsed, questionsCombining, questionsForCourse, questionsForTopic, topicsOfQuestion } from '../src/content/registry';
 import { filterLater } from '../src/components/TopicFilters';
 
 const SL = IB_PHYSICS_SL.id;
@@ -41,6 +41,34 @@ describe('questions that use ideas from other topics', () => {
     }
   });
 
+  it('has a question for every A.3, AP Unit 3 and University Topic 3 standard without later topics', () => {
+    const cases: [Course, string][] = [
+      [IB_PHYSICS_SL, 'ibp.A.3'],
+      [IB_PHYSICS_HL, 'ibp.A.3'],
+      [AP_PHYSICS_C_MECH, 'apcm.3'],
+      [UNIVERSITY_PHYSICS_1, 'up1.3'],
+    ];
+    for (const [course, topicId] of cases) {
+      const { visible } = filterLater(questionsForTopic(topicId, course.id), course.id, false);
+      expect(visible.length, `${course.id} ${topicId}`).toBeGreaterThanOrEqual(10);
+      for (const s of courseTopic(course, topicId)!.standards) {
+        expect(visible.some((q) => q.standards.includes(s.id)), `${course.id} ${s.code} has no question that avoids later topics`).toBe(true);
+      }
+    }
+  });
+
+  it('keeps each course’s questions to that course', () => {
+    const ap = questionsForCourse(AP_PHYSICS_C_MECH.id);
+    const uni = questionsForCourse(UNIVERSITY_PHYSICS_1.id);
+    expect(ap.length).toBe(10);
+    expect(uni.length).toBe(10);
+    expect(ap.every((q) => q.style === 'AP' && q.topic.startsWith('apcm.'))).toBe(true);
+    expect(uni.every((q) => q.style === 'General' && q.topic.startsWith('up1.'))).toBe(true);
+    for (const id of [IB_PHYSICS_SL.id, IB_PHYSICS_HL.id]) {
+      expect(questionsForCourse(id).some((q) => q.topic.startsWith('apcm.') || q.topic.startsWith('up1.')), id).toBe(false);
+    }
+  });
+
   it('only names real topics or standards other than the question’s own', () => {
     for (const q of ALL_QUESTIONS) {
       for (const id of q.uses ?? []) {
@@ -55,6 +83,7 @@ describe('combining topics', () => {
   it('finds only questions that involve every chosen topic', () => {
     const forcesAndEnergy = questionsCombining(['ibp.A.2', 'ibp.A.3'], SL).map((q) => q.id);
     expect(forcesAndEnergy).toContain('ibp-a2-trolley-collision');
+    expect(forcesAndEnergy).toContain('ibp-a3-sledge-pull'); // an A.3 question that uses Newton’s first law
     expect(forcesAndEnergy).not.toContain('ibp-a2-lift-scales');
     expect(forcesAndEnergy).not.toContain('ibp-a2-collision-2d'); // HL only
     expect(questionsCombining(['ibp.A.2', 'ibp.A.3'], HL).map((q) => q.id)).toContain('ibp-a2-collision-2d');

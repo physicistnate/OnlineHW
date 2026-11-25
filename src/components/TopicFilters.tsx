@@ -71,7 +71,14 @@ export function UsesChips({ q, courseId }: { q: AnyTemplate; courseId: string })
 }
 
 /** "Also include questions that use ideas from later topics", with how many that adds. */
-export function LaterTopicsToggle({ checked, onChange, hidden }: { checked: boolean; onChange: (v: boolean) => void; hidden: number }) {
+/** What "later" means for each family of courses, with an example. */
+const LATER_MEANS: Record<Course['family'], string> = {
+  IB: 'later in the IB guide’s order, e.g. kinetic energy (A.3) in an A.2 question',
+  AP: 'later in the course’s unit order, e.g. momentum (Unit 4) in a Unit 3 question',
+  University: 'later in the course’s topic order, e.g. momentum (Topic 4) in a Topic 3 question',
+};
+
+export function LaterTopicsToggle({ checked, onChange, hidden, course }: { checked: boolean; onChange: (v: boolean) => void; hidden: number; course: Course }) {
   return (
     <label className="later-toggle check">
       <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
@@ -79,7 +86,7 @@ export function LaterTopicsToggle({ checked, onChange, hidden }: { checked: bool
         Also include questions that use ideas from later topics
         <span className="muted small">
           {' '}
-          ({hidden === 0 ? 'none in this topic yet' : `${hidden} more question${hidden === 1 ? '' : 's'}`}; later means later in the IB guide’s order, e.g. kinetic energy (A.3) in an A.2 question)
+          ({hidden === 0 ? 'none in this topic yet' : `${hidden} more question${hidden === 1 ? '' : 's'}`}; {LATER_MEANS[course.family]})
         </span>
       </span>
     </label>

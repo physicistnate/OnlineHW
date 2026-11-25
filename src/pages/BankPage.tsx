@@ -168,7 +168,7 @@ export function BankPage(props: {
                 <>
                   {filters}
                   <StandardPicker topic={topic} selected={standards} onChange={setStandards} counts={countByStandard(visible)} />
-                  <LaterTopicsToggle checked={includeLater} onChange={setIncludeLater} hidden={hidden} />
+                  <LaterTopicsToggle checked={includeLater} onChange={setIncludeLater} hidden={hidden} course={course} />
                 </>
               )}
               <p className="muted small mode-hint">

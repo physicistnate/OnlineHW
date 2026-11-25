@@ -77,7 +77,9 @@ The "leave out questions that need later topics" option uses the IB guide's orde
 - **Written (typed) answers**, such as "explain" and "describe" parts. These are left out for now: every part is marked by the computer. When they return, the teacher marks them, with optional **AI marking against the markscheme**. Estimated cost for 150 students: about $2–7 a month with Claude Haiku 5.5, or $33–130 with Sonnet 5.5.
 - **Teacher gradebook:** by class, assignment, student and standard, with live progress, and the option to change a mark by hand (Phase 3).
 - **"Reset password" button** for teachers, once students have passwords (Phase 3).
-- **More courses:** AP Physics 1, 2 and C, general physics, AP Precalculus, AP Calculus AB/BC and IB Maths. The maths courses need answers that are expressions (such as 2x + 3), so they need a symbolic answer checker.
+- **More courses:** the rest of AP Physics C: Mechanics and University Physics I (one trial unit each so far), AP Physics 1, 2 and C: E&M, general physics, AP Precalculus, AP Calculus AB/BC and IB Maths. The maths courses need answers that are expressions (such as 2x + 3), so they need a symbolic answer checker.
+- **Style-specific labels:** "Scoring guidelines" instead of "Markscheme" for AP questions, and AP-style point allocations on printed keys.
+- **Real-world data that stays current:** a yearly reminder (or a small data file) for the figures some questions quote, such as US home electricity use (EIA) and data-centre power (IEA, Epoch AI).
 - **More graph tools:** plotting data with a line of best fit and its gradient, and sketching curves (for example simple harmonic motion).
 - **More physical constants** beyond g (c, e, h, G, k, N_A, …), with each style's accepted values.
 - **Stricter rounding as an assignment setting**, such as "keep at least 3 s.f. in working" (today this is one site-wide setting).

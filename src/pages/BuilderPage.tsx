@@ -210,7 +210,7 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
               ) : (
                 <>
                   <StandardPicker topic={topic} selected={standards} onChange={setStandards} counts={countByStandard(topicQuestions)} />
-                  <LaterTopicsToggle checked={includeLater} onChange={setIncludeLater} hidden={hiddenLater} />
+                  <LaterTopicsToggle checked={includeLater} onChange={setIncludeLater} hidden={hiddenLater} course={course} />
                 </>
               )}
               <p className="muted small mode-hint">

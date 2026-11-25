@@ -1,6 +1,6 @@
 import { ASSIGNMENT_DEFAULTS, SITE } from '../config/site';
-import { IB_PHYSICS_HL, IB_PHYSICS_SL, allTopics } from '../content/catalog';
-import { ALL_QUESTIONS, questionsForTopic } from '../content/registry';
+import { AP_PHYSICS_C_MECH, COURSES, IB_PHYSICS_HL, IB_PHYSICS_SL, UNIVERSITY_PHYSICS_1, allTopics } from '../content/catalog';
+import { ALL_QUESTIONS, questionsForCourse, questionsForTopic } from '../content/registry';
 import { Logo } from '../components/Layout';
 
 const FEATURES = [
@@ -13,8 +13,8 @@ const FEATURES = [
     body: `Each calculation is re-run with every intermediate value kept exact, rounded to 3 s.f. or rounded to 2 s.f. Any answer in that range is accepted, and significant figures are never penalized.`,
   },
   {
-    title: 'IB-style solutions and markschemes',
-    body: 'Step-by-step worked solutions put the explanation beside the maths, and markschemes award marks the IB way, including error carried forward.',
+    title: 'Worked solutions and markschemes',
+    body: 'Step-by-step worked solutions put the explanation beside the maths, and markschemes award marks the IB way, including error carried forward. AP and university questions follow the same approach in their own style.',
   },
   {
     title: 'Tries, due dates and two grades',
@@ -59,9 +59,10 @@ export function HomePage() {
             <div className="stat-label">questions ({marks} marks)</div>
           </div>
           <div className="stat">
-            <div className="stat-num">IB Physics SL &amp; HL</div>
+            <div className="stat-num">{COURSES.length} courses</div>
             <div className="stat-label">
-              {withQuestions.length} of {topics.length} SL topics started · {hlOnly} HL-only topics to come
+              IB Physics SL &amp; HL ({withQuestions.length} of {topics.length} SL topics started · {hlOnly} HL-only topics to come), AP Physics C: Mechanics and
+              University Physics I (one trial unit each)
             </div>
           </div>
         </div>
@@ -85,11 +86,15 @@ export function HomePage() {
               <li>Question engine: seeded randomization, rounding-aware marking, error carried forward</li>
               <li>
                 IB Physics · A.1 Kinematics: {questionsForTopic('ibp.A.1').length} questions; A.2 Forces and momentum: {questionsForTopic('ibp.A.2').length} questions (
-                {questionsForTopic('ibp.A.2').filter((q) => q.level === 'HL').length} HL only). Calculation, graph reading and drawing, and multiple choice, all marked by
-                the computer
+                {questionsForTopic('ibp.A.2').filter((q) => q.level === 'HL').length} HL only); A.3 Work, energy and power: {questionsForTopic('ibp.A.3').length} questions.
+                Calculation, graph reading and drawing, and multiple choice, all marked by the computer
+              </li>
+              <li>
+                Trial units: {AP_PHYSICS_C_MECH.name} Unit 3 Work, Energy, and Power ({questionsForCourse(AP_PHYSICS_C_MECH.id).length} questions) and{' '}
+                {UNIVERSITY_PHYSICS_1.name} Topic 3 Work, energy and power ({questionsForCourse(UNIVERSITY_PHYSICS_1.id).length} questions, with integrals)
               </li>
               <li>Question preview with any student’s numbers, worked solutions and markschemes</li>
-              <li>Assignment builder: SL or HL, several standards at once, tries per part, due date, answer key release, class-grade rules</li>
+              <li>Assignment builder: any course, several standards at once, tries per part, due date, answer key release, class-grade rules</li>
               <li>Printable PDFs (base or per-student version)</li>
               <li>Student demo: sign in with a class code; numbers are pinned, work is saved, countdown before the due time, class grade and IB marks</li>
             </ul>
@@ -97,7 +102,7 @@ export function HomePage() {
           <div>
             <h4 className="next">Coming next</h4>
             <ul>
-              <li>A.3 Work, energy and power, then the other SL topics and the HL-only topics</li>
+              <li>B.1 Thermal energy transfers (the next SL topic), the HL-only topics A.4 and A.5, then the other themes; more AP and university units if the trial units work well</li>
               <li>Supabase database: real teacher and student accounts, classes, saved work across devices, server-side marking and deadlines</li>
               <li>Teacher gradebook by class, assignment, student and standard</li>
               <li>Hosting on a host school networks allow (Cloudflare Pages or Netlify)</li>

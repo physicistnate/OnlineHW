@@ -87,7 +87,7 @@ export default defineQuestion({
       response: { kind: 'numeric', answer: 'W', symbol: 'W', unit: 'J' },
       solution: ({ p, r }) => [
         {
-          text: 'Add the signed area of the sloping section. Where the graph is below the axis, the force is opposite to the motion and the work is negative. The sloping section is a trapezium with signed heights $F_1$ and $-F_2$:',
+          text: 'Add the signed area of the sloping section. Where the graph is below the axis, the force is opposite to the motion and the work is negative. The sloping section is a trapezoid with signed heights $F_1$ and $-F_2$:',
           math: tex`W_2 = \tfrac{1}{2}\big(${p.F1} + (-${p.F2})\big) \times ${p.w} = ${fmtW(r.W2)}\ ${u('J')}`,
         },
         { math: tex`W = ${fmtW(r.W1)} ${r.W2 < 0 ? '-' : '+'} ${fmtW(Math.abs(r.W2))} = ${fmtA(r.W)}\ ${u('J')}` },

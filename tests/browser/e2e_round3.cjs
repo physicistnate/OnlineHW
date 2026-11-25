@@ -43,11 +43,11 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   await p.getByRole('button', { name: 'Select all', exact: true }).click();
 
   console.log('Builder: HL course');
-  await p.locator('.segmented button', { hasText: 'IB Physics HL' }).click();
+  await p.selectOption('select[aria-label="Course"]', 'ib-physics-hl');
   const options = await p.locator('select[aria-label="Topic"] option').allInnerTexts();
   expect(options.some((o) => o.includes('A.4 Rigid body mechanics (HL)')), 'HL lists the HL-only topics');
   expect((await p.locator('.pick-list li').count()) === 11, 'HL still has the SL A.1 questions');
-  await p.locator('.segmented button', { hasText: 'IB Physics SL' }).click();
+  await p.selectOption('select[aria-label="Course"]', 'ib-physics-sl');
   const slOptions = await p.locator('select[aria-label="Topic"] option').allInnerTexts();
   expect(!slOptions.some((o) => o.includes('Rigid body')), 'SL does not list HL-only topics');
 
