@@ -79,11 +79,29 @@ export interface SankeySpec {
   scale?: string;
 }
 
-/** A question figure: a graph, or a Sankey diagram. */
-export type FigureSpec = GraphSpec | SankeySpec;
+/**
+ * A Hertzsprung–Russell diagram: luminosity (in units of the Sun's luminosity) against
+ * surface temperature, both on logarithmic scales, with temperature increasing to the
+ * left from 2500 K to 40 000 K and luminosity from 10⁻⁴ to 10⁶. The main regions are
+ * shaded and labelled. Put stars on gridlines (temperatures 2500, 5000, 10 000, 20 000
+ * or 40 000 K; luminosities a power of ten) so that their values can be read exactly.
+ */
+export interface HRSpec {
+  kind: 'hr';
+  stars: { label: string; T: number; L: number }[];
+  /** Also mark the Sun (5800 K, 1 L☉), for reference. */
+  sun?: boolean;
+}
+
+/** A question figure: a graph, a Sankey diagram or an HR diagram. */
+export type FigureSpec = GraphSpec | SankeySpec | HRSpec;
 
 export function isSankey(f: FigureSpec): f is SankeySpec {
   return (f as SankeySpec).kind === 'sankey';
+}
+
+export function isHR(f: FigureSpec): f is HRSpec {
+  return (f as HRSpec).kind === 'hr';
 }
 
 // ---------- Solutions and markschemes ----------
@@ -141,6 +159,11 @@ export interface McqResponseSpec<C> {
   columns?: string[];
   /** Options in their printed (base version) order. Student versions are shuffled. */
   options: (c: C) => McqOptionSpec[];
+  /**
+   * Keep the printed order in every version, for options that are labels in order
+   * (Star A, Star B, …). The question should vary which one is correct instead.
+   */
+  ordered?: boolean;
 }
 
 export interface TextResponseSpec {

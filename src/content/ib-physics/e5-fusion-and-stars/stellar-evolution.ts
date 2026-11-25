@@ -48,24 +48,28 @@ export default defineQuestion({
           { text: 'White dwarf → supernova → red supergiant' },
         ],
       },
-      solution: () => [{ text: 'Massive stars fuse heavier elements up to iron in a red supergiant. The core then collapses and the star explodes as a supernova, leaving a neutron star or, for the most massive cores, a black hole.' }],
+      solution: () => [{ text: 'Massive stars fuse heavier elements, up to the iron group (iron and nickel), in a red supergiant. The core then collapses and the star explodes as a supernova, leaving a neutron star or, for the most massive cores, a black hole.' }],
       markscheme: () => [{ note: 'Red supergiant, supernova, neutron star or black hole.' }],
     },
     {
       label: '(c)',
       marks: 1,
-      prompt: () => 'Why does fusion in the core of a massive star stop producing energy once the core is iron?',
+      prompt: () => 'Why does fusion in the core of a massive star stop producing energy once the core is mostly iron?',
       response: {
         kind: 'mcq',
         options: () => [
-          { text: 'Iron has the greatest binding energy per nucleon, so fusing it would absorb energy rather than release it.', correct: true },
+          { text: 'Iron-group nuclei (iron and nickel) have the greatest binding energy per nucleon, so fusing them into heavier nuclei would absorb energy rather than release it.', correct: true },
           { text: 'Iron nuclei are too small to fuse.' },
           { text: 'The core becomes too cold for any fusion.' },
           { text: 'Iron is radioactive and decays before it can fuse.' },
         ],
       },
-      solution: () => [{ text: 'Fusion releases energy only while the products are more tightly bound than the reactants. Binding energy per nucleon peaks near iron-56 (and nickel-62), so beyond iron, fusion needs an energy input.' }],
-      markscheme: () => [{ note: 'Peak of the binding energy per nucleon curve.' }],
+      solution: () => [
+        {
+          text: 'Fusion releases energy only while the products are more tightly bound than the reactants. Binding energy per nucleon is greatest in the iron group: nickel-62 is the most tightly bound nucleus, with iron-58 and iron-56 just below it. Fusing iron-group nuclei into heavier ones generally needs an energy input, so the core can no longer support itself by fusion.',
+        },
+      ],
+      markscheme: () => [{ note: 'Iron-group nuclei are at the peak of the binding energy per nucleon curve.' }],
     },
     {
       label: '(d)',

@@ -7,7 +7,7 @@
  * grade and IB marks. In the teacher preview, tries are unlimited.
  */
 import { useId, type CSSProperties } from 'react';
-import { findCourse, findTopic } from '../content/catalog';
+import { courseOfQuestionIn, findCourse, findTopic, type Course } from '../content/catalog';
 import { attemptLimit, percentLabel, summarizeGrades, type GradingPolicy, type LastMark } from '../engine/gradebook';
 import { gradePart, markGraph, summarize } from '../engine/grading';
 import { fmtRange } from '../engine/numbers';
@@ -36,14 +36,17 @@ interface QuestionViewProps {
   closesAt?: number | null;
   /** The browser refused to save the last change. */
   saveFailed?: boolean;
+  /** The course of the assignment the question is in, for its label (an HL assignment names shared questions HL). */
+  context?: Course;
 }
 
 function samePoints(a: [number, number][], b: [number, number][]): boolean {
   return a.length === b.length && a.every(([x, y], i) => Math.abs(x - b[i][0]) < 1e-9 && Math.abs(y - b[i][1]) < 1e-9);
 }
 
-export function questionMeta(template: AnyTemplate): string {
-  const course = findCourse(template.courses[0]);
+/** "IB Physics SL · E.1 Structure of the atom · Paper 2 style"; in an HL assignment, shared questions say IB Physics HL. */
+export function questionMeta(template: AnyTemplate, context?: Course): string {
+  const course = context ? courseOfQuestionIn(template, context) : findCourse(template.courses[0]);
   const topic = findTopic(template.topic);
   const hlTag = template.level === 'HL' && !course?.name.includes('HL') ? 'HL' : '';
   return [course?.name, topic && `${topic.code} ${topic.name}`, hlTag, template.paper].filter(Boolean).join(' · ');
@@ -62,7 +65,7 @@ export interface PartState {
   reason?: 'correct' | 'out-of-tries' | 'closed';
 }
 
-export function QuestionView({ template, instance, number, work, onWork, showSolutions, showMarkscheme, mode = 'preview', policy, closed, closesAt, saveFailed }: QuestionViewProps) {
+export function QuestionView({ template, instance, number, work, onWork, showSolutions, showMarkscheme, mode = 'preview', policy, closed, closesAt, saveFailed, context }: QuestionViewProps) {
   const responses: Record<string, PartResponse | undefined> = Object.fromEntries(instance.parts.map((p) => [p.id, work[p.id]?.response]));
   // The answers as last checked. Follow-through (error carried forward) uses these, so a
   // later part can never earn marks from an earlier answer that was typed but not checked.
@@ -165,7 +168,7 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
         {number !== undefined && <div className="q-num">{number}</div>}
         <div className="q-title">
           <h2>{template.title}</h2>
-          <div className="q-meta">{questionMeta(template)}</div>
+          <div className="q-meta">{questionMeta(template, context)}</div>
         </div>
         {header}
       </header>

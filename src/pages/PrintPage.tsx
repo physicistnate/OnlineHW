@@ -4,7 +4,7 @@
  */
 import { useMemo } from 'react';
 import { CONSTANTS, KEY_NAMES, SITE, sharedKeyName } from '../config/site';
-import { courseOfQuestion, courseOrDefault, printInstructionsFor } from '../content/catalog';
+import { courseOfQuestionIn, courseOrDefault, findCourse, printInstructionsFor, type Course } from '../content/catalog';
 import { getQuestion } from '../content/registry';
 import { Figure } from '../components/Figure';
 import { Graph } from '../components/Graph';
@@ -48,9 +48,12 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
 
   const extMarks = (inst: QuestionInstance) => (withExtensions ? inst.extensions.reduce((s, x) => s + x.marks, 0) : 0);
   const marks = items.reduce((s, it) => s + it.instance.totalMarks + extMarks(it.instance), 0);
-  const course = courseOrDefault(assignment?.courseId ?? query.get('course') ?? items[0]?.template.courses[0]);
-  // A paper can mix courses: name them all, and print instructions that suit them all.
-  const courses = items.map((it) => courseOfQuestion(it.template));
+  // The course the paper was made for (a saved assignment's, or the builder's), if known.
+  const context = findCourse(assignment?.courseId ?? query.get('course'));
+  const course = context ?? courseOrDefault(items[0]?.template.courses[0]);
+  // A paper can mix courses: name them all, and print instructions that suit them all. Questions
+  // the paper's own course contains are named by it (an HL worksheet of shared questions is HL).
+  const courses = items.map((it) => courseOfQuestionIn(it.template, context));
   const courseNames = [...new Set(courses.map((c) => c.name))].join(' + ') || course.name;
   const instructions = items.length > 0 ? printInstructionsFor(courses) : course.printInstructions;
   // One name for the key when every question has the same exam style; otherwise each question's own.
@@ -118,7 +121,7 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
         {items.length === 0 && <p>No questions selected.</p>}
 
         {items.map(({ template, instance }, i) => (
-          <PrintQuestion key={template.id} number={i + 1} template={template} instance={instance} withExtensions={withExtensions} />
+          <PrintQuestion key={template.id} number={i + 1} template={template} instance={instance} withExtensions={withExtensions} context={context} />
         ))}
 
         {(withSolutions || withMarkscheme) && items.length > 0 && (
@@ -158,7 +161,19 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
   );
 }
 
-function PrintQuestion({ number, template, instance, withExtensions }: { number: number; template: AnyTemplate; instance: QuestionInstance; withExtensions: boolean }) {
+function PrintQuestion({
+  number,
+  template,
+  instance,
+  withExtensions,
+  context,
+}: {
+  number: number;
+  template: AnyTemplate;
+  instance: QuestionInstance;
+  withExtensions: boolean;
+  context?: Course;
+}) {
   const extensions = withExtensions ? instance.extensions : [];
   const total = instance.totalMarks + extensions.reduce((s, x) => s + x.marks, 0);
   // Multiple-choice questions are short: keep the stem and all options on one page.
@@ -167,7 +182,7 @@ function PrintQuestion({ number, template, instance, withExtensions }: { number:
     <section className={`paper-question${keepTogether ? ' pq-keep' : ''}`}>
       <div className="pq-head">
         <span className="pq-num">{number}.</span>
-        <span className="pq-meta">{questionMeta(template)}</span>
+        <span className="pq-meta">{questionMeta(template, context)}</span>
         <span className="pq-total">[{marksLabel(total)}]</span>
       </div>
       {instance.stem && <Tex block className="pq-stem" text={instance.stem} />}

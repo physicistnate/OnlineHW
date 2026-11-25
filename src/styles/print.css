@@ -153,6 +153,52 @@
   font-size: 10pt;
   color: inherit;
 }
+.hr.graph-print {
+  max-width: 400px;
+}
+.paper .hr-bg {
+  fill: #fff;
+}
+.paper .hr-grid {
+  stroke: #c7ccd4;
+}
+.paper .hr-frame {
+  stroke: #333;
+}
+.paper .hr-ms {
+  fill: #dbe2ec;
+}
+.paper .hr-giants {
+  fill: #ead9d4;
+}
+.paper .hr-super {
+  fill: #efe8d2;
+}
+.paper .hr-dwarfs {
+  fill: #e5e7eb;
+}
+.paper .hr-region-label,
+.paper .hr-tick,
+.paper .hr-axis-title {
+  fill: #333;
+}
+.paper .hr-star circle {
+  fill: #111;
+  stroke: #fff;
+}
+.paper .hr-sun circle {
+  stroke: #111;
+}
+.paper .hr-sun .hr-sun-dot {
+  fill: #111;
+}
+.paper .hr-star-label {
+  fill: #111;
+}
+.paper .hr-caption {
+  font-size: 9.5pt;
+  color: inherit;
+}
 .pq-part {
   margin: 10px 0 14px 18px;
   break-inside: avoid;

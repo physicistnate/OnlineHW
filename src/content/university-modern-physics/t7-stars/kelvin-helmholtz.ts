@@ -41,9 +41,9 @@ export default defineQuestion({
   parts: [
     {
       label: '(a)',
-      marks: 3,
+      marks: 2,
       prompt: () =>
-        'Build the star up shell by shell: bringing a shell of mass $dm$ from infinity to the surface of a sphere of mass $m(r)$ and radius $r$ changes the potential energy by $dU = -Gm(r)\\,dm/r$. Integrate to show that $U = -\\dfrac{3GM^2}{5R}$, and evaluate $U$ for this star.',
+        'Building a uniform star up shell by shell from material far away releases energy: its gravitational potential energy is $U = -\\dfrac{3GM^2}{5R}$. (For practice, derive this by integrating $dU = -Gm(r)\\,dm/r$; only the value of $U$ is marked here.) Calculate $U$ for this star.',
       response: { kind: 'numeric', answer: 'U', symbol: 'U', unit: 'J' },
       solution: ({ d, p, r }) => [
         {
@@ -52,7 +52,7 @@ export default defineQuestion({
         },
         { math: tex`U = -\frac{3 \times 6.674 \times 10^{-11} \times (${d.M} \times 1.989 \times 10^{30})^2}{5 \times ${radiusOf(p.M)} \times 6.957 \times 10^{8}} = ${fmtA(r.U)}\ ${u('J')}` },
       ],
-      markscheme: ({ r }) => [{ mark: '$m(r)$ and $dm$ for uniform density' }, { mark: 'Integral evaluated to $-3GM^2/5R$' }, { mark: tex`$U = ${fmtA(r.U)}\ ${u('J')}$` }],
+      markscheme: ({ r }) => [{ mark: 'Substitutes $M$ and $R$ in kilograms and metres' }, { mark: tex`$U = ${fmtA(r.U)}\ ${u('J')}$` }],
     },
     {
       label: '(b)',
@@ -70,7 +70,7 @@ export default defineQuestion({
       label: '(c)',
       marks: 2,
       prompt: () =>
-        'In fact the star is powered by fusing hydrogen into helium, which converts 0.7% of the mass of the hydrogen into energy. If 10% of the star’s mass is hydrogen that fuses during its time on the main sequence, how long can it shine at its present luminosity, in years?',
+        'In fact the star is powered by fusing hydrogen into helium, which converts 0.7% of the mass of the hydrogen into energy. If 10% of the star’s mass is hydrogen that fuses during its time on the main sequence, how long can it shine at its present luminosity, in years? Neglect the small share of the energy carried away by neutrinos.',
       response: { kind: 'numeric', answer: 'tNuc', symbol: 't_{\\text{nuc}}', unit: 'years', positive: true },
       solution: ({ d, p, r }) => [
         { math: tex`E = 0.007 \times 0.1 \times Mc^2 = 0.0007 \times ${d.M} \times 1.989 \times 10^{30} \times (2.998 \times 10^{8})^2 = ${fmtW(0.0007 * r.M * UMP.c ** 2)}\ ${u('J')}` },
@@ -98,6 +98,19 @@ export default defineQuestion({
         },
       ],
       markscheme: () => [{ note: 'Kelvin–Helmholtz time ≪ age of Earth.' }],
+    },
+  ],
+  extensions: [
+    {
+      prompt: () =>
+        'Show by integration that a star of uniform density, mass $M$ and radius $R$ has gravitational potential energy $U = -\\dfrac{3GM^2}{5R}$. Build it up shell by shell: bringing a shell of mass $dm$ from infinity to the surface of a sphere of mass $m(r)$ and radius $r$ changes the potential energy by $dU = -Gm(r)\\,dm/r$.',
+      marks: 3,
+      lines: 8,
+      markscheme: () => [
+        { mark: 'Uniform density: $m(r) = M\\dfrac{r^3}{R^3}$ and $dm = \\dfrac{3Mr^2}{R^3}\\,dr$' },
+        { mark: '$U = -\\displaystyle\\int_0^R \\dfrac{3GM^2r^4}{R^6}\\,dr$' },
+        { mark: 'Evaluates to $-\\dfrac{3GM^2}{5R}$' },
+      ],
     },
   ],
 });

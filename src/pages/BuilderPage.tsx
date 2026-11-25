@@ -6,7 +6,7 @@
  * assignment can be loaded back ("Edit questions") to add or remove questions.
  */
 import { useEffect, useState } from 'react';
-import { allTopics, courseOfQuestion, courseOrDefault, courseTopic, findStandard, findTopic, type Course } from '../content/catalog';
+import { allTopics, courseOfQuestion, courseOfQuestionIn, courseOrDefault, courseTopic, findStandard, findTopic, type Course } from '../content/catalog';
 import { getQuestion, questionsCombining, questionsForCourse, questionsForTopic } from '../content/registry';
 import { keyNamesPhrase, sharedKeyName } from '../config/site';
 import { PageHeader } from '../components/Layout';
@@ -68,9 +68,9 @@ function inCourse(courseId: string, questionId: string): boolean {
   return questionsForCourse(courseId).some((q) => q.id === questionId);
 }
 
-/** "IB Phys SL · A.3", "AP Phys C: Mech · Unit 3", "Univ Phys I · Topic 3". */
-function questionTag(q: AnyTemplate): string {
-  return `${courseOfQuestion(q).shortName} · ${findTopic(q.topic)?.code ?? q.topic}`;
+/** "IB Phys SL · A.3", "AP Phys C: Mech · Unit 3", "Univ Phys I · Topic 3"; shared SL questions say HL in an HL assignment. */
+function questionTag(q: AnyTemplate, context?: Course): string {
+  return `${courseOfQuestionIn(q, context).shortName} · ${findTopic(q.topic)?.code ?? q.topic}`;
 }
 
 /** A topic's short name for titles: "A.3", "AP Unit 3", "University Topic 3". */
@@ -99,9 +99,9 @@ function mainCourse(selected: AnyTemplate[], browsing: Course): Course {
   return courseOfQuestion(selected[0]);
 }
 
-/** Course names in a list of questions: "IB Physics SL + AP Physics C: Mechanics". */
-export function coursesLabel(templates: AnyTemplate[]): string {
-  return [...new Set(templates.map((q) => courseOfQuestion(q).name))].join(' + ');
+/** Course names in a list of questions: "IB Physics SL + AP Physics C: Mechanics", in the context of the assignment's course. */
+export function coursesLabel(templates: AnyTemplate[], context?: Course): string {
+  return [...new Set(templates.map((q) => courseOfQuestionIn(q, context).name))].join(' + ');
 }
 
 function initialDraft(query: URLSearchParams): Draft {
@@ -201,6 +201,8 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
       return next;
     });
   const selectedTemplates = selected.map((id) => getQuestion(id)).filter((q): q is AnyTemplate => q !== undefined);
+  // The course the assignment will be filed under: labels name shared SL questions HL in an HL assignment.
+  const filedUnderCourse = mainCourse(selectedTemplates, course);
   const totalMarks = selectedTemplates.reduce((s, q) => s + marksOf(q), 0);
   const browsingTitle =
     mode === 'combine' && combine.length >= 2
@@ -240,7 +242,7 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
       if (!window.confirm('The due date is in the past, so students will not be able to answer. Save anyway?')) return;
     }
     const name = title || defaultTitle;
-    const filedUnder = mainCourse(selectedTemplates, course).id;
+    const filedUnder = filedUnderCourse.id;
     if (editing) {
       if (!updateAssignment(editing.id, name, filedUnder, selected, settings)) {
         setSavedMsg('');
@@ -409,7 +411,7 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
             <div className="selection-summary">
               <strong>{selected.length}</strong> question
               {selected.length === 1 ? '' : 's'} · <strong>{totalMarks}</strong> {totalMarks === 1 ? 'mark' : 'marks'}
-              {selectedTemplates.length > 0 && <div className="muted small">{coursesLabel(selectedTemplates)}</div>}
+              {selectedTemplates.length > 0 && <div className="muted small">{coursesLabel(selectedTemplates, filedUnderCourse)}</div>}
             </div>
             {selectedTemplates.length === 0 ? (
               <p className="muted small">Tick questions on the left. They are listed here, in order, as you go.</p>
@@ -422,7 +424,7 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
                         <span className="sel-main">
                           <span className="sel-title">{q.title}</span>
                           <span className="sel-meta">
-                            {questionTag(q)} · {marksLabel(marksOf(q))}
+                            {questionTag(q, filedUnderCourse)} · {marksLabel(marksOf(q))}
                           </span>
                         </span>
                         <span className="sel-actions">
@@ -519,7 +521,7 @@ function AssignmentRow({ a, onEdit, isEditing }: { a: Assignment; onEdit: (a: As
         {a.builtIn && <span className="chip chip-small">sample</span>}
         {isEditing && <span className="chip chip-small">editing</span>}
         <div className="muted small">
-          {coursesLabel(resolved.map((r) => r.template)) || courseOrDefault(a.courseId).name} · created {new Date(a.createdAt).toLocaleDateString()}
+          {coursesLabel(resolved.map((r) => r.template), courseOrDefault(a.courseId)) || courseOrDefault(a.courseId).name} · created {new Date(a.createdAt).toLocaleDateString()}
         </div>
       </td>
       <td>

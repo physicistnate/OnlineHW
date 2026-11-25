@@ -27,7 +27,8 @@ export default defineQuestion({
   compute: (p, c) => {
     const Fx = p.F * cosD(p.theta);
     const W = p.F * p.s * cosD(p.theta);
-    const Wf = -W;
+    // Friction does the negative of the student's work in (a) (follow-through).
+    const Wf = -c.carry(W, 'W');
     const P = c.carry(W, 'W') / p.t;
     return { Fx, W, Wf, P };
   },

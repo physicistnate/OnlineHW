@@ -22,7 +22,7 @@ export default defineQuestion({
 
   compute: (p, c) => {
     const Ek = p.V * IB.e;
-    const pm = Math.sqrt(2 * IB.me * c.carry(Ek));
+    const pm = Math.sqrt(2 * IB.me * c.carry(Ek, 'Ek'));
     const lam = IB.h / c.carry(pm, 'pm');
     return { Ek, pm, lam };
   },

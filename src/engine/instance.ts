@@ -82,7 +82,7 @@ export function buildInstance(
       }
       case 'mcq': {
         const authored = spec.options(ctx).map((o, i) => ({ key: `o${i}`, text: o.text, cells: o.cells, correct: !!o.correct }));
-        const ordered = seed === null ? authored : shuffled(authored, rngFromString(`${seed}::mcq::${id}`));
+        const ordered = seed === null || spec.ordered ? authored : shuffled(authored, rngFromString(`${seed}::mcq::${id}`));
         const options: McqOptionInstance[] = ordered.map((o, i) => ({ ...o, letter: LETTERS[i] }));
         response = { kind: 'mcq', columns: spec.columns, options };
         break;

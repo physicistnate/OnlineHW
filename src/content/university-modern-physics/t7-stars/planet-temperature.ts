@@ -43,7 +43,7 @@ export default defineQuestion({
   },
 
   stem: ({ d }) =>
-    `An exoplanet orbits a star whose surface temperature is ${d.Ts} K and whose radius is ${d.Rs} times the Sun’s radius ($R_\\odot = 6.957 \\times 10^{8}$ m). The planet’s orbital radius is ${d.d} AU ($1\\ \\mathrm{AU} = 1.496 \\times 10^{11}$ m), and it reflects a fraction $a = ${d.a}$ (its albedo) of the starlight that falls on it. Treat the star and the planet as blackbodies, with the planet at the same temperature all over. Use $\\sigma = 5.67 \\times 10^{-8}\\ \\mathrm{W/(m^2\\,K^4)}$.`,
+    `An exoplanet orbits a star whose surface temperature is ${d.Ts} K and whose radius is ${d.Rs} times the Sun’s radius ($R_\\odot = 6.957 \\times 10^{8}$ m). The planet’s orbital radius is ${d.d} AU ($1\\ \\mathrm{AU} = 1.496 \\times 10^{11}$ m). It reflects a fraction $a = ${d.a}$ (its albedo) of the starlight that falls on it and absorbs the rest. Treat the star as a blackbody. The planet emits thermal radiation with emissivity 1 and has the same temperature all over. Use $\\sigma = 5.67 \\times 10^{-8}\\ \\mathrm{W/(m^2\\,K^4)}$.`,
 
   parts: [
     {
@@ -69,7 +69,7 @@ export default defineQuestion({
       response: { kind: 'numeric', answer: 'T', symbol: 'T_p', unit: 'K', positive: true },
       solution: ({ d, r }) => [
         {
-          text: 'The planet intercepts starlight over its cross-section $\\pi R_p^2$ and absorbs a fraction $1 - a$ of it, but radiates from its whole surface $4\\pi R_p^2$. Its radius cancels.',
+          text: 'The planet intercepts starlight over its cross-section $\\pi R_p^2$ and absorbs a fraction $1 - a$ of it, but radiates from its whole surface $4\\pi R_p^2$ with emissivity 1. Its radius cancels.',
           math: tex`(1 - a)S\pi R_p^2 = 4\pi R_p^2\sigma T_p^4 \quad\Rightarrow\quad T_p = \left(\frac{(1 - a)S}{4\sigma}\right)^{1/4}`,
         },
         { math: tex`T_p = \left(\frac{(1 - ${d.a}) \times ${fmtW(r.S)}}{4 \times 5.67 \times 10^{-8}}\right)^{1/4} = ${fmtA(r.T)}\ ${u('K')}` },

@@ -16,6 +16,7 @@
 import { memo, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { ASSIGNMENT_DEFAULTS, keyNamesPhrase } from '../config/site';
 import { PageHeader } from '../components/Layout';
+import { findCourse } from '../content/catalog';
 import { Modal } from '../components/Modal';
 import { QuestionView } from '../components/QuestionView';
 import { formatCountdown, formatDue, timeLeftLabel, useNow } from '../components/time';
@@ -286,11 +287,13 @@ interface StudentQuestionProps {
   closed: boolean;
   closesAt: number | null;
   showKey: boolean;
+  /** The assignment's course, for the question's label. */
+  courseId: string;
 }
 
 /** One question with the student's pinned numbers (memoised: saving another question does not re-render it). */
 const StudentQuestion = memo(function StudentQuestion(props: StudentQuestionProps) {
-  const { template, number, sKey, assignmentId, maxAttempts, lowestScore, penaltyPerTry, closed, closesAt, showKey } = props;
+  const { template, number, sKey, assignmentId, maxAttempts, lowestScore, penaltyPerTry, closed, closesAt, showKey, courseId } = props;
   const instance = useMemo(() => studentInstance(template, sKey, assignmentId), [template, sKey, assignmentId]);
   const policy = useMemo(() => ({ maxAttempts, lowestScore, penaltyPerTry }), [maxAttempts, lowestScore, penaltyPerTry]);
   const { work, update, saveFailed } = useQuestionWork(sKey, assignmentId, workIdFor(template));
@@ -308,6 +311,7 @@ const StudentQuestion = memo(function StudentQuestion(props: StudentQuestionProp
       closed={closed}
       closesAt={closesAt}
       saveFailed={saveFailed}
+      context={findCourse(courseId)}
     />
   );
 });
@@ -401,6 +405,7 @@ export function StudentAssignment({ id }: { id: string }) {
           closed={closed}
           closesAt={dueMs(assignment)}
           showKey={showKey}
+          courseId={assignment.courseId}
         />
       ))}
     </div>

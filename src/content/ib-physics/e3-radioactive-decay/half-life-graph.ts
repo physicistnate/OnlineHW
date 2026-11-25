@@ -33,9 +33,10 @@ export default defineQuestion({
     B: { min: 20, max: 50, step: 5, base: 30 },
   },
 
-  compute: (p) => {
+  compute: (p, c) => {
     const A3 = p.A0 / 8;
-    const t16 = 4 * p.T;
+    // Four half-lives of the student's own reading in (a) (follow-through).
+    const t16 = 4 * c.carry(p.T, 'T');
     const source = p.C - p.B;
     const later = source / 4 + p.B;
     return { A3, t16, source, later, T: p.T };

@@ -51,10 +51,10 @@ export default defineQuestion({
   parts: [
     {
       label: '(a)',
-      marks: 4,
+      marks: 2,
       prompt: ({ p }) => {
         const x = PAIRS[p.pair as string];
-        return `Solve for $N_D(t)$ with $N_D(0) = 0$, and hence find the activity of the ${x.daughter} at $t = ${timeOf(p.pair as string, p.k as number)}$ h.`;
+        return `Find the activity of the ${x.daughter} at $t = ${timeOf(p.pair as string, p.k as number)}$ h. (First solve the daughter equation for $N_D(t)$ with $N_D(0) = 0$; only the activity is marked here.)`;
       },
       response: { kind: 'numeric', answer: 'Ad', symbol: 'A_D', unit: 'GBq', positive: true },
       solution: ({ d, p, r }) => {
@@ -74,12 +74,7 @@ export default defineQuestion({
           { math: tex`A_D = ${d.A0} \times ${fmtW(r.ratio)} \times (e^{-${fmtW(r.lp)} \times ${fmtW(r.t)}} - e^{-${fmtW(r.ld)} \times ${fmtW(r.t)}}) = ${d.A0} \times ${fmtW(r.ratio)} \times (${fmtW(r.ep)} - ${fmtW(r.ed)}) = ${fmtA(r.Ad)}\ ${u('GBq')}` },
         ];
       },
-      markscheme: ({ r }) => [
-        { mark: 'Integrating factor (or another valid method) for the daughter equation' },
-        { mark: '$N_D(t)$ with $N_D(0) = 0$' },
-        { mark: '$A_D = \\lambda_DN_D$ in terms of $A_{P0}$' },
-        { mark: tex`$A_D = ${fmtA(r.Ad)}\ ${u('GBq')}$` },
-      ],
+      markscheme: ({ r }) => [{ mark: '$A_D = \\lambda_DN_D(t)$ in terms of $A_{P0}$' }, { mark: tex`$A_D = ${fmtA(r.Ad)}\ ${u('GBq')}$` }],
     },
     {
       label: '(b)',
@@ -127,6 +122,19 @@ export default defineQuestion({
         },
       ],
       markscheme: () => [{ note: 'Proportional to the parent activity; parent’s half-life.' }],
+    },
+  ],
+  extensions: [
+    {
+      prompt: () =>
+        'Show that the solution of $\\dfrac{dN_D}{dt} = \\lambda_PN_P - \\lambda_DN_D$ with $N_P = N_{P0}e^{-\\lambda_Pt}$ and $N_D(0) = 0$ is $N_D(t) = \\dfrac{\\lambda_PN_{P0}}{\\lambda_D - \\lambda_P}\\left(e^{-\\lambda_Pt} - e^{-\\lambda_Dt}\\right)$.',
+      marks: 3,
+      lines: 8,
+      markscheme: () => [
+        { mark: 'Integrating factor $e^{\\lambda_Dt}$: $\\dfrac{d}{dt}\\left(N_De^{\\lambda_Dt}\\right) = \\lambda_PN_{P0}e^{(\\lambda_D - \\lambda_P)t}$ (or another valid method, such as checking the solution by substitution)' },
+        { mark: 'Integrates: $N_De^{\\lambda_Dt} = \\dfrac{\\lambda_PN_{P0}}{\\lambda_D - \\lambda_P}e^{(\\lambda_D - \\lambda_P)t} + C$' },
+        { mark: '$N_D(0) = 0$ gives $C = -\\dfrac{\\lambda_PN_{P0}}{\\lambda_D - \\lambda_P}$, and so the result' },
+      ],
     },
   ],
 });

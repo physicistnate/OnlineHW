@@ -32,8 +32,10 @@ export default defineQuestion({
   compute: (p, c) => {
     const dl = LC * (1 - cosD(p.theta)); // pm
     const lf = p.li + c.carry(dl, 'dl');
-    // Energy given to the electron = hc/λi − hc/λf = hc Δλ/(λi λf).
-    const Ee = (HC * c.carry(dl, 'dl')) / (p.li * c.carry(lf, 'lf'));
+    // Energy given to the electron = hc/λi − hc/λf = hc(λf − λi)/(λi λf). Both methods use
+    // only λf from (b), so a wrong λf is never combined with the original shift from (a).
+    const lfc = c.carry(lf, 'lf', 3);
+    const Ee = (HC * (lfc - p.li)) / (p.li * lfc);
     // Or as the difference of the two photon energies (kept to 3 s.f., since they are subtracted).
     const Ei = HC / p.li;
     const Ef = HC / c.carry(lf, 'lf', 3);

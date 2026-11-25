@@ -32,7 +32,7 @@ export default defineQuestion({
   },
 
   stem: ({ d }) =>
-    `A main-sequence star has a luminosity of ${d.f} times the luminosity of the Sun, $L_\\odot = 3.83 \\times 10^{26}\\ \\mathrm{W}$. In its core, hydrogen fuses into helium: overall, four protons become one helium-4 nucleus, releasing ${Q_PP} MeV.`,
+    `A main-sequence star has a luminosity of ${d.f} times the luminosity of the Sun, $L_\\odot = 3.83 \\times 10^{26}\\ \\mathrm{W}$. In its core, hydrogen fuses into helium: overall, four protons become one helium-4 nucleus, releasing ${Q_PP} MeV. Neglect the small fraction of this energy carried away by neutrinos: assume it all leaves the star as radiation.`,
 
   parts: [
     {

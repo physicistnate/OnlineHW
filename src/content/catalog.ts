@@ -388,6 +388,21 @@ export function courseOfQuestion(q: { courses: string[]; level?: 'SL' | 'HL' }):
   return COURSES.find((c) => c.id === q.courses[0]) ?? IB_PHYSICS_SL;
 }
 
+/** Whether a course contains a question: HL contains every SL question, and SL leaves out HL-only ones. */
+export function courseIncludes(course: Course, q: { courses: string[]; level?: 'SL' | 'HL' }): boolean {
+  const ids = [course.id, ...(course.includes ?? [])];
+  return q.courses.some((c) => ids.includes(c)) && !(course.level === 'SL' && q.level === 'HL');
+}
+
+/**
+ * The course to name a question by in an assignment or paper made for `context`: an HL
+ * worksheet names the SL questions it shares with SL as IB Physics HL. Questions from
+ * other courses keep their own course.
+ */
+export function courseOfQuestionIn(q: { courses: string[]; level?: 'SL' | 'HL' }, context?: Course): Course {
+  return context && courseIncludes(context, q) ? context : courseOfQuestion(q);
+}
+
 /** Instructions for a paper mixing IB, AP and university questions. */
 const MIXED_PRINT_INSTRUCTIONS = [
   'Answer all questions in the spaces provided. Each question is labelled with its course.',

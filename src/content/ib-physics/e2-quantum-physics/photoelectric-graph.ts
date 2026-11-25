@@ -24,11 +24,12 @@ export default defineQuestion({
     w: { min: 4, max: 6, step: 1, base: 5 },
   },
 
-  compute: (p) => {
+  compute: (p, c) => {
     const f0Hz = p.f0 * 1e14;
     const Eend = p.w * SLOPE; // eV at the end of the line
     const h = IB.h;
-    const phi = p.f0 * SLOPE; // eV
+    // Φ = hf₀ from the student's own readings in (a) and (b) (follow-through from both).
+    const phi = (c.carry(h, 'h') * c.carry(f0Hz, 'f0Hz')) / IB.e; // eV
     return { f0Hz, Eend, h, phi, fend: p.f0 + p.w };
   },
 

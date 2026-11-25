@@ -36,7 +36,7 @@ of IB Theme E (Topics 2–7). Course menus group them as IB, AP and
 University. HL includes every SL topic and question plus the HL-only topics
 (A.4, A.5, B.4, D.4, E.2); a question marked level 'HL' appears only in HL.
 
-Questions so far (103, 628 marks): A.1 Kinematics (12), A.2 Forces and
+Questions so far (103, 625 marks): A.1 Kinematics (12), A.2 Forces and
 momentum (15, two of them HL only), A.3 Work, energy and power (13), E.1
 Structure of the atom (7, three HL only), E.2 Quantum physics (5, an HL-only
 topic), E.3 Radioactive decay (7, three HL only), E.4 Fission (6), E.5 Fusion
@@ -186,16 +186,24 @@ Question types implemented (all marked by the computer):
   Graph reading     A randomized graph is part of the question.
   Sankey diagrams   Drawn to scale on a counting grid (one square = a stated
                     power), with a key; read off and calculated from (A.3).
+  HR diagrams       Luminosity against temperature on logarithmic axes, with
+                    the main regions shaded and lettered stars on gridlines,
+                    so their values can be read exactly (E.5).
   Graph drawing     Students drag points that snap to the grid (mouse, touch
                     or keyboard arrows). Marked segment by segment.
   Written answers   Not online for now: every online part is marked by the
                     computer (the tests enforce this). Written "explain"
                     questions exist as paper-only extensions on some
                     questions (stopping distance, kicked ball, skydiver,
-                    trolleys) and derivations on three AP questions
-                    (variable force, potential function, rough incline): the
-                    teacher can print them and mark them by hand; students
-                    never see them online.
+                    trolleys), derivations on three AP questions (variable
+                    force, potential function, rough incline) and "show
+                    that" derivations on two Modern Physics questions (the
+                    parent–daughter equations, the energy of a uniform
+                    star): the teacher can print them and mark them by
+                    hand; students never see them online. An online part
+                    never asks for a derivation it cannot mark: if it
+                    mentions one, it says that only the value is marked
+                    (the tests check this).
 
 Marking rules (one policy, online and on paper):
   - A correct final answer earns full marks for that part (markschemes say
@@ -216,6 +224,13 @@ Marking rules (one policy, online and on paper):
   - ECF never uses inadmissible inputs (e.g. negative velocity components
     where the question defines them as positive) and never credits a
     physically impossible calculation (e.g. a negative time of flight).
+  - Every "Allow ECF from (a)" note in a markscheme is backed by the
+    calculation: the tests change each earlier answer a note names and check
+    that the later answer follows it. Different methods applied to a
+    student's own earlier answer may each be accepted (½kx² or mg(L + x)
+    with their x), but no method mixes an earlier answer with one worked out
+    from it (a wrong λf with the original Compton shift), so the grader never
+    accepts two incompatible answers from the same submission.
   - Feedback hints: wrong sign, or out by a power of ten (units/prefixes).
   - Unreadable input (including a wrong unit typed after the number) is
     reported as unreadable, not as wrong, and does not use up a try.
@@ -436,18 +451,19 @@ E.5 Fusion and stars: 6 questions (32 marks)
                                              per second, hydrogen used, stability,
                                              6 marks
    3. How a star’s mass decides its life     evolution of 1 and 20 solar-mass
-                                             stars, why fusion stops at iron,
-                                             lifetimes, 4 marks
-   4. Reading the Hertzsprung–Russell        regions, radius ratio at equal
-      diagram                                temperature, giant and main sequence
-                                             at equal luminosity, 6 marks
+                                             stars, why fusion stops at the iron
+                                             group, lifetimes, 4 marks
+   4. Reading the Hertzsprung–Russell        an HR diagram with four lettered
+      diagram                                stars: white dwarf, main sequence,
+                                             radius ratio from the readings,
+                                             largest star, 6 marks
    5. A nearby star: distance from           d = 1/p in pc and m, L = 4πd²b, the
       parallax, luminosity from brightness   limits of parallax, 5 marks
    6. The temperature and size of a star     Wien’s law, radius from L = σ4πR²T⁴
       from its spectrum                      (uses B.1), R/R☉, black bodies,
                                              5 marks
 
-University Modern Physics: 12 questions (97 marks), by topic (no questions
+University Modern Physics: 12 questions (94 marks), by topic (no questions
 yet for Topic 1, special relativity)
    1. Measuring Planck’s constant with the   Topic 2: h and the work function from
       photoelectric effect                   two stopping potentials, threshold,
@@ -467,10 +483,10 @@ yet for Topic 1, special relativity)
    6. A PET scan: counting decays by         Topic 5: λ, ∫₀^∞ A dt = N₀, decays
       integrating the activity               during the scan, mean life by parts,
                                              8 marks
-   7. A radioisotope generator: solving the  Topic 5: integrating factor for
-      parent–daughter decay equations        N_D(t), daughter activity, time of the
-                                             maximum, transient equilibrium,
-                                             8 marks
+   7. A radioisotope generator: solving the  Topic 5: daughter activity from
+      parent–daughter decay equations        N_D(t), time of the maximum, transient
+                                             equilibrium, 6 marks (and a 3-mark
+                                             written derivation of N_D(t))
    8. Fission of uranium-235: the Q-value    Topic 6: Q from atomic masses, energy
       and the fragments’ energies            shared by momentum, fragment speed,
                                              fissions per second, 9 marks
@@ -483,9 +499,10 @@ yet for Topic 1, special relativity)
   11. The equilibrium temperature of an      Topic 7: L = 4πR²σT⁴, intensity,
       exoplanet                              equilibrium temperature, albedo change
                                              by differentials, 7 marks
-  12. What powers a star? Gravity versus     Topic 7: U = −3GM²/5R by integration,
+  12. What powers a star? Gravity versus     Topic 7: U = −3GM²/5R,
       fusion                                 Kelvin–Helmholtz time, fusion
-                                             lifetime, 8 marks
+                                             lifetime, 7 marks (and a 3-mark
+                                             written derivation of U)
 
 Theme E standards paraphrase the understandings in the IB guide (first
 assessment 2025); the numbering E.1.1, E.1.2, ... is ours. The IB's own site
@@ -865,7 +882,10 @@ src/content: questions and the syllabus they are tagged with
                             far for A.1–A.3, E.1–E.5, AP Unit 3, University
                             Topic 3 and Modern Physics Topics 2–7.
                             courseOfQuestion() and printInstructionsFor() label
-                            questions and papers that mix courses.
+                            questions and papers that mix courses;
+                            courseOfQuestionIn() names questions by the course
+                            an assignment was made for (HL for shared SL
+                            questions in an HL assignment).
                             A.1 standards paraphrase the IB guide's
                             understandings (numbering A.1.1–A.1.7 is ours). Also
                             the instructions printed at the top of PDFs.
@@ -972,9 +992,12 @@ src/content: questions and the syllabus they are tagged with
 
 src/components: reusable pieces of the interface
   Tex.tsx                   Renders text with KaTeX maths (cached).
-  Figure.tsx                A question's figure: a graph or a Sankey diagram.
+  Figure.tsx                A question's figure: a graph, a Sankey diagram or
+                            an HR diagram.
   Sankey.tsx                Sankey diagrams drawn to scale on a counting grid,
                             with the bands' labels in a key below.
+  HRDiagram.tsx             Hertzsprung–Russell diagrams on logarithmic axes,
+                            with shaded regions and lettered stars.
   Graph.tsx                 SVG graph paper: axes, gridlines, labels, lines,
                             draggable snapping points for graph answers, and a
                             read-only view of a locked answer.
@@ -1085,6 +1108,13 @@ tests (run with: npm test)
   review5.test.ts           Review 5 and round 6: follow-through in the fixed
                             questions, key names by style, papers that mix
                             courses, and editing a saved assignment.
+  followthrough.test.ts     For EVERY question: each "Allow ECF from (x)"
+                            note is backed by the calculation, and no method
+                            mixes an earlier answer with one derived from it.
+  review6.test.ts           Review 6: the follow-through cases the review
+                            submitted, physics wording, derivations kept for
+                            paper, the HR diagram in every version, and the
+                            course named on HL papers of shared questions.
   numbers.test.ts           Reading and formatting numbers (including answers
                             padded with zeros); random generator.
   helpers.ts                Shared test tools: typed forms of numbers, and the
@@ -1102,7 +1132,10 @@ tests (run with: npm test)
                             and the Sankey diagram; e2e_theme_e.cjs the Theme
                             E and Modern Physics topic lists, every new
                             question, follow-through, a mixed paper and phone
-                            widths down to 320 px.
+                            widths down to 320 px; e2e_round7.cjs the review-6
+                            follow-through cases, the HR diagram, printed
+                            derivations, and HL labels from the builder to the
+                            printed key and the student view.
 
 
 -------------------------------------------------------------------------------
