@@ -14,6 +14,7 @@ import { fmtRange } from '../engine/numbers';
 import { unitTex } from '../engine/units';
 import type { AnyTemplate, MarkLine, PartInstance, PartResponse, PartResult, QuestionInstance, SolutionStep } from '../engine/types';
 import type { PartWork, QuestionWork, WorkUpdater } from '../store/progress';
+import { Figure } from './Figure';
 import { Graph } from './Graph';
 import { MathBlock, Tex } from './Tex';
 
@@ -175,7 +176,7 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
       )}
 
       {instance.stem && <Tex block className="q-stem" text={instance.stem} />}
-      {instance.figure && <Graph spec={instance.figure} className="q-figure" />}
+      {instance.figure && <Figure spec={instance.figure} className="q-figure" />}
 
       {instance.parts.map((part) => (
         <PartBlock

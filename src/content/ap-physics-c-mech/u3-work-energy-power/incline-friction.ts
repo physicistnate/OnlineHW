@@ -11,7 +11,7 @@ export default defineQuestion({
   standards: ['apcm.3.4', 'apcm.3.2', 'apcm.3.1'],
   uses: ['apcm.2'],
   style: 'AP',
-  paper: 'Free-response style',
+  paper: 'AP-style problem set',
   types: ['calculation', 'multiple-choice'],
   difficulty: 3,
 
@@ -111,6 +111,19 @@ export default defineQuestion({
         },
       ],
       markscheme: () => [{ note: 'Smaller acceleration on the way down, so a longer time.' }],
+    },
+  ],
+  extensions: [
+    {
+      prompt: () =>
+        'Derive expressions for the time taken to slide up the incline and the time taken to slide back down, in terms of $d$, $g$, $\\theta$ and $\\mu_k$. Use them to justify your answer to (d).',
+      marks: 3,
+      lines: 8,
+      markscheme: () => [
+        { mark: '$a_{\\text{up}} = g(\\sin\\theta + \\mu_k\\cos\\theta)$ and $a_{\\text{down}} = g(\\sin\\theta - \\mu_k\\cos\\theta)$' },
+        { mark: 'From $d = \\tfrac{1}{2}at^2$ (the trip up, reversed in time, starts from rest): $t_{\\text{up}} = \\sqrt{2d/a_{\\text{up}}}$ and $t_{\\text{down}} = \\sqrt{2d/a_{\\text{down}}}$' },
+        { mark: 'Since $a_{\\text{down}} < a_{\\text{up}}$, $t_{\\text{down}} > t_{\\text{up}}$' },
+      ],
     },
   ],
 });

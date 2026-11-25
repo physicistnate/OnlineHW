@@ -63,6 +63,29 @@ export interface GraphSpec {
   series?: GraphSeries[];
 }
 
+/**
+ * A Sankey diagram drawn to scale on a grid of small squares, so students can read
+ * energies (or powers) by counting squares. The input arrow splits into the useful
+ * output, which carries straight on, and the wasted outputs, which bend downwards.
+ * The widths (in squares) of the useful and wasted arrows must add up to the input.
+ */
+export interface SankeySpec {
+  kind: 'sankey';
+  input: { label: string; squares: number };
+  useful: { label: string; squares: number };
+  /** Listed from the top of the arrow downwards; numbered 1, 2, 3 … on the diagram. */
+  wasted: { label: string; squares: number }[];
+  /** Shown under the diagram, e.g. "Each small square represents 5 kW." */
+  scale?: string;
+}
+
+/** A question figure: a graph, or a Sankey diagram. */
+export type FigureSpec = GraphSpec | SankeySpec;
+
+export function isSankey(f: FigureSpec): f is SankeySpec {
+  return (f as SankeySpec).kind === 'sankey';
+}
+
 // ---------- Solutions and markschemes ----------
 
 /** One step of a worked solution: an explanation alongside the maths. */
@@ -190,7 +213,7 @@ export interface QuestionTemplate<PS extends ParamSpecs = ParamSpecs, R extends 
   constraint?: (p: Params<PS>) => boolean;
   compute: (p: Params<PS>, c: Calc) => R;
   stem?: (c: Ctx<PS, R>) => string;
-  figure?: (c: Ctx<PS, R>) => GraphSpec;
+  figure?: (c: Ctx<PS, R>) => FigureSpec;
   parts: PartTemplate<Ctx<PS, R>, R>[];
   /** Written questions for printed copies only (see ExtensionTemplate). */
   extensions?: ExtensionTemplate<Ctx<PS, R>>[];
@@ -257,7 +280,7 @@ export interface QuestionInstance {
   display: Record<string, string>;
   results: Record<string, number>;
   stem?: string;
-  figure?: GraphSpec;
+  figure?: FigureSpec;
   parts: PartInstance[];
   /** Written questions for printed copies only; not part of the online marks. */
   extensions: { prompt: string; marks: number; lines: number; markscheme: MarkLine[] }[];

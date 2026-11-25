@@ -102,7 +102,8 @@ export default defineQuestion({
     {
       label: '(d)',
       marks: 1,
-      prompt: () => 'Suppose the ramp were rougher at the top instead, with $\\mu_k = \\mu_0 + c(L - s)$. How would the total work done by friction over the whole ramp compare?',
+      prompt: () =>
+        'Suppose instead the ramp were rougher at the top, with $\\mu_k = \\mu_0 + c(L - s)$, and the crate were given a push so that it slides the whole length of the ramp. How would the total work done by friction compare with your answer to (a)?',
       response: {
         kind: 'mcq',
         options: () => [
@@ -114,10 +115,10 @@ export default defineQuestion({
       },
       solution: () => [
         {
-          text: 'The work done by friction depends only on $\\int_0^L \\mu_k\\,ds$ along the path (the normal force is the same everywhere), not on the speed or on the order in which the rough and smooth parts are met. Reversing the roughness gives the same integral, so the same energy is transferred to internal energy and the speed at the bottom is the same, although the speed partway down is different.',
+          text: 'The work done by friction depends only on $\\int_0^L \\mu_k\\,ds$ along the path (the normal force is the same everywhere), not on the speed or on the order in which the rough and smooth parts are met. Reversing the roughness gives the same integral, so friction does the same work, provided the crate slides the whole length. The push matters: at the top the coefficient would be $\\mu_0 + cL$, which is greater than $\\tan\\theta$, so a crate released from rest would not start to slide at all.',
         },
       ],
-      markscheme: () => [{ note: 'Same ∫μ ds, so the same work done by friction.' }],
+      markscheme: () => [{ note: 'Same ∫μ ds over the whole length, so the same work done by friction (given that the crate slides the whole way).' }],
     },
   ],
 });

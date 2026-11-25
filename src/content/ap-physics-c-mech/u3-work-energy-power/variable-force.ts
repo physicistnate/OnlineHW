@@ -10,7 +10,7 @@ export default defineQuestion({
   topic: 'apcm.3',
   standards: ['apcm.3.2', 'apcm.3.1', 'apcm.3.5'],
   style: 'AP',
-  paper: 'Free-response style',
+  paper: 'AP-style problem set',
   types: ['calculation', 'multiple-choice'],
   difficulty: 2,
 
@@ -93,6 +93,19 @@ export default defineQuestion({
         },
       ],
       markscheme: () => [{ note: 'Work is the area under the F–x graph.' }],
+    },
+  ],
+  extensions: [
+    {
+      prompt: () =>
+        'Derive an expression for the speed $v$ of the block as a function of its position $x$, in terms of $A$, $B$, $m$ and $x$. Start from the work–energy theorem.',
+      marks: 3,
+      lines: 6,
+      markscheme: () => [
+        { mark: "Work done from $0$ to $x$: $W(x) = \\int_0^x (A + Bx'^2)\\,dx' = Ax + \\tfrac{1}{3}Bx^3$" },
+        { mark: 'Work–energy theorem, starting from rest: $\\tfrac{1}{2}mv^2 = W(x)$' },
+        { mark: '$v = \\sqrt{\\dfrac{2}{m}\\left(Ax + \\tfrac{1}{3}Bx^3\\right)}$' },
+      ],
     },
   ],
 });

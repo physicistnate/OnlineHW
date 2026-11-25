@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 import { CONSTANTS, SITE } from '../config/site';
 import { courseOrDefault } from '../content/catalog';
 import { getQuestion } from '../content/registry';
+import { Figure } from '../components/Figure';
 import { Graph } from '../components/Graph';
 import { Logo } from '../components/Layout';
 import { Markscheme, MarkschemeList, SolutionSteps, questionMeta } from '../components/QuestionView';
@@ -163,7 +164,7 @@ function PrintQuestion({ number, template, instance, withExtensions }: { number:
         <span className="pq-total">[{marksLabel(total)}]</span>
       </div>
       {instance.stem && <Tex block className="pq-stem" text={instance.stem} />}
-      {instance.figure && <Graph spec={instance.figure} className="graph-print" />}
+      {instance.figure && <Figure spec={instance.figure} className="graph-print" />}
       {instance.parts.map((part) => (
         <PrintPart key={part.id} part={part} />
       ))}

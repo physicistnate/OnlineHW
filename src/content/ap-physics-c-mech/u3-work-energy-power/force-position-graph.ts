@@ -31,7 +31,7 @@ export default defineQuestion({
   topic: 'apcm.3',
   standards: ['apcm.3.2', 'apcm.3.1'],
   style: 'AP',
-  paper: 'Free-response style',
+  paper: 'AP-style problem set',
   types: ['graph-reading', 'calculation'],
   difficulty: 2,
 

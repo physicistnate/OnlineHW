@@ -946,6 +946,53 @@ h4.next {
   padding: 4px 0;
 }
 
+/* ---------- Sankey diagram (drawn to scale on a counting grid) ---------- */
+
+.sankey {
+  margin: 0;
+  max-width: 460px;
+}
+.sankey svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+}
+.sk-grid {
+  stroke: var(--g-major);
+  stroke-width: 1;
+}
+.sk-band {
+  stroke: var(--g-axis);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.sk-input {
+  fill: rgba(170, 181, 200, 0.35);
+}
+.sk-useful {
+  fill: rgba(90, 167, 255, 0.55);
+}
+.sk-waste {
+  fill: rgba(245, 184, 74, 0.45);
+}
+.sk-label {
+  fill: var(--g-text);
+  font-size: 13px;
+  font-family: var(--font);
+}
+.sk-key {
+  font-size: 0.92rem;
+  color: var(--text);
+  margin-top: 6px;
+  display: grid;
+  gap: 2px;
+}
+.sk-scale {
+  margin-top: 4px;
+  font-style: italic;
+}
+
 /* ---------- Graph ---------- */
 
 .graph {

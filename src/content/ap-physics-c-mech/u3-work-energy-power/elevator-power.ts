@@ -11,7 +11,7 @@ export default defineQuestion({
   standards: ['apcm.3.5', 'apcm.3.4'],
   uses: ['apcm.2'],
   style: 'AP',
-  paper: 'Free-response style',
+  paper: 'AP-style problem set',
   types: ['calculation', 'multiple-choice'],
   difficulty: 2,
 

@@ -38,7 +38,7 @@ export default defineQuestion({
     const E1 = p.Pbar * (T2 - T1);
     const E2 = c.carry(coef) * c.carry(diff);
     const Epk = E1 + c.carry(E2);
-    const Eoff = Etot - c.carry(Epk, 'Epk', 3);
+    const Eoff = c.carry(Etot, 'Etot') - c.carry(Epk, 'Epk', 3);
     const cents = c.carry(Epk, 'Epk') * p.cPk + c.carry(Eoff) * p.cOff;
     const cost = cents / 100;
     return { Etot, coef, s2, s1, diff, E1, E2, Epk, Eoff, cents, cost };

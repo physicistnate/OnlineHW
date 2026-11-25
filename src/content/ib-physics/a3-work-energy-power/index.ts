@@ -6,6 +6,7 @@ import springLauncher from './spring-launcher';
 import rollerCoaster from './roller-coaster';
 import carPower from './car-power';
 import motorEfficiency from './motor-efficiency';
+import sankeyEngine from './sankey-engine';
 import homeEnergy from './home-energy';
 import dataCentre from './data-centre';
 import hydroelectric from './hydroelectric';
@@ -20,6 +21,7 @@ export default [
   rollerCoaster,
   carPower,
   motorEfficiency,
+  sankeyEngine,
   homeEnergy,
   dataCentre,
   hydroelectric,

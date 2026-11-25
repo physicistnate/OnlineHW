@@ -137,6 +137,22 @@
   max-width: 470px;
   margin: 8px auto 12px;
 }
+.sankey.graph-print {
+  max-width: 400px;
+}
+.paper .sk-input {
+  fill: #e5e7eb;
+}
+.paper .sk-useful {
+  fill: #9ca3af;
+}
+.paper .sk-waste {
+  fill: #d1d5db;
+}
+.paper .sk-key {
+  font-size: 10pt;
+  color: inherit;
+}
 .pq-part {
   margin: 10px 0 14px 18px;
   break-inside: avoid;

@@ -10,7 +10,7 @@ export default defineQuestion({
   topic: 'apcm.3',
   standards: ['apcm.3.3', 'apcm.3.4'],
   style: 'AP',
-  paper: 'Free-response style',
+  paper: 'AP-style problem set',
   types: ['calculation', 'multiple-choice'],
   difficulty: 3,
 
@@ -27,12 +27,16 @@ export default defineQuestion({
     return Math.abs(t2 - t1) >= 0.25 * (t1 + t2) && p.b / Math.sqrt(2 * p.a * p.m) <= 20;
   },
 
-  compute: (p) => {
+  compute: (p, c) => {
     const t1 = 4 * p.a * p.x0 ** 3;
     const t2 = 2 * p.b * p.x0;
     const F = t2 - t1; // F = −dU/dx = −4ax³ + 2bx
     const xe = Math.sqrt(p.b / (2 * p.a));
-    const depth = p.b ** 2 / (4 * p.a); // U(0) − U(xe)
+    // U(0) − U(x) at the position from (b) (equal to b²/4a at the true equilibrium), so a
+    // student's own answer to (b) carries through.
+    const xc = c.carry(xe, 'xe');
+    const depth = p.b * xc ** 2 - p.a * xc ** 4;
+    c.assume(depth > 0);
     const v = Math.sqrt((2 * depth) / p.m);
     return { t1, t2, F, xe, depth, v };
   },
@@ -96,16 +100,38 @@ export default defineQuestion({
     {
       label: '(d)',
       marks: 2,
-      prompt: () => 'The object passes through the stable equilibrium position found in (b). Calculate the minimum speed it must have there to reach $x = 0$.',
-      response: { kind: 'numeric', answer: 'v', symbol: 'v_{\\min}', unit: 'm/s', positive: true },
+      prompt: () =>
+        'The object passes through the stable equilibrium position found in (b), moving toward $x = 0$. Calculate the critical speed at that position: with any greater speed the object crosses $x = 0$, and with any smaller speed it turns back before reaching $x = 0$.',
+      response: { kind: 'numeric', answer: 'v', symbol: 'v_{\\text{crit}}', unit: 'm/s', positive: true },
       solution: ({ d, r }) => [
         {
-          text: 'Mechanical energy is conserved. To just reach $x = 0$ (arriving with zero speed), the kinetic energy at the equilibrium position must equal the rise in potential energy. With $x^2 = b/2a$: $U = a\\left(\\dfrac{b}{2a}\\right)^2 - b\\left(\\dfrac{b}{2a}\\right) = -\\dfrac{b^2}{4a}$, and $U(0) = 0$.',
-          math: tex`\Delta U = U(0) - U(x) = \frac{b^2}{4a} = \frac{${d.b}^2}{4 \times ${d.a}} = ${fmtW(r.depth)}\ ${u('J')}`,
+          text: 'Mechanical energy is conserved. On the way to $x = 0$ the potential energy rises by $U(0) - U(x)$, where $x$ is the equilibrium position. If the kinetic energy at $x$ is greater than this rise, the object crosses $x = 0$; if it is smaller, the object turns back. The critical kinetic energy equals the rise.',
+          math: tex`\Delta U = U(0) - U(x) = bx^2 - ax^4 = ${d.b} \times (${fmtW(r.xe)})^2 - ${d.a} \times (${fmtW(r.xe)})^4 = ${fmtW(r.depth)}\ ${u('J')}`,
         },
+        { text: 'With $x^2 = b/2a$ this is $b^2/4a$.' },
         { math: tex`\tfrac{1}{2}mv^2 = \Delta U \quad\Rightarrow\quad v = \sqrt{\frac{2 \times ${fmtW(r.depth)}}{${d.m}}} = ${fmtA(r.v)}\ ${u('m/s')}` },
+        {
+          text: 'At exactly the critical speed the object would only approach $x = 0$, slowing down more and more without ever arriving, because the force there is zero: it is an energy threshold, not a speed that gets the object to $x = 0$ at a definite time.',
+        },
       ],
-      markscheme: ({ r }) => [{ mark: tex`Energy difference $b^2/4a = ${fmtA(r.depth)}\ ${u('J')}$` }, { mark: tex`$v = ${fmtA(r.v)}\ ${u('m/s')}$` }, { note: 'Allow credit for an answer consistent with (b).' }],
+      markscheme: ({ r }) => [
+        { mark: tex`$\Delta U = U(0) - U(x) = bx^2 - ax^4 = ${fmtA(r.depth)}\ ${u('J')}$ (that is, $b^2/4a$)` },
+        { mark: tex`$v = ${fmtA(r.v)}\ ${u('m/s')}$` },
+        { note: 'Allow credit for an answer consistent with (b).' },
+      ],
+    },
+  ],
+  extensions: [
+    {
+      prompt: () =>
+        'Sketch $U(x)$ for $x \\ge 0$. Use your sketch to explain why the object, released from rest a little beyond the equilibrium position found in (b), oscillates about that position.',
+      marks: 3,
+      lines: 8,
+      markscheme: () => [
+        { mark: 'Sketch: $U = 0$ at $x = 0$, falling to a minimum at $x = \\sqrt{b/2a}$, then rising steeply (like $x^4$)' },
+        { mark: 'The force $F = -dU/dx$ points toward the minimum on both sides of it: a restoring force' },
+        { mark: 'Energy is conserved, so the object moves between two turning points where $U(x) = E$, one on each side of the minimum: it oscillates' },
+      ],
     },
   ],
 });

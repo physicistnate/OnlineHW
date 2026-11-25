@@ -90,7 +90,7 @@ export default defineQuestion({
     {
       label: '(d)',
       marks: 1,
-      prompt: () => 'The particle’s total mechanical energy is negative. Which describes its motion?',
+      prompt: () => 'The particle’s total mechanical energy $E$ is negative but greater than the minimum potential energy: $U(x_0) < E < 0$. Which describes its motion?',
       response: {
         kind: 'mcq',
         options: () => [
@@ -102,7 +102,7 @@ export default defineQuestion({
       },
       solution: () => [
         {
-          text: 'With $E < 0$ the particle can only be where $U(x) \\le E$. Since $U \\to +\\infty$ as $x \\to 0$ and $U \\to 0 > E$ as $x \\to \\infty$, that region is a finite interval around $x_0$. At its ends $K = 0$ (turning points), so the motion is bounded and oscillates. (It is at rest at $x_0$ only if $E = U(x_0)$ exactly.)',
+          text: 'With $E < 0$ the particle can only be where $U(x) \\le E$. Since $U \\to +\\infty$ as $x \\to 0$ and $U \\to 0 > E$ as $x \\to \\infty$, that region is a finite interval around $x_0$. At its ends $K = 0$ (turning points), so the motion is bounded and oscillates. (It could stay at rest at $x_0$ only if $E = U(x_0)$, which is ruled out here.)',
         },
       ],
       markscheme: () => [{ note: 'Bounded motion between turning points where U = E.' }],
