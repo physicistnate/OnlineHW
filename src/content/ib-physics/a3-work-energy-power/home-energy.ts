@@ -46,7 +46,7 @@ export default defineQuestion({
   },
 
   stem: ({ d }) =>
-    `The table shows the electrical appliances used in a home on one summer day.\n$$\\begin{array}{lll} \\textbf{Appliance} & \\textbf{Power} & \\textbf{Time used} \\\\ \\hline \\text{Refrigerator (average)} & 60\\ \\mathrm{W} & 24\\ \\mathrm{h} \\\\ \\text{LED light bulbs (10)} & 9.0\\ \\mathrm{W}\\ \\text{each} & 5.0\\ \\mathrm{h} \\\\ \\text{Television} & 100\\ \\mathrm{W} & 4.0\\ \\mathrm{h} \\\\ \\text{Laptop} & 50\\ \\mathrm{W} & 6.0\\ \\mathrm{h} \\\\ \\text{Electric oven} & 2.4\\ \\mathrm{kW} & 30\\ \\text{min} \\\\ \\text{Clothes dryer} & 4.0\\ \\mathrm{kW} & 45\\ \\text{min} \\\\ \\text{Air conditioner} & ${d.PAC}\\ \\mathrm{kW} & ${d.tAC}\\ \\mathrm{h} \\\\ \\text{Electric car charger} & ${EV}\\ \\mathrm{kW} & ${d.tEV}\\ \\mathrm{h} \\end{array}$$`,
+    `The table shows the electrical appliances used in a home on one summer day. The refrigerator’s power is its average power (its motor switches on and off).\n$$\\small\\begin{array}{lll} \\textbf{Appliance} & \\textbf{Power} & \\textbf{Time} \\\\ \\hline \\text{Refrigerator} & 60\\ \\mathrm{W} & 24\\ \\mathrm{h} \\\\ \\text{LED bulbs (10)} & 9.0\\ \\mathrm{W}\\ \\text{each} & 5.0\\ \\mathrm{h} \\\\ \\text{Television} & 100\\ \\mathrm{W} & 4.0\\ \\mathrm{h} \\\\ \\text{Laptop} & 50\\ \\mathrm{W} & 6.0\\ \\mathrm{h} \\\\ \\text{Oven} & 2.4\\ \\mathrm{kW} & 30\\ \\text{min} \\\\ \\text{Clothes dryer} & 4.0\\ \\mathrm{kW} & 45\\ \\text{min} \\\\ \\text{Air conditioner} & ${d.PAC}\\ \\mathrm{kW} & ${d.tAC}\\ \\mathrm{h} \\\\ \\text{EV charger} & ${EV}\\ \\mathrm{kW} & ${d.tEV}\\ \\mathrm{h} \\end{array}$$`,
 
   parts: [
     {
@@ -90,7 +90,7 @@ export default defineQuestion({
       solution: ({ d, r }) => [
         {
           text: 'Find the energy for each appliance in kW h (convert minutes to hours), then add them.',
-          math: tex`\begin{gathered} \text{refrigerator: } 0.060 \times 24 = 1.44 \qquad \text{bulbs: } 10 \times 0.0090 \times 5.0 = 0.45 \\ \text{television: } 0.100 \times 4.0 = 0.40 \qquad \text{laptop: } 0.050 \times 6.0 = 0.30 \\ \text{oven: } 2.4 \times 0.50 = 1.20 \qquad \text{dryer: } 4.0 \times 0.75 = 3.00 \\ \text{air conditioner: } ${fmtW(r.EAC)} \qquad \text{car charger: } ${EV} \times ${d.tEV} = ${fmtW(r.EEV)} \end{gathered}`,
+          math: tex`\begin{gathered} \text{refrigerator: } 0.060 \times 24 = 1.44 \\ \text{bulbs: } 10 \times 0.0090 \times 5.0 = 0.45 \\ \text{television: } 0.100 \times 4.0 = 0.40 \\ \text{laptop: } 0.050 \times 6.0 = 0.30 \\ \text{oven: } 2.4 \times 0.50 = 1.20 \\ \text{dryer: } 4.0 \times 0.75 = 3.00 \\ \text{air conditioner: } ${fmtW(r.EAC)} \\ \text{EV charger: } ${EV} \times ${d.tEV} = ${fmtW(r.EEV)} \end{gathered}`,
         },
         {
           math: tex`E_{\text{total}} = 1.44 + 0.45 + 0.40 + 0.30 + 1.20 + 3.00 + ${fmtW(r.EAC)} + ${fmtW(r.EEV)} = ${fmtA(r.total)}\ ${u('kW h')}`,

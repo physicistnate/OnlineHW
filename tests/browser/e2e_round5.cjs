@@ -93,7 +93,7 @@ const UP_T3 = ['dot-product-3d', 'exponential-force', 'nonlinear-spring', 'pumpi
   await go('#/q/ibp-a3-home-energy');
   expect((await p.locator('.q-stem .katex-display').count()) === 1, 'the appliance table is shown');
   // KaTeX writes the spaces in \text{} as no-break spaces.
-  expect((await p.locator('.q-stem').innerText()).replace(/\u00a0/g, ' ').includes('Electric car charger'), 'the table lists the car charger');
+  expect((await p.locator('.q-stem').innerText()).replace(/\u00a0/g, ' ').includes('EV charger'), 'the table lists the car charger');
 
   console.log('Builder: AP and University courses');
   await go('#/builder');
@@ -123,6 +123,9 @@ const UP_T3 = ['dot-product-3d', 'exponential-force', 'nonlinear-spring', 'pumpi
     const over = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(over <= 0, `${h.split('?')[0]}${h.includes('q/') ? ' ' + h.split('/')[2].split('?')[0] : ''}: no sideways scrolling at 375 px (${over}px)`);
   }
+  await go('#/q/ibp-a3-home-energy');
+  const table = await p.locator('.q-stem .katex-display').evaluate((el) => el.scrollWidth - el.clientWidth);
+  expect(table <= 0, `the appliance table fits a phone without scrolling sideways (${table}px)`);
 
   await b.close();
   console.log(problems.length ? `\n${problems.length} PROBLEM(S):\n- ${problems.join('\n- ')}` : '\nAll round-5 browser checks passed.');
