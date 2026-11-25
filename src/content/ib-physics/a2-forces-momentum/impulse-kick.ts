@@ -43,7 +43,7 @@ export default defineQuestion({
   },
 
   stem: ({ d }) =>
-    `A football of mass ${Q(d.m, 'kg')} is at rest on the ground. It is kicked, and the graph shows how the force $F$ exerted on the ball by the foot varies with time $t$ during the kick.`,
+    `A football of mass ${Q(d.m, 'kg')} is at rest on the ground. It is kicked horizontally, and the graph shows how the horizontal force $F$ exerted on the ball by the foot varies with time $t$ during the kick. Assume that this is the only significant horizontal force on the ball during the kick.`,
   figure: ({ p }) => graph(p),
 
   parts: [
@@ -71,7 +71,7 @@ export default defineQuestion({
       response: { kind: 'numeric', answer: 'v', symbol: 'v', unit: 'm s-1', positive: true },
       solution: ({ d, r }) => [
         {
-          text: 'The impulse equals the change in momentum. The ball starts at rest, so its momentum after the kick equals the impulse.',
+          text: 'The force from the foot is the only significant horizontal force, so its impulse equals the change in momentum of the ball. The ball starts at rest, so its momentum after the kick equals the impulse.',
           math: tex`J = mv - 0 \quad\Rightarrow\quad v = \frac{J}{m} = \frac{${fmtW(r.J)}}{${d.m}} = ${fmtA(r.v)}\ ${u('m s-1')}`,
         },
       ],

@@ -22,10 +22,11 @@ export default defineQuestion({
 
   compute: (p) => {
     const m2 = p.n * p.m1;
-    const v2 = (p.m1 * p.v) / m2;
+    const mom = p.m1 * p.v;
+    const v2 = mom / m2;
     const KE1 = 0.5 * p.m1 * p.v ** 2;
     const KE2 = 0.5 * m2 * v2 ** 2;
-    return { m2, v2, KE1, KE2, sameSpeed: 0.5 * m2 * p.v ** 2, lightMassSlow: 0.5 * p.m1 * v2 ** 2 };
+    return { m2, mom, v2, KE1, KE2, sameSpeed: 0.5 * m2 * p.v ** 2, lightMassSlow: 0.5 * p.m1 * v2 ** 2 };
   },
 
   stem: ({ d, r }) =>
@@ -47,12 +48,16 @@ export default defineQuestion({
       },
       solution: ({ p, d, r }) => [
         {
-          text: 'The object starts at rest, so the total momentum is zero before and after the explosion. The fragments move in opposite directions with equal and opposite momenta.',
-          math: tex`m_1 v_1 = m_2 v_2 \quad\Rightarrow\quad v_2 = \frac{${d.m1} \times ${d.v}}{${fmtW(r.m2)}} = ${fmtW(r.v2)}\ ${u('m s-1')}`,
+          text: 'The object starts at rest, so the total momentum is zero before and after the explosion. The fragments move in opposite directions with momenta of equal size.',
+          math: tex`p = m_1 v_1 = ${d.m1} \times ${d.v} = ${fmtW(r.mom)}\ ${u('kg m s-1')}`,
         },
         {
-          text: 'Kinetic energy of the heavier fragment:',
-          math: tex`E_k = \tfrac{1}{2} m_2 v_2^{\,2} = \tfrac{1}{2} \times ${fmtW(r.m2)} \times ${fmtW(r.v2)}^2 = ${fmt(r.KE2)}\ ${u('J')}`,
+          text: 'The heavier fragment has the same size of momentum, so it moves more slowly.',
+          math: tex`v_2 = \frac{p}{m_2} = \frac{${fmtW(r.mom)}}{${fmtW(r.m2)}} = ${fmtW(r.v2)}\ ${u('m s-1')}`,
+        },
+        {
+          text: 'Its kinetic energy is $\tfrac{1}{2}m_2 v_2^{\,2}$, which is the same as $p^2/2m_2$. Using the momentum avoids rounding the speed.',
+          math: tex`E_k = \frac{p^2}{2m_2} = \frac{${fmtW(r.mom)}^2}{2 \times ${fmtW(r.m2)}} = ${fmt(r.KE2)}\ ${u('J')}`,
         },
         {
           text: `The heavier fragment has ${p.n} times the mass of the lighter one but only $\\tfrac{1}{${p.n}}$ of its kinetic energy: with equal momenta, $E_k = p^2/2m$. The other options come from giving it the same kinetic energy as the lighter fragment, the same speed as the lighter fragment, or the lighter fragment’s mass with the heavier fragment’s speed.`,

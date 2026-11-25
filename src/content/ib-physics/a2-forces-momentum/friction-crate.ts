@@ -61,7 +61,7 @@ export default defineQuestion({
       label: '(b)',
       marks: 1,
       prompt: ({ d }) =>
-        `The worker pulls the crate with a horizontal force of ${Q(d.F, 'N')} and the crate starts to move. Calculate the frictional force on the moving crate.`,
+        `The worker pulls the crate with a horizontal force of ${Q(d.F, 'N')} and the crate starts to move. Calculate the magnitude of the frictional force on the moving crate.`,
       response: { kind: 'numeric', answer: 'Fd', symbol: 'F_f', unit: 'N', positive: true },
       solution: ({ d, r }) => [
         {

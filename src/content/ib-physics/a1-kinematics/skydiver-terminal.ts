@@ -65,10 +65,10 @@ export default defineQuestion({
         kind: 'mcq',
         columns: ['Acceleration at the earlier time', 'Acceleration at the later time'],
         options: () => [
-          { cells: ['between zero and $g$', 'zero'], correct: true },
-          { cells: ['equal to $g$', 'zero'] },
+          { cells: ['between zero and $g$', 'approximately zero'], correct: true },
+          { cells: ['equal to $g$', 'approximately zero'] },
           { cells: ['between zero and $g$', 'equal to $g$'] },
-          { cells: ['zero', 'between zero and $g$'] },
+          { cells: ['approximately zero', 'between zero and $g$'] },
         ],
       },
       solution: ({ r }) => [
@@ -79,10 +79,10 @@ export default defineQuestion({
           text: `At $t = ${r.tA}\\ \\mathrm{s}$ the graph is still rising, but less steeply than at the start. At the start the only force is the weight, so the gradient there is $g$; air resistance then grows with speed, so the acceleration is between zero and $g$.`,
         },
         {
-          text: `At $t = ${r.tMax}\\ \\mathrm{s}$ the graph is horizontal: the speed is constant (terminal speed), so the acceleration is zero.`,
+          text: `At $t = ${r.tMax}\\ \\mathrm{s}$ the graph is almost horizontal: the skydiver is very close to terminal speed, so the acceleration is approximately zero. (It would be exactly zero only at terminal speed, which the curve approaches but never quite reaches.)`,
         },
       ],
-      markscheme: () => [{ note: 'The gradient of the v–t graph gives the acceleration; it falls from g to zero.' }],
+      markscheme: () => [{ note: 'The gradient of the v–t graph gives the acceleration; it falls from g towards zero.' }],
     },
     {
       label: '(c)',

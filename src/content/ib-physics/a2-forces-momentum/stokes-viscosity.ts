@@ -21,10 +21,12 @@ export default defineQuestion({
     r: { min: 1.0, max: 3.0, step: 0.1, base: 2.0, dp: 1 },
     v: { min: 1.0, max: 9.0, step: 0.1, base: 4.0, dp: 1 },
   },
-  // Viscosities of real oils (0.2 to 3 Pa s).
+  // Viscosities of real oils (0.2 to 3 Pa s), and slow enough flow for Stokes' law:
+  // Reynolds number (based on the diameter) at most 0.2.
   constraint: (p) => {
     const eta = (2 * (p.r / 1000) ** 2 * (RHO_STEEL - RHO_OIL) * 9.8) / (9 * (p.v / 100));
-    return eta >= 0.2 && eta <= 3;
+    const reynolds = (RHO_OIL * (p.v / 100) * (2 * p.r) / 1000) / eta;
+    return eta >= 0.2 && eta <= 3 && reynolds <= 0.2;
   },
 
   compute: (p, c) => {
@@ -41,7 +43,7 @@ export default defineQuestion({
   },
 
   stem: ({ d }) =>
-    `To measure the viscosity of an oil, a small steel ball of radius ${Q(d.r, 'mm')} is released in a tall tube of the oil. The ball quickly reaches a terminal speed of ${Q(d.v, 'cm s-1')}. The density of steel is ${Q(RHO_STEEL, 'kg m-3')} and the density of the oil is ${Q(RHO_OIL, 'kg m-3')}.`,
+    `To measure the viscosity of an oil, a small steel ball of radius ${Q(d.r, 'mm')} is released in a tall tube of the oil. The ball quickly reaches a terminal speed of ${Q(d.v, 'cm s-1')}. The density of steel is ${Q(RHO_STEEL, 'kg m-3')} and the density of the oil is ${Q(RHO_OIL, 'kg m-3')}. Assume that Stokes’ law applies and that the tube is wide enough for its walls to have no effect on the ball.`,
 
   parts: [
     {
