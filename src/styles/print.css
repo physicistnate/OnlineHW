@@ -361,3 +361,9 @@
     overflow: visible !important;
   }
 }
+
+/* Written extension questions (paper only) */
+.pq-extension .pq-label {
+  font-style: italic;
+  white-space: nowrap;
+}

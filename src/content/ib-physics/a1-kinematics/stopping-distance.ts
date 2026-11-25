@@ -116,4 +116,17 @@ export default defineQuestion({
       ],
     },
   ],
+  extensions: [
+    {
+      marks: 2,
+      lines: 4,
+      prompt: () =>
+        'The driver is tired and their reaction time doubles. The car travels at the same speed and decelerates at the same rate. Explain why the total stopping distance does **not** double.',
+      markscheme: () => [
+        { mark: 'The reaction (thinking) distance doubles / is proportional to the reaction time' },
+        { mark: 'The braking distance is unchanged / does not depend on the reaction time' },
+        { note: 'Accept a correct numerical argument. Each mark needs a reason: only restating that the distance does not double earns no marks.' },
+      ],
+    },
+  ],
 });

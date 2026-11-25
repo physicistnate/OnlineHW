@@ -9,7 +9,7 @@
 import { useId, type CSSProperties } from 'react';
 import { findCourse, findTopic } from '../content/catalog';
 import { attemptLimit, percentLabel, summarizeGrades, type GradingPolicy, type LastMark } from '../engine/gradebook';
-import { gradePart, markGraph, remarkLaterParts, summarize } from '../engine/grading';
+import { gradePart, markGraph, summarize } from '../engine/grading';
 import { fmtRange } from '../engine/numbers';
 import { unitTex } from '../engine/units';
 import type { AnyTemplate, MarkLine, PartInstance, PartResponse, PartResult, QuestionInstance, SolutionStep } from '../engine/types';
@@ -62,7 +62,15 @@ export interface PartState {
 
 export function QuestionView({ template, instance, number, work, onWork, showSolutions, showMarkscheme, mode = 'preview', policy, closed, closesAt, saveFailed }: QuestionViewProps) {
   const responses: Record<string, PartResponse | undefined> = Object.fromEntries(instance.parts.map((p) => [p.id, work[p.id]?.response]));
-  const results: Record<string, PartResult | undefined> = Object.fromEntries(instance.parts.map((p) => [p.id, work[p.id]?.result]));
+  // The answers as last checked. Follow-through (error carried forward) uses these, so a
+  // later part can never earn marks from an earlier answer that was typed but not checked.
+  // (Work saved before this was recorded falls back to the saved answer if it was marked.)
+  const submitted: Record<string, PartResponse | undefined> = Object.fromEntries(
+    instance.parts.map((p) => {
+      const w = work[p.id];
+      return [p.id, w?.checked ?? (w?.last ? w.response : undefined)];
+    }),
+  );
   const inAssignment = mode === 'assignment';
 
   const stateOf = (part: PartInstance): PartState => {
@@ -78,33 +86,41 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
 
   const pastDue = () => inAssignment && closesAt != null && Date.now() >= closesAt;
 
-  // Editing an answer clears its own feedback and re-marks later parts that already
-  // have a result, since error-carried-forward credit depends on earlier answers.
-  // Clearing (response undefined, e.g. "Reset points") works the same way.
-  // In an assignment, locked parts (correct, out of tries) keep the mark they have.
+  // Editing an answer only changes its own draft and clears its own feedback (the
+  // recorded mark stays until the next check). Clearing ("Reset points") works the same way.
   const change = (part: PartInstance, response: PartResponse | undefined) => {
     if (stateOf(part).locked || pastDue()) return;
     // A graph whose points are all back at their starting places is not an answer.
     if (response?.kind === 'graph' && part.response.kind === 'graph' && samePoints(response.points, part.response.start)) response = undefined;
-    const next = { ...responses, [part.id]: response };
-    const patches: Record<string, Partial<PartWork>> = { [part.id]: { response, result: undefined } };
-    for (const [id, result] of Object.entries(remarkLaterParts(template, instance, part.id, next, results))) {
-      const later = instance.parts.find((p) => p.id === id);
-      if (inAssignment && later && stateOf(later).locked) continue;
-      patches[id] = { result, last: lastFrom(result, work[id]?.attempts ?? 0) };
-    }
-    onWork(patches);
+    onWork({ [part.id]: { response, result: undefined } });
   };
   const clear = (part: PartInstance) => change(part, undefined);
+  // Checking marks this part using the earlier parts' checked answers. Later parts that
+  // already have a mark are then re-marked against the newly checked answer, since
+  // error-carried-forward credit depends on it; in an assignment, locked parts
+  // (correct, out of tries) keep the mark they have.
   const check = (part: PartInstance) => {
     if (stateOf(part).locked || pastDue()) return;
-    const result = gradePart(template, instance, part, responses);
+    const now = { ...submitted, [part.id]: responses[part.id] };
+    const result = gradePart(template, instance, part, now);
     if (result.status === 'invalid') {
       onWork({ [part.id]: { result } }); // unreadable input does not use up a try
       return;
     }
     const attempts = (work[part.id]?.attempts ?? 0) + 1;
-    onWork({ [part.id]: { result, attempts, last: lastFrom(result, attempts) } });
+    const patches: Record<string, Partial<PartWork>> = {
+      [part.id]: { result, attempts, last: lastFrom(result, attempts), checked: responses[part.id] },
+    };
+    const index = instance.parts.indexOf(part);
+    for (const later of instance.parts.slice(index + 1)) {
+      const w = work[later.id];
+      if (!w?.last || !now[later.id] || (inAssignment && stateOf(later).locked)) continue;
+      const remarked = gradePart(template, instance, later, now);
+      if (remarked.status === 'invalid') continue;
+      // The feedback shown is updated only if the answer box still holds the checked answer.
+      patches[later.id] = { last: lastFrom(remarked, w.attempts), ...(w.result ? { result: remarked } : {}) };
+    }
+    onWork(patches);
   };
 
   const header = (() => {
@@ -122,7 +138,14 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
         </div>
       );
     }
-    const s = summarize(instance, results);
+    // Marks recorded at the latest checks (they stay while an answer is being edited).
+    const recorded: Record<string, PartResult | undefined> = Object.fromEntries(
+      instance.parts.map((p) => {
+        const l = work[p.id]?.last;
+        return [p.id, l ? { status: l.status, score: l.score, max: l.max } : undefined];
+      }),
+    );
+    const s = summarize(instance, recorded);
     return (
       <div className="q-score" title="Marks for your latest checked answers">
         <span className="q-score-num">
@@ -168,6 +191,24 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
           showMarkscheme={showMarkscheme}
         />
       ))}
+
+      {!inAssignment && instance.extensions.length > 0 && (
+        <details className="extension-teacher">
+          <summary>
+            Written extension for printed copies ({instance.extensions.length}) · not shown to students online
+          </summary>
+          {instance.extensions.map((x, i) => (
+            <div key={i} className="ext-item">
+              <div className="part-head">
+                <span className="part-label">Ext.</span>
+                <Tex className="part-prompt" text={x.prompt} />
+                <span className="part-marks">[{x.marks}]</span>
+              </div>
+              {showMarkscheme ? <MarkschemeList marks={x.marks} lines={x.markscheme} /> : <p className="muted small">Turn on “Markscheme” to see its marking points.</p>}
+            </div>
+          ))}
+        </details>
+      )}
     </article>
   );
 }
@@ -456,10 +497,15 @@ export function Markscheme({ part }: { part: PartInstance }) {
     extra.push({ note: `Online marking: ${what}${alt}${rounding}.` });
   }
   const lines = [...(r.kind === 'mcq' ? extra : []), ...part.markscheme, ...(r.kind === 'numeric' ? extra : [])];
+  return <MarkschemeList marks={part.marks} lines={lines} />;
+}
+
+/** IB-style markscheme lines: a tick per marking point, notes in italics. */
+export function MarkschemeList({ marks, lines }: { marks: number; lines: MarkLine[] }) {
   return (
     <div className="markscheme">
       <div className="panel-title">
-        Markscheme <span className="muted">[{part.marks}]</span>
+        Markscheme <span className="muted">[{marks}]</span>
       </div>
       <ul>
         {lines.map((line, i) =>

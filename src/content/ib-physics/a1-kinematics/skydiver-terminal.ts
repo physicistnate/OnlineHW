@@ -127,4 +127,17 @@ export default defineQuestion({
       markscheme: () => [{ note: 'Drag must still reach the weight, which now happens at a higher speed.' }],
     },
   ],
+  extensions: [
+    {
+      marks: 3,
+      lines: 5,
+      prompt: () => 'Explain, in terms of the forces acting on the skydiver, why the skydiver reaches a terminal speed.',
+      markscheme: () => [
+        { mark: 'Air resistance increases as the speed increases' },
+        { mark: 'So the resultant force (weight − air resistance) and the acceleration decrease' },
+        { mark: 'When the air resistance equals the weight, the resultant force and acceleration are zero, so the speed stays constant' },
+        { note: 'OWTTE. The third mark needs the balance of forces, not only "the speed stops increasing".' },
+      ],
+    },
+  ],
 });

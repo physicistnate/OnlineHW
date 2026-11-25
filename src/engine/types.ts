@@ -150,6 +150,19 @@ export interface PartTemplate<C, R> {
   markscheme: (c: C) => MarkLine[];
 }
 
+/**
+ * A written question for paper only (an "explain" or "describe" prompt). It is printed
+ * after the computer-marked parts when the teacher chooses, with its markscheme in the
+ * answer key, and is never shown to students online.
+ */
+export interface ExtensionTemplate<C> {
+  prompt: (c: C) => string;
+  marks: number;
+  /** Writing lines to print. */
+  lines: number;
+  markscheme: (c: C) => MarkLine[];
+}
+
 export interface QuestionTemplate<PS extends ParamSpecs = ParamSpecs, R extends Results = Results> {
   /** Stable identifier. Never change it once students have used the question. */
   id: string;
@@ -179,6 +192,8 @@ export interface QuestionTemplate<PS extends ParamSpecs = ParamSpecs, R extends 
   stem?: (c: Ctx<PS, R>) => string;
   figure?: (c: Ctx<PS, R>) => GraphSpec;
   parts: PartTemplate<Ctx<PS, R>, R>[];
+  /** Written questions for printed copies only (see ExtensionTemplate). */
+  extensions?: ExtensionTemplate<Ctx<PS, R>>[];
 }
 
 /** Any template, regardless of its parameter and result names (used by the registry and UI). */
@@ -244,6 +259,8 @@ export interface QuestionInstance {
   stem?: string;
   figure?: GraphSpec;
   parts: PartInstance[];
+  /** Written questions for printed copies only; not part of the online marks. */
+  extensions: { prompt: string; marks: number; lines: number; markscheme: MarkLine[] }[];
   totalMarks: number;
   /** True if the random parameters could not satisfy the constraint (base values used). */
   usedFallbackParams: boolean;

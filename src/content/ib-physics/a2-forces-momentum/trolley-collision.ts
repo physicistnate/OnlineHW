@@ -139,4 +139,16 @@ export default defineQuestion({
       markscheme: () => [{ note: 'Momentum is always conserved in an isolated system; kinetic energy is conserved only in an elastic collision.' }],
     },
   ],
+  extensions: [
+    {
+      marks: 2,
+      lines: 4,
+      prompt: () => 'Explain why the total momentum of the trolleys is conserved in the collision but their total kinetic energy is not.',
+      markscheme: () => [
+        { mark: 'No resultant external (horizontal) force acts on the system of two trolleys, so the total momentum is conserved' },
+        { mark: 'Some kinetic energy is transferred to other forms, such as internal energy and sound, as the trolleys deform during the collision' },
+        { note: 'Do not accept "energy is lost" without saying where it goes.' },
+      ],
+    },
+  ],
 });

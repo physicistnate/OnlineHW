@@ -1713,6 +1713,23 @@ h4.next {
   cursor: default;
 }
 
+/* Written extensions (paper only), as the teacher sees them in a preview */
+.extension-teacher {
+  margin: 14px 0 6px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+.extension-teacher summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+.ext-item {
+  margin-top: 12px;
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 980px) {

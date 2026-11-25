@@ -8,7 +8,7 @@ import { courseOrDefault } from '../content/catalog';
 import { getQuestion } from '../content/registry';
 import { Graph } from '../components/Graph';
 import { Logo } from '../components/Layout';
-import { Markscheme, SolutionSteps, questionMeta } from '../components/QuestionView';
+import { Markscheme, MarkschemeList, SolutionSteps, questionMeta } from '../components/QuestionView';
 import { formatDue } from '../components/time';
 import { Tex } from '../components/Tex';
 import { instantiate } from '../engine/instance';
@@ -32,6 +32,7 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
   const student = query.get('student') || '';
   const withSolutions = query.get('sol') === '1';
   const withMarkscheme = query.get('ms') === '1';
+  const withExtensions = query.get('ext') === '1';
 
   const items = useMemo(() => {
     const templates: AnyTemplate[] = assignment
@@ -44,7 +45,8 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
     return templates.map((t) => ({ template: t, instance: student ? studentInstance(t, student, assignmentKey, false) : instantiate(t, null) }));
   }, [assignment?.id, ids, student, assignmentKey]);
 
-  const marks = items.reduce((s, it) => s + it.instance.totalMarks, 0);
+  const extMarks = (inst: QuestionInstance) => (withExtensions ? inst.extensions.reduce((s, x) => s + x.marks, 0) : 0);
+  const marks = items.reduce((s, it) => s + it.instance.totalMarks + extMarks(it.instance), 0);
   const course = courseOrDefault(assignment?.courseId ?? query.get('course') ?? items[0]?.template.courses[0]);
 
   return (
@@ -56,6 +58,7 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
         <div className="print-summary">
           <strong>{title}</strong> · {items.length} questions · {marksLabel(marks)} · {student ? `version for ${student}` : 'base version'}
           {(withSolutions || withMarkscheme) && ' · with answer key'}
+          {withExtensions && ' · with written extensions'}
         </div>
         <button className="btn btn-primary" onClick={() => window.print()}>
           Download PDF
@@ -108,7 +111,7 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
         {items.length === 0 && <p>No questions selected.</p>}
 
         {items.map(({ template, instance }, i) => (
-          <PrintQuestion key={template.id} number={i + 1} template={template} instance={instance} />
+          <PrintQuestion key={template.id} number={i + 1} template={template} instance={instance} withExtensions={withExtensions} />
         ))}
 
         {(withSolutions || withMarkscheme) && items.length > 0 && (
@@ -126,6 +129,13 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
                     {withMarkscheme && <Markscheme part={part} />}
                   </div>
                 ))}
+                {withExtensions &&
+                  instance.extensions.map((x, j) => (
+                    <div key={`ext${j}`} className="key-part">
+                      <div className="key-label">{instance.extensions.length > 1 ? `Extension ${j + 1}` : 'Extension'}</div>
+                      <MarkschemeList marks={x.marks} lines={x.markscheme} />
+                    </div>
+                  ))}
               </div>
             ))}
           </section>
@@ -140,7 +150,9 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
   );
 }
 
-function PrintQuestion({ number, template, instance }: { number: number; template: AnyTemplate; instance: QuestionInstance }) {
+function PrintQuestion({ number, template, instance, withExtensions }: { number: number; template: AnyTemplate; instance: QuestionInstance; withExtensions: boolean }) {
+  const extensions = withExtensions ? instance.extensions : [];
+  const total = instance.totalMarks + extensions.reduce((s, x) => s + x.marks, 0);
   // Multiple-choice questions are short: keep the stem and all options on one page.
   const keepTogether = instance.parts.every((p) => p.response.kind === 'mcq');
   return (
@@ -148,12 +160,22 @@ function PrintQuestion({ number, template, instance }: { number: number; templat
       <div className="pq-head">
         <span className="pq-num">{number}.</span>
         <span className="pq-meta">{questionMeta(template)}</span>
-        <span className="pq-total">[{marksLabel(instance.totalMarks)}]</span>
+        <span className="pq-total">[{marksLabel(total)}]</span>
       </div>
       {instance.stem && <Tex block className="pq-stem" text={instance.stem} />}
       {instance.figure && <Graph spec={instance.figure} className="graph-print" />}
       {instance.parts.map((part) => (
         <PrintPart key={part.id} part={part} />
+      ))}
+      {extensions.map((x, i) => (
+        <div key={`ext${i}`} className="pq-part pq-extension">
+          <div className="pq-part-head">
+            <span className="pq-label">{extensions.length > 1 ? `Extension ${i + 1}` : 'Extension'}</span>
+            <Tex className="pq-prompt" text={x.prompt} />
+            <span className="pq-marks">[{x.marks}]</span>
+          </div>
+          <Lines count={x.lines} className="writing-lines" />
+        </div>
       ))}
     </section>
   );

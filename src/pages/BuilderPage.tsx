@@ -380,14 +380,15 @@ function PrintPanel({ selected, courseId, title, assignments }: { selected: stri
   const [username, setUsername] = useState('');
   const [sol, setSol] = useState(true);
   const [ms, setMs] = useState(true);
+  const [ext, setExt] = useState(false);
 
   const saved = assignments.find((a) => a.id === target);
   const count = saved ? saved.items.length : selected.length;
   const student = version === 'student' && username.trim() ? studentKey(classCode || 'DEMO', username) : '';
   const disabled = count === 0 || (version === 'student' && !username.trim());
   const url = saved
-    ? href('/print', { a: saved.id, student, sol, ms })
-    : href('/print', { ids: selected.join(','), course: courseId, title, student, sol, ms });
+    ? href('/print', { a: saved.id, student, sol, ms, ext })
+    : href('/print', { ids: selected.join(','), course: courseId, title, student, sol, ms, ext });
 
   return (
     <section className="card">
@@ -427,6 +428,10 @@ function PrintPanel({ selected, courseId, title, assignments }: { selected: stri
         <label className="check">
           <input type="checkbox" checked={ms} onChange={(e) => setMs(e.target.checked)} /> IB-style markscheme
         </label>
+        <label className="check">
+          <input type="checkbox" checked={ext} onChange={(e) => setExt(e.target.checked)} /> Written extension questions (paper only)
+        </label>
+        <span className="hint">Some questions have an “explain” question for printed copies, marked by you. Students never see them online.</span>
       </fieldset>
       <a className={`btn btn-primary btn-block${disabled ? ' is-disabled' : ''}`} href={disabled ? undefined : url} aria-disabled={disabled}>
         Open printable view

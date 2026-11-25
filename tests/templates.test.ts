@@ -39,6 +39,14 @@ function renderMath(math: string | undefined, where: string) {
 
 function checkInstance(inst: QuestionInstance, where: string) {
   renderAll(inst.stem, `${where} stem`);
+  // Written extensions for printed copies: valid text, marks, lines and marking points.
+  for (const x of inst.extensions) {
+    renderAll(x.prompt, `${where} extension prompt`);
+    expect(x.marks, `${where}: extension needs marks`).toBeGreaterThan(0);
+    expect(x.lines, `${where}: extension needs writing lines`).toBeGreaterThan(0);
+    expect(x.markscheme.filter((l) => 'mark' in l).length, `${where}: extension needs marking points`).toBeGreaterThanOrEqual(x.marks);
+    for (const line of x.markscheme) renderAll('mark' in line ? line.mark : line.note, `${where} extension markscheme`);
+  }
   const ids = new Set<string>();
   for (const part of inst.parts) {
     const at = `${where} ${part.label || 'main'}`;

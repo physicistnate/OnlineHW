@@ -9,7 +9,13 @@ import type { PartResponse, PartResult } from '../engine/types';
 import { readJson, removeKey, subscribe, writeJson } from './storage';
 
 export interface PartWork {
+  /** What is in the answer box now (a draft until it is checked). */
   response?: PartResponse;
+  /**
+   * The answer as it was when last checked (unreadable input aside). Error carried
+   * forward in later parts uses this, never an unchecked draft.
+   */
+  checked?: PartResponse;
   /** Result of the most recent check, for feedback (cleared when the response is edited). */
   result?: PartResult;
   /** Marking state after the latest check or re-marking, for grades (kept when the response is edited). */

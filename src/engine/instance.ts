@@ -121,6 +121,7 @@ export function buildInstance(
     stem: template.stem?.(ctx),
     figure: template.figure?.(ctx),
     parts,
+    extensions: (template.extensions ?? []).map((x) => ({ prompt: x.prompt(ctx), marks: x.marks, lines: x.lines, markscheme: x.markscheme(ctx) })),
     totalMarks: parts.reduce((sum, p) => sum + p.marks, 0),
     usedFallbackParams,
   };
