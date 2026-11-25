@@ -93,19 +93,24 @@ Question types implemented:
   Short answer /    Free text, saved as typed, "Submit for marking". Marked by
   long response     the teacher for now (AI marking is deliberately left out).
 
-Marking rules:
-  - Online, a correct final answer earns full marks for that part. This is a
-    homework policy: the computer cannot see working. On IB papers, "show
-    that" questions and some multi-step calculations need working, so the
-    printed papers say "show your working" and leave space for it.
+Marking rules (one policy, online and on paper):
+  - A correct final answer earns full marks for that part (markschemes say
+    "Award [2] for a bald correct answer"). On paper, correct working earns
+    marks when the final answer is wrong, so printed papers say "show your
+    working" and leave space for it. ("Show that" questions, which need
+    working, should not be marked this way; none exist yet.)
   - Error carried forward (ECF), as in IB markschemes: if a student gets (a)
     wrong but uses their wrong value correctly in (b), (b) is marked correct
     and says so. This also works from a drawn graph (the lift question's
     distance is accepted if it matches the area under the student's graph).
-  - ECF credit is re-checked whenever an earlier answer changes: correcting
-    (a) removes ECF credit that (b) had earned from the old answer.
-  - A re-worked answer that is physically impossible (e.g. a negative time or
-    distance) never earns ECF credit; positive-only quantities are marked so.
+  - Follow-through also uses accepted rounded answers: a student who writes
+    0.33 for 0.325 in (a) and then uses 0.33 in (b) gets (b) marked correct.
+  - ECF credit is re-checked whenever an earlier answer changes or is
+    cleared: correcting (a), or resetting a drawn graph, removes credit that
+    later parts had earned from the old answer.
+  - ECF never uses inadmissible inputs (e.g. negative velocity components
+    where the question defines them as positive) and never credits a
+    physically impossible calculation (e.g. a negative time of flight).
   - Feedback hints: wrong sign, or out by a power of ten (units/prefixes).
   - Unreadable input (including a wrong unit typed after the number) is
     reported as unreadable, not as wrong, and does not use up an attempt.
@@ -148,8 +153,9 @@ The system then re-runs the whole calculation many times:
     9.81 m s⁻²; for AP, also g = 10;
   - by every method the worked solution shows. For example, the train's time
     can come from t = (v − u)/a or from distance ÷ average speed, each with
-    its own rounding.
-  The smallest and largest results form the range. A small extra allowance of
+    its own rounding. Each method keeps its own range and an answer must fit
+    one of them: the gap between two methods is never accepted.
+  For each method, the smallest and largest results form the range. A small extra allowance of
   0.5% of the exact answer is added to each end, to cover calculator and
   rounding quirks that a single path cannot capture. Rounding is done the way
   a person does it (halves round up), not the way binary floating point does.
@@ -174,25 +180,34 @@ what they typed. In practice:
   - whole numbers ending in zero ("200") get the benefit of the doubt (they
     could mean 1, 2 or 3 s.f.).
 
-Accepted input formats: 13.8, -0.48, .5, 3.0e8, 3.0x10^8, 3.0*10^8,
-3.0×10⁸ and a decimal comma (1,5). A unit may be typed after the number only
-if it is the expected one, in any common form ("4 m/s", "4 m s^-1", "4 m s⁻¹");
-any other unit ("13.8 km" when metres are expected) is refused with a message,
-so a wrong unit is never silently ignored. Malformed entries such as "0.48e",
-"0.48x2" or "0.48m+999" are refused, as are the ambiguous "1,500" and
-fractions such as 1/3, each with a message explaining why.
+Accepted input formats: 13.8, -0.48, .5, 3.0e8, 3.0x10^8, 3.0x10^(8),
+3.0x10^{8}, 3.0*10^8, 3.0·10^8, 3.0×10⁸ and a decimal comma (1,5). A unit may
+be typed after the number only if it is the expected one, in any common form
+("4 m/s", "4 m s^-1", "4 m s⁻¹", "4 m·s⁻¹"); any other unit ("13.8 km" when
+metres are expected) is refused with a message, so a wrong unit is never
+silently ignored. Malformed entries such as "0.48e", "0.48x2", "0.48m+999" or
+"0.48x10^(0}" are refused, as are the ambiguous "1,500" and fractions such as
+1/3, each with a message explaining why.
 
 ERROR CARRIED FORWARD (ECF)
 
-When a later part is marked wrong, the system checks whether the student got
-an earlier part wrong. If so, it re-runs the whole calculation (with all the
-rounding options above) using the student's own earlier answer in place of
-the correct carried value. If the later answer then falls in range, it is
-marked correct, with the message "Correct, using your answer to (a) (error
-carried forward)". A question can also define ECF from a non-numeric answer,
-such as the area under a graph the student drew. Later parts are re-marked
-automatically whenever an earlier answer is edited, and ECF never rescues a
-physically impossible value (a negative time, distance or speed).
+When a later part is marked wrong, the system re-runs the whole calculation
+(with all the rounding options above) using the student's own answers to the
+earlier parts in place of the carried values: wrong answers (error carried
+forward) and also accepted rounded ones (0.33 written for 0.325). If the later
+answer then fits one of the methods that use those answers, it is marked
+correct, with the message "Correct, using your answer to (a) (error carried
+forward)" or "Correct, following on from your rounded answer to (a)".
+  - Earlier answers that break the question's sign conventions (a negative
+    component the question defines as positive) are never carried forward.
+  - Each question can state its physical assumptions in compute() with
+    c.assume(...), e.g. a positive time of flight; a re-worked calculation
+    that breaks one earns no credit.
+  - A question can also define ECF from a non-numeric answer, such as the
+    area under a graph the student drew. A graph left at, or moved back to,
+    its starting layout counts as no answer, and "Reset points" clears it.
+  - Later parts are re-marked automatically whenever an earlier answer is
+    edited or cleared.
 
 WORKED SOLUTIONS AND ROUNDING
 Worked solutions write intermediate values with one guard digit (4 s.f.)
@@ -286,7 +301,8 @@ Top level
   .github/workflows/deploy-pages.yml
                             Publishes the site to GitHub Pages. Runs only when
                             started by hand (Actions tab → "Deploy to GitHub
-                            Pages" → Run workflow); see Next steps.
+                            Pages" → Run workflow). Optional: school wifi
+                            blocks GitHub, so see "Deployment" in Next steps.
 
 src/config
   site.ts                   Organization and product names, answer tolerance
@@ -374,8 +390,13 @@ src/pages: one file per screen
 
 src/store: saved data (browser storage now, Supabase in Phase 3)
   storage.ts                Safe wrapper around browser localStorage, with
-                            change notifications.
-  progress.ts               Each student's saved responses, results and attempts.
+                            change notifications (also across tabs) and a
+                            one-time check that storage is allowed. Everything
+                            is stored under "rice-hw:v2"; work saved by earlier
+                            builds was reset when the marking rules changed.
+  progress.ts               Each student's saved responses, results and
+                            attempts, per question version (a revised question
+                            starts fresh instead of showing stale marks).
   assignments.ts            Saved assignments, the built-in sample assignment,
                             and the "release solutions" switch.
   session.ts                The signed-in student (class code + username).
@@ -458,9 +479,27 @@ Phase 2: content (IB Physics SL first)
       will need answers that are expressions (e.g. 2x + 3), not just numbers;
       plan a symbolic answer checker for that.
 
-Phase 3: accounts and the gradebook (Supabase, free tier)
+Before any students use it (do not share the link until then)
+  Today the whole question bank, every answer formula, every worked solution
+  and every markscheme is sent to every visitor's browser, and the repository
+  is public. A student with developer tools, or the GitHub link, could read
+  them, and the teacher pages have no login. So:
+  [ ] Make the GitHub repository private (Settings → General → Danger zone).
+      Reviewers such as Codex then need access to it.
+  [ ] Teacher login: the bank, builder, preview and answer keys open only for
+      the teacher. Students see only their own assignments.
+  [ ] Marking on the server: move the question bank, answer calculations and
+      marking into Supabase Edge Functions (free tier; they run the same
+      TypeScript as src/engine). A student's browser then receives only the
+      text of their own questions with their own numbers; "Check" asks the
+      server and gets back only right/wrong and a hint; worked solutions are
+      sent only after the teacher releases them, and only that student's
+      version. (This stops answers being read from the site. It cannot stop
+      students sharing answers, but different numbers per student limit that.)
+
+Phase 3: accounts and the gradebook (Supabase, free tier), built around the above
   [ ] Create a free Supabase project and put its URL and public "anon" key in
-      the repository settings.
+      the hosting settings.
   [ ] Database tables: teachers, classes (with class codes), students,
       assignments (questions, due date, attempts allowed, solution release),
       and responses (one row per student × question × part, with attempts and
@@ -471,25 +510,28 @@ Phase 3: accounts and the gradebook (Supabase, free tier)
       student password" button for the teacher.
   [ ] Save each student's numbers when they first open a question, so later
       edits to a template never change numbers a student has already seen.
+      (Phase 1 already keys saved work by question version for the same reason.)
   [ ] Row-level security, so students can only read and write their own work.
   [ ] Teacher gradebook: by class, by assignment, by student, with live
       progress as students work, and teacher marking of written answers.
-  [ ] Optional, stricter integrity: move marking into a Supabase Edge
-      Function. Right now answers are worked out in the browser, so a
-      determined student could find them with developer tools. That is
-      common and usually acceptable for homework, but not for tests.
   [ ] Assignment settings: due dates, number of attempts, when feedback is
       shown.
 
-Deployment
-  [ ] GitHub Pages (free for public repositories, which this one is):
-      1. Merge this work into main first. GitHub only offers "Run workflow"
-         for hand-started workflows that exist on the default branch, and the
-         Pages environment only accepts deployments from it.
-      2. Repository Settings → Pages → Source: "GitHub Actions".
-      3. Actions → "Deploy to GitHub Pages" → Run workflow.
-      The site will appear at https://physicistnate.github.io/OnlineHW/
-      (Change the workflow to run on every push to main once you're happy.)
+Deployment (school wifi blocks GitHub, so do not rely on GitHub Pages)
+  The site loads nothing from GitHub at run time; GitHub only stores the code.
+  What matters is the address students open: github.io is often blocked
+  along with github.com.
+  [ ] From school wifi, check that a *.pages.dev site, a *.netlify.app site
+      and supabase.co all open.
+  [ ] Host on Cloudflare Pages (free, yoursite.pages.dev) or Netlify (free,
+      yoursite.netlify.app). Both connect to the GitHub repository (private
+      is fine) and rebuild the site on their own servers after every push.
+      Build command: npm run build. Output folder: dist.
+  [ ] Optional: a custom domain (about $10–15 a year) is less likely to be
+      caught by a filter category.
+  [ ] The GitHub Pages workflow (.github/workflows/deploy-pages.yml) stays as
+      an option for home use; it needs the work merged into main, Settings →
+      Pages → Source "GitHub Actions", and a public repository on the free plan.
   [ ] Before real student data is stored (Phase 3), check your school's
       student-data privacy rules. Collect as little as possible: class code,
       username, and work.
@@ -513,9 +555,11 @@ Later
     −9%). For a stricter "keep at least 3 s.f. in working" policy, set
     TOLERANCE.carrySigFigs to [3] in src/config/site.ts; the same example then
     accepts 6.789 to 6.899 m (6.8 and 6.9 accepted, 7.0 and above rejected).
-  - Full credit online for a correct final answer is a homework policy (the
-    computer cannot see working). Printed papers ask for working and leave
-    space for it, for teachers marking by hand with the markscheme.
+  - Marking policy: a correct final answer earns full marks, online and in
+    the printed markschemes ("Award [2] for a bald correct answer"); on paper,
+    correct working earns marks when the answer is wrong. For stricter hand
+    marking (method marks required), remove those notes from the markschemes
+    and change the printed instruction in src/content/catalog.ts.
   - The value of g. Solutions show g = 9.8 m s⁻², the value in the IB Physics
     data booklet (first assessment 2025); 9.81 is accepted too. It is set by
     CONSTANTS.IB.g.primary in src/config/site.ts.

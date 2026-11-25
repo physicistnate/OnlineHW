@@ -43,7 +43,7 @@ function normalizeTypedUnit(text: string): string {
   return [...text]
     .map((ch) => UNSUP[ch] ?? ch)
     .join('')
-    .replace(/[\s^·.*()]/g, '');
+    .replace(/[\s^·⋅∙.*()]/g, '');
 }
 
 /**

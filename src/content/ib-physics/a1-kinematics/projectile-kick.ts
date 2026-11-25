@@ -22,14 +22,19 @@ export default defineQuestion({
   compute: (p, c) => {
     const vx = p.v * cosD(p.theta);
     const vy = p.v * sinD(p.theta);
-    const H = c.carry(vy, 'vy') ** 2 / (2 * c.g);
-    const tf = (2 * c.carry(vy, 'vy')) / c.g;
-    const R = c.carry(vx, 'vx') * c.carry(tf, 'tf');
+    const vyc = c.carry(vy, 'vy');
+    const vxc = c.carry(vx, 'vx');
+    // The method assumes the ball is kicked upwards and forwards (positive components).
+    c.assume(vyc > 0 && vxc > 0);
+    const H = vyc ** 2 / (2 * c.g);
+    const tf = (2 * vyc) / c.g;
+    c.assume(tf > 0);
+    const R = vxc * c.carry(tf, 'tf');
     return { vx, vy, H, tf, R, tUp: tf / 2 };
   },
 
   stem: ({ d }) =>
-    `A ball is kicked from ground level with an initial velocity of ${Q(d.v, 'm s-1')} at ${Q(d.theta, 'deg')} above the horizontal. The ground is horizontal and air resistance is negligible.`,
+    `A ball is kicked from ground level with an initial velocity of ${Q(d.v, 'm s-1')} at ${Q(d.theta, 'deg')} above the horizontal. The ground is horizontal and air resistance is negligible. Take upwards and the direction of the kick as positive.`,
 
   parts: [
     {

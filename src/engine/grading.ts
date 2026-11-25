@@ -2,12 +2,13 @@
  * Marking student responses.
  *
  * Numeric answers: see PROJECT_GUIDE.txt section 4. In short, an answer is correct if
- * some value inside the accepted range (from the rounding analysis in calc.ts) rounds
+ * some value inside an accepted range (from the rounding analysis in calc.ts) rounds
  * to what the student typed, reading their answer to at least TOLERANCE.minSigFigs
- * significant figures. Significant figures themselves are never penalized.
+ * significant figures. Significant figures themselves are never penalized. When a
+ * question has alternative methods, each method's range is checked on its own.
  */
 import { TOLERANCE } from '../config/site';
-import { answerRange, computeAnswerRanges } from './calc';
+import { answerRanges, computeAnswerRanges, padRange } from './calc';
 import { exponentOf, parseNumber, type ParsedNumber } from './numbers';
 import { unitMatches, unitPlain } from './units';
 import type { AnswerRange, AnyTemplate, PartInstance, PartResponse, PartResult, QuestionInstance } from './types';
@@ -35,7 +36,16 @@ export interface NumericOptions {
   positive?: boolean;
 }
 
-export function checkNumeric(input: string, range: AnswerRange, opts: NumericOptions = {}): NumericVerdict {
+/** All accepted ranges of a numeric part: main method, then alternative methods. */
+export function rangesOf(r: { range: AnswerRange; altRanges?: AnswerRange[] }): AnswerRange[] {
+  return [r.range, ...(r.altRanges ?? [])];
+}
+
+/** Checks typed input against one or more accepted ranges (it must fit at least one). */
+export function checkNumeric(input: string, ranges: AnswerRange | AnswerRange[], opts: NumericOptions = {}): NumericVerdict {
+  const list = Array.isArray(ranges) ? ranges : [ranges];
+  const fits = (n: ParsedNumber) => list.some((r) => acceptsNumber(n, r));
+
   const parsed = parseNumber(input);
   if (!parsed.ok) return { status: 'invalid', message: parsed.error };
   if (parsed.unit) {
@@ -47,23 +57,17 @@ export function checkNumeric(input: string, range: AnswerRange, opts: NumericOpt
   if (opts.positive && parsed.value < 0) {
     return { status: 'incorrect', value: parsed.value, hint: 'This quantity cannot be negative.' };
   }
-  if (acceptsNumber(parsed, range)) return { status: 'correct', value: parsed.value };
+  if (fits(parsed)) return { status: 'correct', value: parsed.value };
 
-  if (parsed.value !== 0 && acceptsNumber({ ...parsed, value: -parsed.value }, range)) {
+  if (parsed.value !== 0 && fits({ ...parsed, value: -parsed.value })) {
     return { status: 'incorrect', value: parsed.value, hint: 'Check the sign: think about which direction is positive.' };
   }
   for (let k = -12; k <= 12; k++) {
-    if (k !== 0 && acceptsNumber({ ...parsed, value: parsed.value * 10 ** k }, range)) {
+    if (k !== 0 && fits({ ...parsed, value: parsed.value * 10 ** k })) {
       return { status: 'incorrect', value: parsed.value, hint: 'Out by a power of ten: check your units and prefixes.' };
     }
   }
   return { status: 'incorrect', value: parsed.value };
-}
-
-/** The accepted range around a re-worked (ECF) value, with the same allowance as normal answers. */
-function padded(raw: { exact: number; min: number; max: number }, tol?: { rel?: number; abs?: number }): AnswerRange {
-  const pad = (tol?.rel ?? TOLERANCE.relFloor) * Math.abs(raw.exact) + (tol?.abs ?? 0);
-  return { exact: raw.exact, lo: raw.min - pad, hi: raw.max + pad };
 }
 
 // ---------- Graphs ----------
@@ -122,6 +126,73 @@ export function areaUnderPoints(points: [number, number][]): number {
 
 // ---------- Marking ----------
 
+function list(labels: string[]): string {
+  return labels.length <= 1 ? labels.join('') : `${labels.slice(0, -1).join(', ')} and ${labels[labels.length - 1]}`;
+}
+
+/**
+ * Follow-through for a numeric part: re-work it with the student's own answers to
+ * earlier numeric parts (wrong ones, and also correct ones that were rounded, such
+ * as 0.33 for 0.325) in place of the values the calculation carries forward.
+ * Earlier answers that are inadmissible (negative where only positive values make
+ * sense) are never carried forward, and a calculation whose physical assumptions
+ * fail (Calc.assume) earns nothing.
+ */
+function followThrough(
+  template: AnyTemplate,
+  instance: QuestionInstance,
+  part: PartInstance & { response: { kind: 'numeric' } },
+  responses: Record<string, PartResponse | undefined>,
+  input: string,
+): PartResult | null {
+  const spec = part.response;
+  const tSpec = template.parts[instance.parts.indexOf(part)]?.response;
+  const tolerance = tSpec?.kind === 'numeric' ? tSpec.tolerance : undefined;
+  const opts = { unit: spec.unit, positive: spec.positive };
+
+  const overrides: Record<string, number> = {};
+  const wrong: string[] = [];
+  const rounded: string[] = [];
+  for (const earlier of instance.parts) {
+    if (earlier.id === part.id) break;
+    if (earlier.response.kind !== 'numeric') continue;
+    const r = responses[earlier.id];
+    if (!r || r.kind !== 'numeric') continue;
+    const verdict = checkNumeric(r.value, rangesOf(earlier.response), { unit: earlier.response.unit });
+    if (verdict.status === 'invalid') continue;
+    if (earlier.response.positive && verdict.value <= 0) continue; // inadmissible: never carried forward
+    overrides[earlier.response.answer] = verdict.value;
+    (verdict.status === 'incorrect' ? wrong : rounded).push(earlier.label);
+  }
+
+  if (Object.keys(overrides).length > 0) {
+    let ranges: AnswerRange[] = [];
+    try {
+      const report = computeAnswerRanges(template.compute, instance.params, template.style, overrides);
+      ranges = answerRanges(report, spec.answer)
+        .filter((raw) => Number.isFinite(raw.exact) && !(spec.positive && raw.exact <= 0))
+        .map((raw) => padRange(raw, tolerance));
+    } catch {
+      ranges = []; // a physical assumption failed: no credit
+    }
+    if (ranges.length > 0 && checkNumeric(input, ranges, opts).status === 'correct') {
+      return wrong.length > 0
+        ? { status: 'correct', score: part.marks, max: part.marks, ecf: true, message: `Correct, using your answer to ${list(wrong)} (error carried forward).` }
+        : { status: 'correct', score: part.marks, max: part.marks, message: `Correct, following on from your rounded answer to ${list(rounded)}.` };
+    }
+  }
+
+  // Follow-through from a non-numeric earlier answer, such as a drawn graph.
+  if (tSpec?.kind === 'numeric' && tSpec.followThrough) {
+    const v = tSpec.followThrough.value(responses);
+    const admissible = v !== undefined && Number.isFinite(v) && v !== 0 && !(spec.positive && v < 0);
+    if (admissible && checkNumeric(input, padRange({ exact: v, min: v, max: v }, tolerance), opts).status === 'correct') {
+      return { status: 'correct', score: part.marks, max: part.marks, ecf: true, message: `Correct, using ${tSpec.followThrough.from} (error carried forward).` };
+    }
+  }
+  return null;
+}
+
 /**
  * Marks one part. `responses` holds the student's current responses to every part
  * of the question (needed for error-carried-forward marking).
@@ -141,49 +212,12 @@ export function gradePart(
   switch (spec.kind) {
     case 'numeric': {
       if (response.kind !== 'numeric') break;
-      const opts = { unit: spec.unit, positive: spec.positive };
-      const verdict = checkNumeric(response.value, spec.range, opts);
+      const verdict = checkNumeric(response.value, rangesOf(spec), { unit: spec.unit, positive: spec.positive });
       if (verdict.status === 'invalid') return { status: 'invalid', score: 0, max, message: verdict.message };
       if (verdict.status === 'correct') return { status: 'correct', score: max, max };
       if (spec.positive && verdict.value < 0) return { status: 'incorrect', score: 0, max, message: verdict.hint };
-
-      const templatePart = template.parts[instance.parts.indexOf(part)];
-      const tSpec = templatePart?.response.kind === 'numeric' ? templatePart.response : undefined;
-
-      // Error carried forward from earlier numeric parts: re-work this answer using
-      // the student's own wrong earlier answers in place of the correct carried values.
-      const overrides: Record<string, number> = {};
-      const labels: string[] = [];
-      for (const earlier of instance.parts) {
-        if (earlier.id === part.id) break;
-        if (earlier.response.kind !== 'numeric') continue;
-        const r = responses[earlier.id];
-        if (!r || r.kind !== 'numeric') continue;
-        const v = checkNumeric(r.value, earlier.response.range, { unit: earlier.response.unit });
-        if (v.status === 'incorrect') {
-          overrides[earlier.response.answer] = v.value;
-          labels.push(earlier.label);
-        }
-      }
-      if (labels.length > 0) {
-        const report = computeAnswerRanges(template.compute, instance.params, template.style, overrides);
-        const raw = answerRange(report, spec.answer);
-        // A re-worked answer that is physically impossible (e.g. a negative time) earns nothing.
-        const admissible = raw && Number.isFinite(raw.exact) && !(spec.positive && raw.exact <= 0);
-        if (admissible && checkNumeric(response.value, padded(raw, tSpec?.tolerance), opts).status === 'correct') {
-          return { status: 'correct', score: max, max, ecf: true, message: `Correct, using your answer to ${labels.join(' and ')} (error carried forward).` };
-        }
-      }
-
-      // Error carried forward from a non-numeric earlier answer, such as a drawn graph.
-      if (tSpec?.followThrough) {
-        const v = tSpec.followThrough.value(responses);
-        const admissible = v !== undefined && Number.isFinite(v) && v !== 0 && !(spec.positive && v < 0);
-        if (admissible && checkNumeric(response.value, padded({ exact: v, min: v, max: v }, tSpec.tolerance), opts).status === 'correct') {
-          return { status: 'correct', score: max, max, ecf: true, message: `Correct, using ${tSpec.followThrough.from} (error carried forward).` };
-        }
-      }
-      return { status: 'incorrect', score: 0, max, message: verdict.hint };
+      const ft = followThrough(template, instance, part as PartInstance & { response: { kind: 'numeric' } }, responses, response.value);
+      return ft ?? { status: 'incorrect', score: 0, max, message: verdict.hint };
     }
 
     case 'mcq': {
@@ -217,9 +251,9 @@ export function gradePart(
 }
 
 /**
- * After the response to one part changes, re-marks every later part that already
- * has a result, because error-carried-forward marks depend on earlier answers.
- * Returns the new results (attempt counts are not affected).
+ * After the response to one part changes (or is cleared), re-marks every later
+ * numeric part that already has a result, because error-carried-forward marks
+ * depend on earlier answers. Returns the new results (attempt counts unchanged).
  */
 export function remarkLaterParts(
   template: AnyTemplate,

@@ -105,6 +105,9 @@
 .paper-question {
   margin-bottom: 26px;
 }
+.paper-question.pq-keep {
+  break-inside: avoid;
+}
 .pq-head {
   display: flex;
   align-items: baseline;
@@ -128,6 +131,7 @@
 }
 .pq-stem {
   margin: 4px 0 10px;
+  break-after: avoid; /* keep a stem with the start of its first part */
 }
 .graph-print {
   max-width: 470px;

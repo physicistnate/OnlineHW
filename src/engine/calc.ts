@@ -10,11 +10,13 @@
  * The smallest and largest result for each answer define its accepted range.
  *
  * Alternative methods: a result named "<answer>__<anything>" (e.g. "t__avg") is
- * another way a student might calculate <answer>; its range is merged into the
- * accepted range for <answer> (see answerRange()).
+ * another way a student might calculate <answer>. Each method keeps its own range
+ * (see answerRanges()); an answer is accepted if it fits any one of them, so the
+ * gap between two methods is never accepted.
  */
 import { CONSTANTS, TOLERANCE, type ConstantName, type Style } from '../config/site';
 import { exactSigFigs, roundSig, workingValue } from './numbers';
+import type { AnswerRange } from './types';
 
 export interface Calc {
   /**
@@ -24,8 +26,21 @@ export interface Calc {
    * error-carried-forward (ECF) marking of later parts.
    */
   carry(x: number, name?: string): number;
+  /**
+   * A physical assumption of the method, e.g. assume(timeOfFlight > 0). If it fails
+   * (usually because a student's wrong earlier answer was substituted), the
+   * calculation is invalid and earns no error-carried-forward credit.
+   */
+  assume(condition: boolean): void;
   /** Acceleration of free fall (varies between accepted values during range checks). */
   readonly g: number;
+}
+
+/** Thrown when a calculation's physical assumptions fail (see Calc.assume). */
+export class InadmissibleError extends Error {
+  constructor() {
+    super('The calculation is not physically valid for these values.');
+  }
 }
 
 export type Results = Record<string, number>;
@@ -56,6 +71,10 @@ class RunCalc implements Calc {
     // they are; only longer values (11.5702...) get rounded by students.
     if (exactSigFigs(x, 3) !== null) return x;
     return roundSig(x, mode);
+  }
+
+  assume(condition: boolean): void {
+    if (!condition) throw new InadmissibleError();
   }
 
   get g(): number {
@@ -124,7 +143,8 @@ function carryCombos(n: number, levels: CarryMode[], budget: number): CarryMode[
 /**
  * Evaluates every rounding scenario and returns, for each result, its exact value
  * and the smallest and largest values produced. `overrides` replaces named carried
- * values (used for error-carried-forward marking).
+ * values (used for error-carried-forward marking). Throws InadmissibleError if the
+ * full-precision calculation breaks one of its assumptions.
  */
 export function computeAnswerRanges<P, R extends Results>(
   compute: (p: P, c: Calc) => R,
@@ -176,15 +196,24 @@ export function computeAnswerRanges<P, R extends Results>(
   return { exact, ranges: ranges as Record<keyof R & string, RawRange>, runs, carries: n };
 }
 
-/** The range for an answer, merged with the ranges of its alternative methods ("<key>__..."). */
-export function answerRange(report: RangeReport<Results>, key: string): RawRange | undefined {
+/**
+ * Adds the small extra allowance (TOLERANCE.relFloor, or a question's own
+ * tolerance) to both ends of a raw range.
+ */
+export function padRange(raw: RawRange, tol?: { rel?: number; abs?: number }): AnswerRange {
+  const pad = (tol?.rel ?? TOLERANCE.relFloor) * Math.abs(raw.exact) + (tol?.abs ?? 0);
+  return { exact: raw.exact, lo: raw.min - pad, hi: raw.max + pad };
+}
+
+/**
+ * The ranges for an answer: its main method first, then each alternative method
+ * ("<key>__..."). They are kept separate on purpose: an answer must fit one method.
+ */
+export function answerRanges(report: RangeReport<Results>, key: string): RawRange[] {
   const main = report.ranges[key];
-  if (!main) return undefined;
-  const merged = { ...main };
-  for (const [k, r] of Object.entries(report.ranges)) {
-    if (!k.startsWith(`${key}__`)) continue;
-    merged.min = Math.min(merged.min, r.min);
-    merged.max = Math.max(merged.max, r.max);
-  }
-  return merged;
+  if (!main) return [];
+  const alternatives = Object.entries(report.ranges)
+    .filter(([k]) => k.startsWith(`${key}__`))
+    .map(([, r]) => r);
+  return [main, ...alternatives];
 }

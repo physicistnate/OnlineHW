@@ -128,8 +128,10 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
 }
 
 function PrintQuestion({ number, template, instance }: { number: number; template: AnyTemplate; instance: QuestionInstance }) {
+  // Multiple-choice questions are short: keep the stem and all options on one page.
+  const keepTogether = instance.parts.every((p) => p.response.kind === 'mcq');
   return (
-    <section className="paper-question">
+    <section className={`paper-question${keepTogether ? ' pq-keep' : ''}`}>
       <div className="pq-head">
         <span className="pq-num">{number}.</span>
         <span className="pq-meta">{questionMeta(template)}</span>

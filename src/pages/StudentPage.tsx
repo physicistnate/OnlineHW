@@ -12,12 +12,14 @@ import { instantiate, seedFor } from '../engine/instance';
 import type { AnyTemplate } from '../engine/types';
 import { href } from '../router';
 import { getAssignment, useAssignments, type Assignment } from '../store/assignments';
-import { loadWork, useQuestionWork } from '../store/progress';
+import { loadWork, useQuestionWork, workIdFor } from '../store/progress';
 import { signIn, signOut, studentKey, useSession } from '../store/session';
 import { storageAvailable, subscribe } from '../store/storage';
 
 function StorageWarning() {
-  if (storageAvailable()) return null;
+  // Checked once when the banner mounts (storageAvailable() caches its result).
+  const [ok] = useState(storageAvailable);
+  if (ok) return null;
   return (
     <div className="banner banner-warn" role="alert">
       This browser is blocking storage (for example in a private window), so your answers will not be saved. Open the site in a normal window.
@@ -45,7 +47,7 @@ function assignmentProgress(a: Assignment, sKey: string): Progress {
     const t = getQuestion(id);
     if (!t) continue;
     const inst = instantiate(t, seedFor(sKey, a.id, t.id));
-    const work = loadWork(sKey, a.id, t.id);
+    const work = loadWork(sKey, a.id, workIdFor(t));
     const results = Object.fromEntries(inst.parts.map((part) => [part.id, work[part.id]?.result]));
     const s = summarize(inst, results);
     p.parts += inst.parts.length;
@@ -151,7 +153,7 @@ export function StudentHome() {
 function StudentQuestion({ template, number, sKey, assignment }: { template: AnyTemplate; number: number; sKey: string; assignment: Assignment }) {
   const seed = seedFor(sKey, assignment.id, template.id);
   const instance = useMemo(() => instantiate(template, seed), [template, seed]);
-  const { work, update } = useQuestionWork(sKey, assignment.id, template.id);
+  const { work, update } = useQuestionWork(sKey, assignment.id, workIdFor(template));
   return (
     <QuestionView
       template={template}

@@ -16,8 +16,15 @@ export interface PartWork {
 
 export type QuestionWork = Record<string, PartWork>;
 
-const workKey = (studentKey: string, assignmentKey: string, questionId: string) =>
-  `work:${studentKey}::${assignmentKey}::${questionId}`;
+/**
+ * Identifies saved work for a question *version*: when a question is revised (its
+ * version goes up), work saved against the old version is not shown with the new numbers.
+ */
+export function workIdFor(template: { id: string; version: number }): string {
+  return `${template.id}@v${template.version}`;
+}
+
+const workKey = (studentKey: string, assignmentKey: string, workId: string) => `work:${studentKey}::${assignmentKey}::${workId}`;
 
 export function loadWork(studentKey: string, assignmentKey: string, questionId: string): QuestionWork {
   return readJson<QuestionWork>(workKey(studentKey, assignmentKey, questionId), {});

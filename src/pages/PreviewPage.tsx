@@ -8,7 +8,7 @@ import { fmtRange } from '../engine/numbers';
 import { Tex } from '../components/Tex';
 import { href } from '../router';
 import { useAssignments } from '../store/assignments';
-import { useQuestionWork } from '../store/progress';
+import { useQuestionWork, workIdFor } from '../store/progress';
 import { studentKey } from '../store/session';
 
 const NAMES = ['alex', 'sam', 'jordan', 'priya', 'mateo', 'aisha', 'liam', 'mei', 'noah', 'zara', 'kofi', 'elena'];
@@ -27,7 +27,7 @@ export function PreviewPage({ id, query }: { id: string; query: URLSearchParams 
   const sKey = studentKey(classCode || 'DEMO', username || 'student');
   const seed = template && mode === 'student' ? seedFor(sKey, assignmentKey, template.id) : null;
   const instance = useMemo(() => (template ? instantiate(template, seed) : null), [template, seed]);
-  const { work, update, reset } = useQuestionWork(`preview|${seed ?? 'base'}`, 'preview', id);
+  const { work, update, reset } = useQuestionWork(`preview|${seed ?? 'base'}`, 'preview', template ? workIdFor(template) : id);
 
   if (!template || !instance) {
     return (
@@ -157,8 +157,12 @@ export function PreviewPage({ id, query }: { id: string; query: URLSearchParams 
                   let range = 'teacher-marked';
                   if (r.kind === 'numeric') {
                     exact = `$${Number(r.range.exact.toPrecision(6))}$`;
-                    const [lo, hi] = fmtRange(r.range.lo, r.range.hi);
-                    range = `$${lo}$ to $${hi}$`;
+                    range = [r.range, ...r.altRanges]
+                      .map((x) => {
+                        const [lo, hi] = fmtRange(x.lo, x.hi);
+                        return `$${lo}$ to $${hi}$`;
+                      })
+                      .join(' or ');
                   } else if (r.kind === 'mcq') {
                     exact = r.options.find((o) => o.correct)?.letter ?? '';
                     range = 'exact choice';

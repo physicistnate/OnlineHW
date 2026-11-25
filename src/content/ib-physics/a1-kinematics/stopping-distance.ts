@@ -1,5 +1,5 @@
 import { defineQuestion } from '../../../engine/define';
-import { fmtA, fmtW } from '../../../engine/numbers';
+import { fmtA, fmtW, workingValue } from '../../../engine/numbers';
 import { Q, knowns, tex, unitTex as u } from '../../../engine/units';
 
 export default defineQuestion({
@@ -99,7 +99,7 @@ export default defineQuestion({
           text: `The braking distance $s_2 = \\frac{u^2}{2|a|}$ depends only on the speed and the size of the deceleration, so it stays at $${fmtA(r.s2)}$ m.`,
         },
         {
-          text: `The new stopping distance is $${fmtA(r.totalDouble)}$ m, which is less than double the original ($2 \\times ${fmtW(r.total)} = ${fmtW(2 * r.total)}$ m).`,
+          text: `The new stopping distance is $${fmtA(r.totalDouble)}$ m, which is less than double the original ($2 \\times ${fmtW(r.total)} = ${fmtW(2 * workingValue(r.total))}$ m).`,
           math: tex`s_{\text{new}} = ${fmtW(r.s1Double)} + ${fmtW(r.s2)} = ${fmtA(r.totalDouble)}\ ${u('m')}`,
         },
       ],

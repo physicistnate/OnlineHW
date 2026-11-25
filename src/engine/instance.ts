@@ -1,8 +1,7 @@
 /**
  * Turns a template into one student's version of the question.
  */
-import { TOLERANCE } from '../config/site';
-import { answerRange, computeAnswerRanges, computeDisplayPath, primaryConstants } from './calc';
+import { answerRanges, computeAnswerRanges, computeDisplayPath, padRange, primaryConstants } from './calc';
 import { baseParams, displayParams, generateParams } from './params';
 import { rngFromString, shuffled } from './rng';
 import type { AnyTemplate, Ctx, GraphSpec, McqOptionInstance, PartInstance, QuestionInstance, ResponseInstance } from './types';
@@ -68,18 +67,16 @@ export function buildInstance(
 
     switch (spec.kind) {
       case 'numeric': {
-        const raw = answerRange(report, spec.answer);
-        if (!raw) throw new Error(`${template.id} ${part.label}: compute() has no result named "${spec.answer}"`);
-        const rel = spec.tolerance?.rel ?? TOLERANCE.relFloor;
-        const abs = spec.tolerance?.abs ?? 0;
-        const pad = rel * Math.abs(raw.exact) + abs;
+        const [main, ...alternatives] = answerRanges(report, spec.answer);
+        if (!main) throw new Error(`${template.id} ${part.label}: compute() has no result named "${spec.answer}"`);
         response = {
           kind: 'numeric',
           answer: spec.answer,
           symbol: spec.symbol,
           unit: spec.unit,
           positive: spec.positive,
-          range: { exact: raw.exact, lo: raw.min - pad, hi: raw.max + pad },
+          range: padRange(main, spec.tolerance),
+          altRanges: alternatives.map((r) => padRange(r, spec.tolerance)),
         };
         break;
       }

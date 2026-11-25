@@ -50,6 +50,12 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
     writeJson(DRAFT_KEY, { topicId, standard, selected, title } satisfies Draft, false);
   }, [topicId, standard, selected, title]);
 
+  // "Add to assignment" links (?add=...) are applied once, then dropped from the
+  // address, so coming back to this page later does not re-add a removed question.
+  useEffect(() => {
+    if (query.get('add')) window.history.replaceState(null, '', '#/builder');
+  }, [query]);
+
   const topic = findTopic(topicId)!;
   const questions = questionsForTopic(topicId).filter((q) => !standard || q.standards.includes(standard));
   const toggle = (id: string) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));

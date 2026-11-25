@@ -46,9 +46,11 @@ export function parseNumber(raw: string): ParseResult {
 
   s = s
     .replace(/[−‒–—]/g, '-') // typographic minus signs and dashes
+    .replace(/\s+/g, '')
     .replace(/[×✕✖]/g, 'x')
-    .replace(/[·⋅∙]/g, '*')
-    .replace(/\s+/g, '');
+    // A middle dot means "times ten" only before 10 (3.0·10^8); elsewhere it
+    // separates units (m·s⁻²) and is left for the unit check.
+    .replace(/[·⋅∙](?=10)/g, '*');
   // Superscript exponents: 10⁻³ -> 10^-3
   s = s.replace(/10([⁻⁺]?[⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (_m, e: string) => '10^' + [...e].map((ch) => SUPERSCRIPT[ch]).join(''));
 
@@ -58,10 +60,12 @@ export function parseNumber(raw: string): ParseResult {
     s = s.replace(',', '.');
   }
 
-  const m = s.match(/^([+-]?)(\d+(?:\.\d*)?|\.\d+)(?:[eE]([+-]?\d+)|[xX*]10(?:\^|\*\*)[({]?([+-]?\d+)[)}]?)?(.*)$/);
+  // Exponent after 10^ may be bare, in (round) brackets or in {curly} brackets,
+  // but the brackets must match: "3.0x10^(8}" is not accepted.
+  const m = s.match(/^([+-]?)(\d+(?:\.\d*)?|\.\d+)(?:[eE]([+-]?\d+)|[xX*]10(?:\^|\*\*)(?:\(([+-]?\d+)\)|\{([+-]?\d+)\}|([+-]?\d+)))?(.*)$/);
   if (!m) return { ok: false, error: NOT_A_NUMBER };
 
-  const [, sign, mantissa, expE, expTen, rest] = m;
+  const [, sign, mantissa, expE, expRound, expCurly, expBare, rest] = m;
   if (rest !== '') {
     if (rest.startsWith('/')) return { ok: false, error: 'Enter the value as a decimal (for example 0.333), not a fraction.' };
     // An unfinished exponent ("0.48e", "0.48e-") — but not units such as eV.
@@ -69,11 +73,12 @@ export function parseNumber(raw: string): ParseResult {
       return { ok: false, error: 'Finish the power of ten, for example 3.0e8 or 3.0e-8.' };
     }
     if (/^[xX*]/.test(rest)) return { ok: false, error: 'Write powers of ten as 3.0x10^8 or 3.0e8.' };
-    // A unit: starts with a letter (or µ ° Ω %), then letters, exponents, "/", "^", "-", "·", ".".
-    if (!/^[a-zA-Zµμ°%Ω][a-zA-Zµμ°%Ω0-9^\-/.()⁰¹²³⁴⁵⁶⁷⁸⁹⁻]*$/.test(rest)) return { ok: false, error: NOT_A_NUMBER };
+    // A unit: starts with a letter (or µ ° Ω %), then letters, exponents, "/", "^",
+    // "-", and separators "·", "*", "." between unit symbols.
+    if (!/^[a-zA-Zµμ°%Ω][a-zA-Zµμ°%Ω0-9^\-/.()·⋅∙*⁰¹²³⁴⁵⁶⁷⁸⁹⁻]*$/.test(rest)) return { ok: false, error: NOT_A_NUMBER };
   }
 
-  const exponent = expE ?? expTen ?? '0';
+  const exponent = expE ?? expRound ?? expCurly ?? expBare ?? '0';
   const value = Number(`${sign}${mantissa}e${exponent}`);
   if (!Number.isFinite(value)) return { ok: false, error: 'That number is too large to read.' };
   return { ok: true, value, ...sigFigs(mantissa), unit: rest };

@@ -192,7 +192,17 @@ export interface McqOptionInstance {
 }
 
 export type ResponseInstance =
-  | { kind: 'numeric'; answer: string; symbol?: string; unit?: string; positive?: boolean; range: AnswerRange }
+  | {
+      kind: 'numeric';
+      answer: string;
+      symbol?: string;
+      unit?: string;
+      positive?: boolean;
+      /** Accepted range for the main method. */
+      range: AnswerRange;
+      /** Accepted ranges for alternative methods, each checked on its own. */
+      altRanges: AnswerRange[];
+    }
   | { kind: 'mcq'; columns?: string[]; options: McqOptionInstance[] }
   | { kind: 'text'; lines: number }
   | {

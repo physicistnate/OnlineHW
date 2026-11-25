@@ -28,6 +28,11 @@ describe('parseNumber', () => {
     ['4 m/s', 4, 1, 1],
     ['−9.8', -9.8, 2, 2],
     ['+7', 7, 1, 1],
+    ['3.0x10^(8)', 3e8, 2, 2],
+    ['3.0x10^{-3}', 3e-3, 2, 2],
+    ['3.0·10^8', 3e8, 2, 2],
+    ['3.0 · 10^8', 3e8, 2, 2],
+    ['0.48 m·s⁻²', 0.48, 2, 2],
   ])('reads %s', (input, value, sfMin, sfMax) => {
     const r = parsed(input);
     expect(r.value).toBeCloseTo(value as number, 12);
@@ -35,7 +40,7 @@ describe('parseNumber', () => {
     expect(r.sfMax).toBe(sfMax);
   });
 
-  it.each(['', 'abc', '1/3', '1,500', '12..3', '--4', '5 + 2', '0.48e', '0.48e-', '0.48x2', '0.48m+999', '0.48*2'])('rejects %j', (input) => {
+  it.each(['', 'abc', '1/3', '1,500', '12..3', '--4', '5 + 2', '0.48e', '0.48e-', '0.48x2', '0.48m+999', '0.48*2', '0.48x10^(0}', '0.48x10^{3)', '0.48x10^(3'])('rejects %j', (input) => {
     expect(parseNumber(input).ok).toBe(false);
   });
 
@@ -44,6 +49,7 @@ describe('parseNumber', () => {
     expect(parsed('4 m/s').unit).toBe('m/s');
     expect(parsed('1.6 eV').unit).toBe('eV'); // "e" followed by letters is a unit, not an exponent
     expect(parsed('13.8').unit).toBe('');
+    expect(parsed('0.48 m·s⁻²').unit).toBe('m·s⁻²'); // a middle dot between units is a separator
   });
 });
 

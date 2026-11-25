@@ -13,6 +13,31 @@ import { checkNumeric } from '../src/engine/grading';
 import { exponentOf, fmtA, roundSig } from '../src/engine/numbers';
 import { isChoice, rangeValues, type ParamSpecs } from '../src/engine/params';
 
+/**
+ * Finds displayed arithmetic such as "14 + 33.33 = 47.3" or "2 \times 100.6 = 201.2"
+ * (sums and products of plain numbers) and checks that the left side really gives
+ * the right side at the precision shown. Covers text as well as maths, including
+ * the explanations of written-answer parts.
+ */
+const NUM = String.raw`\d+(?:\.\d+)?`;
+const CHAIN = new RegExp(String.raw`(?<![\w.^{}\\-])(${NUM}(?:\s*(?:\+|\\times)\s*${NUM})+)\s*=\s*(${NUM})(?![\d.^]|\s*\\times)`, 'g');
+
+export function arithmeticErrors(text: string | undefined): string[] {
+  if (!text) return [];
+  const errors: string[] = [];
+  for (const m of text.matchAll(CHAIN)) {
+    const lhs = m[1]
+      .split('+')
+      .map((term) => term.split('\\times').reduce((prod, x) => prod * Number(x.trim()), 1))
+      .reduce((a, b) => a + b, 0);
+    const decimals = m[2].split('.')[1]?.length ?? 0;
+    if (Math.abs(lhs - Number(m[2])) > 0.5 * 10 ** -decimals + 1e-9 * Math.max(1, Math.abs(lhs))) {
+      errors.push(`"${m[0]}" (the left side is ${lhs})`);
+    }
+  }
+  return errors;
+}
+
 function allCombos(specs: ParamSpecs): Record<string, number | string>[] {
   let combos: Record<string, number | string>[] = [{}];
   for (const [name, spec] of Object.entries(specs)) {
@@ -21,6 +46,24 @@ function allCombos(specs: ParamSpecs): Record<string, number | string>[] {
   }
   return combos;
 }
+
+describe('displayed-arithmetic checker', () => {
+  it('catches a wrong equality and accepts correct ones', () => {
+    expect(arithmeticErrors('less than double ($2 \\times 100.6 = 201.3$ m)')).toHaveLength(1); // 2 × 100.6 = 201.2
+    expect(arithmeticErrors('s = s_1 + s_2 = 14 + 33.33 = 47.3\\ \\mathrm{m}')).toEqual([]);
+    expect(arithmeticErrors('v = u + at = 0 + 1.0 \\times 3.0 = 3.0')).toEqual([]);
+    expect(arithmeticErrors('t = \\frac{2 \\times 400}{4.0 + 20} = 33.3')).toEqual([]); // fractions are skipped
+  });
+
+  it('finds equalities to check in the real questions', () => {
+    let found = 0;
+    for (const t of ALL_QUESTIONS) {
+      const inst = buildInstance(t, Object.fromEntries(Object.entries(t.params as ParamSpecs).map(([k, s]) => [k, s.base])));
+      for (const part of inst.parts) for (const s of part.solution) found += [...`${s.text ?? ''} ${s.math ?? ''}`.matchAll(CHAIN)].length;
+    }
+    expect(found).toBeGreaterThan(5);
+  });
+});
 
 describe.each(ALL_QUESTIONS.map((t) => [t.id, t] as const))('%s', (_id, t) => {
   it('is valid for every allowed combination of given data', () => {
@@ -33,6 +76,9 @@ describe.each(ALL_QUESTIONS.map((t) => [t.id, t] as const))('%s', (_id, t) => {
       for (const part of inst.parts) {
         const r = part.response;
         const at = `${t.id} ${JSON.stringify(p)} ${part.label || 'main'}`;
+        const shownText = [...part.solution.flatMap((s) => [s.text, s.math]), ...part.markscheme.map((l) => ('mark' in l ? l.mark : l.note))];
+        const bad = shownText.flatMap(arithmeticErrors);
+        expect(bad, `${at}: displayed arithmetic does not add up`).toEqual([]);
         switch (r.kind) {
           case 'numeric':
             expect(Number.isFinite(r.range.exact), `${at}: answer not finite`).toBe(true);

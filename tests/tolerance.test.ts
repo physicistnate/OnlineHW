@@ -26,6 +26,8 @@ describe('accepting typed answers (cell rule)', () => {
     ['4 ms-1', 'm s-1'],
     ['0.48 m/s^2', 'm s-2'],
     ['0.48 m/s2', 'm s-2'],
+    ['0.48 m·s⁻²', 'm s-2'],
+    ['0.48 m*s^-2', 'm s-2'],
   ])('recognises %j as the unit %j', (s, unit) => {
     const value = Number.parseFloat(s);
     expect(checkNumeric(s, range(value, value, value), { unit }).status).toBe('correct');
@@ -183,5 +185,50 @@ describe('graph drawing', () => {
     expect(res.ecf).toBe(true);
     expect(gradePart(lift, inst, distPart, { ...responses, b: { kind: 'numeric', value: '31' } }).status).toBe('incorrect');
     expect(gradePart(lift, inst, distPart, { ...responses, b: { kind: 'numeric', value: '22.5' } }).status).toBe('correct');
+  });
+
+  it('gives no follow-through credit when there is no drawn graph (e.g. after Reset points)', () => {
+    // With the preset points saved as a "drawing", 32 m (their area) used to earn 2/2.
+    expect(gradePart(lift, inst, distPart, { b: { kind: 'numeric', value: '32' } }).status).toBe('incorrect');
+  });
+});
+
+describe('review round 2 regressions', () => {
+  const train = getQuestion('ibp-a1-train-acceleration')!;
+  const kick = getQuestion('ibp-a1-projectile-kick')!;
+  const num = (value: string): PartResponse => ({ kind: 'numeric', value });
+
+  it('never accepts an answer in the gap between two methods', () => {
+    // Base train: a = 0.10 (wrong) → t = 160 by follow-through; the average-speed method gives 33.3.
+    const inst = instantiate(train, null);
+    const b = inst.parts[1];
+    expect(gradePart(train, inst, b, { a: num('0.10'), b: num('100') }).status).toBe('incorrect');
+    expect(gradePart(train, inst, b, { a: num('0.10'), b: num('160') }).ecf).toBe(true);
+    expect(gradePart(train, inst, b, { a: num('0.10'), b: num('33.3') }).status).toBe('correct');
+  });
+
+  it('follows through from an accepted rounded answer', () => {
+    // u = 2.0, v = 15, s = 340: a = 0.325 exactly; 0.33 is accepted, so 13/0.33 = 39 must be too.
+    const inst = buildInstance(train, { u: 2, v: 15, s: 340 });
+    const [a, b] = inst.parts;
+    expect(gradePart(train, inst, a, { a: num('0.33') }).status).toBe('correct');
+    const res = gradePart(train, inst, b, { a: num('0.33'), b: num('39') });
+    expect(res.status).toBe('correct');
+    expect(res.ecf).toBeFalsy();
+    expect(res.message).toMatch(/rounded answer/);
+    expect(gradePart(train, inst, b, { a: num('0.33'), b: num('37') }).status).toBe('incorrect');
+  });
+
+  it('does not carry forward inadmissible inputs or break the method’s assumptions', () => {
+    // Base projectile: components −10 and −10 would give a "flight time" of −2.04 s and R = 20.4 m.
+    const inst = instantiate(kick, null);
+    const R = inst.parts.find((p) => p.id === 'c')!;
+    expect(gradePart(kick, inst, R, { 'a-i': num('-10'), 'a-ii': num('-10'), c: num('20.4') }).status).toBe('incorrect');
+    // Positive (but wrong) components still earn normal follow-through: 10 × (2 × 10 / 9.8) = 20.4 m.
+    expect(gradePart(kick, inst, R, { 'a-i': num('10'), 'a-ii': num('10'), c: num('20.4') }).ecf).toBe(true);
+  });
+
+  it('states the positive axes in the projectile stem', () => {
+    expect(instantiate(kick, null).stem).toMatch(/upwards and the direction of the kick as positive/);
   });
 });

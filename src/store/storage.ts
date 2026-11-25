@@ -5,7 +5,12 @@
  * windows, strict privacy settings).
  */
 
-export const PREFIX = 'rice-hw:v1';
+/**
+ * Namespace for everything this site stores. Bumped to v2 when marking rules
+ * changed, so demo work saved by earlier builds is not shown with stale marks.
+ */
+export const PREFIX = 'rice-hw:v2';
+const PROBE_KEY = `${PREFIX}:__probe`;
 
 const listeners = new Set<() => void>();
 
@@ -34,16 +39,23 @@ export function writeJson(key: string, value: unknown, notify = true): boolean {
   return ok;
 }
 
-/** True if this browser lets the site save data (false in some private windows). */
+let available: boolean | null = null;
+
+/**
+ * True if this browser lets the site save data (false in some private windows).
+ * The write test runs once per page load: it must never run during rendering,
+ * because every write wakes up the site's other open tabs.
+ */
 export function storageAvailable(): boolean {
+  if (available !== null) return available;
   try {
-    const k = `${PREFIX}:__test`;
-    window.localStorage.setItem(k, '1');
-    window.localStorage.removeItem(k);
-    return true;
+    window.localStorage.setItem(PROBE_KEY, '1');
+    window.localStorage.removeItem(PROBE_KEY);
+    available = true;
   } catch {
-    return false;
+    available = false;
   }
+  return available;
 }
 
 export function removeKey(key: string): void {
@@ -73,6 +85,7 @@ export function keysStartingWith(start: string): string[] {
 export function subscribe(fn: () => void): () => void {
   listeners.add(fn);
   const onStorage = (e: StorageEvent) => {
+    if (e.key === PROBE_KEY) return; // another tab's availability test, not a data change
     if (!e.key || e.key.startsWith(PREFIX)) fn();
   };
   window.addEventListener('storage', onStorage);

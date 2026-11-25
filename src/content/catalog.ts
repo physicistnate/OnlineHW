@@ -52,7 +52,7 @@ export const IB_PHYSICS_SL: Course = {
   style: 'IB',
   printInstructions: [
     'Answer all questions in the spaces provided.',
-    'Show your working. In calculations, marks are awarded for the method as well as for the final answer.',
+    'Show your working. If a final answer is wrong, correct working can still earn marks.',
     'A calculator and the IB Physics data booklet may be used.',
     'Take $g = {g}\\ \\mathrm{m\\,s^{-2}}$.',
   ],

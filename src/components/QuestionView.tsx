@@ -22,6 +22,10 @@ interface QuestionViewProps {
   showMarkscheme?: boolean;
 }
 
+function samePoints(a: [number, number][], b: [number, number][]): boolean {
+  return a.length === b.length && a.every(([x, y], i) => Math.abs(x - b[i][0]) < 1e-9 && Math.abs(y - b[i][1]) < 1e-9);
+}
+
 export function questionMeta(template: AnyTemplate): string {
   const course = findCourse(template.courses[0]);
   const topic = findTopic(template.topic);
@@ -35,12 +39,16 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
 
   // Editing an answer clears its own result and re-marks later parts that already
   // have one, since error-carried-forward credit depends on earlier answers.
-  const change = (part: PartInstance, response: PartResponse) => {
+  // Clearing (response undefined, e.g. "Reset points") works the same way.
+  const change = (part: PartInstance, response: PartResponse | undefined) => {
+    // A graph whose points are all back at their starting places is not an answer.
+    if (response?.kind === 'graph' && part.response.kind === 'graph' && samePoints(response.points, part.response.start)) response = undefined;
     const next = { ...responses, [part.id]: response };
     const patches: Record<string, Partial<PartWork>> = { [part.id]: { response, result: undefined } };
     for (const [id, result] of Object.entries(remarkLaterParts(template, instance, part.id, next, results))) patches[id] = { result };
     onWork(patches);
   };
+  const clear = (part: PartInstance) => change(part, undefined);
   const check = (part: PartInstance) => {
     const result = gradePart(template, instance, part, responses);
     const attempts = work[part.id]?.attempts ?? 0;
@@ -73,6 +81,7 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
           part={part}
           work={work[part.id]}
           onChange={(r) => change(part, r)}
+          onClear={() => clear(part)}
           onCheck={() => check(part)}
           showSolutions={showSolutions}
           showMarkscheme={showMarkscheme}
@@ -83,6 +92,7 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
 }
 
 interface PartBlockProps {
+  onClear: () => void;
   part: PartInstance;
   work?: PartWork;
   onChange: (r: PartResponse) => void;
@@ -91,7 +101,7 @@ interface PartBlockProps {
   showMarkscheme?: boolean;
 }
 
-function PartBlock({ part, work, onChange, onCheck, showSolutions, showMarkscheme }: PartBlockProps) {
+function PartBlock({ part, work, onChange, onClear, onCheck, showSolutions, showMarkscheme }: PartBlockProps) {
   return (
     <section className={`part${part.label || part.prompt ? '' : ' part-single'}`}>
       {(part.label || part.prompt) && (
@@ -102,7 +112,7 @@ function PartBlock({ part, work, onChange, onCheck, showSolutions, showMarkschem
         </div>
       )}
       <div className="part-body">
-        <PartAnswer part={part} work={work} onChange={onChange} onCheck={onCheck} />
+        <PartAnswer part={part} work={work} onChange={onChange} onClear={onClear} onCheck={onCheck} />
         <Feedback result={work?.result} attempts={work?.attempts ?? 0} />
         {(showSolutions || showMarkscheme) && (
           <div className="reveal">
@@ -115,7 +125,15 @@ function PartBlock({ part, work, onChange, onCheck, showSolutions, showMarkschem
   );
 }
 
-function PartAnswer({ part, work, onChange, onCheck }: { part: PartInstance; work?: PartWork; onChange: (r: PartResponse) => void; onCheck: () => void }) {
+interface PartAnswerProps {
+  part: PartInstance;
+  work?: PartWork;
+  onChange: (r: PartResponse) => void;
+  onClear: () => void;
+  onCheck: () => void;
+}
+
+function PartAnswer({ part, work, onChange, onClear, onCheck }: PartAnswerProps) {
   const uid = useId();
   const r = part.response;
   const response = work?.response;
@@ -232,7 +250,7 @@ function PartAnswer({ part, work, onChange, onCheck }: { part: PartInstance; wor
             <button className="btn btn-primary btn-sm" onClick={onCheck}>
               Check graph
             </button>
-            <button className="btn btn-ghost btn-sm" onClick={() => onChange({ kind: 'graph', points: r.start })}>
+            <button className="btn btn-ghost btn-sm" onClick={onClear}>
               Reset points
             </button>
           </div>
@@ -310,7 +328,12 @@ export function Markscheme({ part }: { part: PartInstance }) {
   if (r.kind === 'numeric') {
     const [lo, hi] = fmtRange(r.range.lo, r.range.hi);
     const unit = r.unit ? `\\ ${unitTex(r.unit)}` : '';
-    extra.push({ note: `Online marking: accepts any value from $${lo}$ to $${hi}${unit}$, or that value rounded to 2 or more significant figures.` });
+    const others = r.altRanges.map((a) => {
+      const [alo, ahi] = fmtRange(a.lo, a.hi);
+      return `$${alo}$ to $${ahi}${unit}$`;
+    });
+    const alt = others.length ? ` (or ${others.join(' or ')} by the alternative method)` : '';
+    extra.push({ note: `Online marking: accepts any value from $${lo}$ to $${hi}${unit}$${alt}, or that value rounded to 2 or more significant figures.` });
   }
   const lines = [...(r.kind === 'mcq' ? extra : []), ...part.markscheme, ...(r.kind === 'numeric' ? extra : [])];
   return (
