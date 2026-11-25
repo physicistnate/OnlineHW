@@ -5,11 +5,34 @@
  * - choosing several topics to find questions that combine them;
  * - chips saying which other topics a question uses.
  */
-import { allTopics, findStandard, findTopic, topicOf, type Course } from '../content/catalog';
+import { COURSE_GROUPS, allTopics, findStandard, findTopic, topicOf, type Course } from '../content/catalog';
 import { laterTopicsUsed, questionsForCourse, topicsOfQuestion } from '../content/registry';
 import type { AnyTemplate } from '../engine/types';
 
 export type ChooseMode = 'topic' | 'combine';
+
+/** The course menu, grouped into IB, AP and University courses. */
+export function CourseSelect({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+  return (
+    <select className="course-select" value={value} onChange={(e) => onChange(e.target.value)} aria-label="Course">
+      {COURSE_GROUPS.map((g) => (
+        <optgroup key={g.label} label={g.label}>
+          {g.courses.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </optgroup>
+      ))}
+    </select>
+  );
+}
+
+/** One line about the chosen course, under the page heading. */
+export function courseNote(course: Course): string {
+  if (course.family === 'IB') return 'HL includes every SL question plus the HL-only topics.';
+  return 'Pilot course: so far only work, energy and power has questions.';
+}
 
 export function ModeSwitch({ mode, onChange }: { mode: ChooseMode; onChange: (m: ChooseMode) => void }) {
   return (

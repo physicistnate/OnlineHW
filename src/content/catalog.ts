@@ -7,6 +7,11 @@
  *
  * IB Physics HL includes every SL topic (so SL questions appear in HL too) plus
  * the HL-only topics. A question marked level: 'HL' appears only in HL.
+ *
+ * AP Physics C: Mechanics follows the College Board course and exam description
+ * (units 1–7, effective fall 2024); topic numbers 3.1–3.5 are the CED's. University
+ * Physics I is a typical first-semester calculus-based course; its outline and
+ * numbering are ours. Both have questions for work, energy and power only so far.
  */
 import type { Style } from '../config/site';
 
@@ -37,6 +42,8 @@ export interface Course {
   id: string;
   name: string;
   shortName: string;
+  /** For grouping in course menus. */
+  family: 'IB' | 'AP' | 'University';
   style: Style;
   level?: 'SL' | 'HL';
   /** Courses whose questions also belong to this one (HL includes SL). */
@@ -46,14 +53,19 @@ export interface Course {
   themes: Theme[];
 }
 
-function topic(code: string, name: string, standards: [string, string, 'HL'?][] = [], hlOnly = false): Topic {
+/** A topic whose id and standard ids start with `prefix` ('ibp.A.1', 'ibp.A.1.4'). */
+function makeTopic(prefix: string, code: string, name: string, standards: [string, string, 'HL'?][] = [], hlOnly = false, idCode = code): Topic {
   return {
-    id: `ibp.${code}`,
+    id: `${prefix}.${idCode}`,
     code,
     name,
-    standards: standards.map(([c, text, level]) => ({ id: `ibp.${c}`, code: c, text, ...(level === 'HL' ? { hl: true } : {}) })),
+    standards: standards.map(([c, text, level]) => ({ id: `${prefix}.${c}`, code: c, text, ...(level === 'HL' ? { hl: true } : {}) })),
     ...(hlOnly ? { hlOnly } : {}),
   };
+}
+
+function topic(code: string, name: string, standards: [string, string, 'HL'?][] = [], hlOnly = false): Topic {
+  return makeTopic('ibp', code, name, standards, hlOnly);
 }
 
 // Topics are shared objects, so SL and HL always list the same standards.
@@ -132,6 +144,7 @@ export const IB_PHYSICS_SL: Course = {
   id: 'ib-physics-sl',
   name: 'IB Physics SL',
   shortName: 'IB Phys SL',
+  family: 'IB',
   style: 'IB',
   level: 'SL',
   printInstructions: IB_PRINT_INSTRUCTIONS,
@@ -145,6 +158,7 @@ export const IB_PHYSICS_HL: Course = {
   id: 'ib-physics-hl',
   name: 'IB Physics HL',
   shortName: 'IB Phys HL',
+  family: 'IB',
   style: 'IB',
   level: 'HL',
   includes: ['ib-physics-sl'],
@@ -152,15 +166,101 @@ export const IB_PHYSICS_HL: Course = {
   themes: IB_PHYSICS_THEMES,
 };
 
-export const COURSES: Course[] = [IB_PHYSICS_SL, IB_PHYSICS_HL];
+// ---------- AP Physics C: Mechanics ----------
+
+const AP_C_MECH_TOPICS = {
+  U1: makeTopic('apcm', 'Unit 1', 'Kinematics', [], false, '1'),
+  U2: makeTopic('apcm', 'Unit 2', 'Force and Translational Dynamics', [], false, '2'),
+  U3: makeTopic(
+    'apcm',
+    'Unit 3',
+    'Work, Energy, and Power',
+    [
+      ['3.1', 'Translational kinetic energy'],
+      ['3.2', 'Work: constant forces (dot product) and variable forces (integral of F dx)'],
+      ['3.3', 'Potential energy: springs, gravity, and F = −dU/dx'],
+      ['3.4', 'Conservation of energy, including work done by nonconservative forces'],
+      ['3.5', 'Power: average power and instantaneous power P = F · v'],
+    ],
+    false,
+    '3',
+  ),
+  U4: makeTopic('apcm', 'Unit 4', 'Linear Momentum', [], false, '4'),
+  U5: makeTopic('apcm', 'Unit 5', 'Torque and Rotational Dynamics', [], false, '5'),
+  U6: makeTopic('apcm', 'Unit 6', 'Energy and Momentum of Rotating Systems', [], false, '6'),
+  U7: makeTopic('apcm', 'Unit 7', 'Oscillations', [], false, '7'),
+};
+
+export const AP_PHYSICS_C_MECH: Course = {
+  id: 'ap-physics-c-mech',
+  name: 'AP Physics C: Mechanics',
+  shortName: 'AP Phys C: Mech',
+  family: 'AP',
+  style: 'AP',
+  printInstructions: [
+    'Show your work for each part. Write equations before substituting numbers.',
+    'A calculator and the AP Physics C equation sheet may be used.',
+    'Use $g = {g}\\ \\mathrm{m\\,s^{-2}}$ (answers using $10\\ \\mathrm{m\\,s^{-2}}$ are also accepted online).',
+  ],
+  themes: [{ code: 'M', name: 'Mechanics', topics: Object.values(AP_C_MECH_TOPICS) }],
+};
+
+// ---------- University Physics I (calculus-based) ----------
+
+const UNIVERSITY_1_TOPICS = {
+  T1: makeTopic('up1', 'Topic 1', 'Motion in one and two dimensions', [], false, '1'),
+  T2: makeTopic('up1', 'Topic 2', 'Newton’s laws and applications', [], false, '2'),
+  T3: makeTopic(
+    'up1',
+    'Topic 3',
+    'Work, energy and power',
+    [
+      ['3.1', 'Work done by a constant force as a dot product; when a force does no work'],
+      ['3.2', 'Work done by a variable force: W = ∫F dx, including springs'],
+      ['3.3', 'Kinetic energy and the work–energy theorem'],
+      ['3.4', 'Conservative forces, potential energy, F = −dU/dx and energy diagrams'],
+      ['3.5', 'Conservation of energy with nonconservative forces such as friction'],
+      ['3.6', 'Power: P = dW/dt = F · v; energy use by homes and industry'],
+    ],
+    false,
+    '3',
+  ),
+  T4: makeTopic('up1', 'Topic 4', 'Momentum and collisions', [], false, '4'),
+  T5: makeTopic('up1', 'Topic 5', 'Rotation', [], false, '5'),
+  T6: makeTopic('up1', 'Topic 6', 'Gravitation', [], false, '6'),
+  T7: makeTopic('up1', 'Topic 7', 'Oscillations', [], false, '7'),
+};
+
+export const UNIVERSITY_PHYSICS_1: Course = {
+  id: 'university-physics-1',
+  name: 'University Physics I (calculus-based)',
+  shortName: 'Univ Phys I',
+  family: 'University',
+  style: 'General',
+  printInstructions: [
+    'Show all working, including any integrals or derivatives.',
+    'Calculators are allowed. Give answers to 3 significant figures unless stated otherwise.',
+    'Take $g = {g}\\ \\mathrm{m\\,s^{-2}}$.',
+  ],
+  themes: [{ code: 'I', name: 'Mechanics', topics: Object.values(UNIVERSITY_1_TOPICS) }],
+};
+
+export const COURSES: Course[] = [IB_PHYSICS_SL, IB_PHYSICS_HL, AP_PHYSICS_C_MECH, UNIVERSITY_PHYSICS_1];
 export const DEFAULT_COURSE_ID = IB_PHYSICS_SL.id;
+
+/** Courses grouped for menus: IB, AP, University. */
+export const COURSE_GROUPS: { label: string; courses: Course[] }[] = [
+  { label: 'IB', courses: COURSES.filter((c) => c.family === 'IB') },
+  { label: 'AP', courses: COURSES.filter((c) => c.family === 'AP') },
+  { label: 'University', courses: COURSES.filter((c) => c.family === 'University') },
+];
 
 export function allTopics(course: Course): Topic[] {
   return course.themes.flatMap((t) => t.topics);
 }
 
-/** Every topic with all of its standards (SL and HL). */
-export const ALL_TOPICS: Topic[] = Object.values(T);
+/** Every topic with all of its standards (IB SL and HL, AP, university). */
+export const ALL_TOPICS: Topic[] = [...Object.values(T), ...Object.values(AP_C_MECH_TOPICS), ...Object.values(UNIVERSITY_1_TOPICS)];
 
 /** A topic with all of its standards, including HL-only ones. */
 export function findTopic(topicId: string): Topic | undefined {

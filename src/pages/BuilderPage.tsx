@@ -4,13 +4,13 @@
  * then save it for students or print it.
  */
 import { useEffect, useState } from 'react';
-import { COURSES, allTopics, courseOrDefault, courseTopic, findStandard, findTopic, type Course } from '../content/catalog';
+import { allTopics, courseOrDefault, courseTopic, findStandard, findTopic, type Course } from '../content/catalog';
 import { getQuestion, questionsCombining, questionsForCourse, questionsForTopic } from '../content/registry';
 import { PageHeader } from '../components/Layout';
 import { Dialog } from '../components/Modal';
 import { SettingsForm } from '../components/SettingsForm';
 import { StandardPicker, countByStandard } from '../components/StandardPicker';
-import { CombineTopics, LaterTopicsToggle, ModeSwitch, UsesChips, filterLater, type ChooseMode } from '../components/TopicFilters';
+import { CombineTopics, CourseSelect, LaterTopicsToggle, ModeSwitch, UsesChips, courseNote, filterLater, type ChooseMode } from '../components/TopicFilters';
 import { formatDue } from '../components/time';
 import { Difficulty, TypeChips, marksLabel, marksOf } from './BankPage';
 import { href } from '../router';
@@ -141,7 +141,7 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
     const kept = selected.filter((q) => inCourse(next.id, q));
     const dropped = selected.length - kept.length;
     setSelected(kept);
-    setNotice(dropped > 0 ? `Removed ${dropped} HL-only question${dropped === 1 ? '' : 's'} from the selection.` : '');
+    setNotice(dropped > 0 ? `Removed ${dropped} question${dropped === 1 ? '' : 's'} that ${dropped === 1 ? 'is' : 'are'} not part of ${next.name} from the selection.` : '');
     if (!allTopics(next).some((t) => t.id === topicId)) {
       setTopicId(firstTopicWithQuestions(next));
       setStandards([]);
@@ -180,15 +180,10 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
         <section className="card">
           <h2 className="card-title">1 · Choose questions</h2>
           <div className="filters">
-            <div className="segmented" role="group" aria-label="Course">
-              {COURSES.map((c) => (
-                <button key={c.id} className={c.id === course.id ? 'is-active' : ''} aria-pressed={c.id === course.id} onClick={() => changeCourse(c.id)}>
-                  {c.name}
-                </button>
-              ))}
-            </div>
+            <CourseSelect value={course.id} onChange={changeCourse} />
             <ModeSwitch mode={mode} onChange={setMode} />
           </div>
+          <p className="muted small">{courseNote(course)}</p>
           {notice && <p className="muted small">{notice}</p>}
 
           {mode === 'topic' ? (

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { COURSES, allTopics, courseOrDefault, courseTopic, findStandard } from '../content/catalog';
+import { allTopics, courseOrDefault, courseTopic, findStandard } from '../content/catalog';
 import { questionsCombining, questionsForTopic } from '../content/registry';
 import { PageHeader } from '../components/Layout';
 import { StandardPicker, countByStandard } from '../components/StandardPicker';
-import { CombineTopics, LaterTopicsToggle, ModeSwitch, UsesChips, filterLater, type ChooseMode } from '../components/TopicFilters';
+import { CombineTopics, CourseSelect, LaterTopicsToggle, ModeSwitch, UsesChips, courseNote, filterLater, type ChooseMode } from '../components/TopicFilters';
 import { QUESTION_TYPE_LABELS, type AnyTemplate, type QuestionType } from '../engine/types';
-import { href } from '../router';
+import { href, navigate } from '../router';
 
 export function marksOf(t: AnyTemplate): number {
   return t.parts.reduce((s, p) => s + p.marks, 0);
@@ -112,17 +112,9 @@ export function BankPage(props: {
       <PageHeader
         eyebrow={course.name}
         title="Question bank"
-        actions={
-          <div className="segmented" role="group" aria-label="Course">
-            {COURSES.map((c) => (
-              <a key={c.id} href={href('/bank', { course: c.id, topic: active })} className={c.id === course.id ? 'is-active' : ''} aria-current={c.id === course.id ? 'page' : undefined}>
-                {c.name}
-              </a>
-            ))}
-          </div>
-        }
+        actions={<CourseSelect value={course.id} onChange={(id) => navigate(href('/bank', { course: id }).slice(1))} />}
       >
-        Preview any question with a student’s numbers, then add it to an assignment. HL includes every SL question plus the HL-only topics.
+        Preview any question with a student’s numbers, then add it to an assignment. {courseNote(course)}
       </PageHeader>
 
       <div className="bank-layout">
