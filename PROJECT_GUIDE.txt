@@ -1,19 +1,21 @@
 ===============================================================================
  RICE EDUCATION · ONLINE HW SYSTEM
  Project guide: files, functionality, answer tolerance, next steps
- Phase 1 (question engine + first questions) · last updated 2026-11-25
+ Phase 1 (question engine, first questions, assignments) · last updated 2026-11-25
 ===============================================================================
 
 CONTENTS
   1. What this is
-  2. Running it on your computer
+  2. Running it on your computer, and testing changes before they go live
   3. What works now
   4. Answer tolerance: how numeric answers are checked
-  5. How the per-student numbers work
-  6. File-by-file guide
-  7. How to add a question
-  8. Next steps
-  9. Decisions to review
+  5. Assignments: tries, due dates, answer keys and grades
+  6. How the per-student numbers work
+  7. File-by-file guide
+  8. How to add (or revise) a question
+  9. Next steps
+ 10. Decisions to review
+ (Ideas for later are kept in FUTURE_FEATURES.md.)
 
 
 -------------------------------------------------------------------------------
@@ -26,15 +28,18 @@ Phase 1 is a working website with no database yet. Everything a student does
 is saved in their own browser, which is enough to test the whole question
 engine before real accounts are added in Phase 3.
 
-Starting course: IB Physics SL. Starting topic: A.1 Kinematics (7 questions).
+Courses so far: IB Physics SL and IB Physics HL. HL includes every SL topic
+and question plus the HL-only topics (A.4, A.5, B.4, D.4, E.2); a question
+marked level 'HL' appears only in HL. Questions so far: A.1 Kinematics (7).
 
 Technology: a static website (Vite + React + TypeScript), maths rendered with
 KaTeX, graphs drawn as SVG. No server is needed, so it can be hosted free on
-GitHub Pages. The planned database is Supabase (free tier).
+Cloudflare Pages or Netlify (school wifi blocks GitHub, see section 9). The
+planned database is Supabase (free tier).
 
 
 -------------------------------------------------------------------------------
-2. RUNNING IT ON YOUR COMPUTER
+2. RUNNING IT ON YOUR COMPUTER, AND TESTING CHANGES BEFORE THEY GO LIVE
 -------------------------------------------------------------------------------
 
 One-time setup:
@@ -43,15 +48,33 @@ One-time setup:
 
 Every time:
   npm run dev        Start the site at http://localhost:5173 (reloads as you edit)
-  npm test           Check every question for 150 random students (about 2 s)
+  npm test           Check every question and the grading rules (about 4 s)
   npm run build      Build the finished site into the dist/ folder
   npm run preview    Serve the built site at http://localhost:4173
 
 Opening dist/index.html directly from the file system will not work (browsers
 block it); use "npm run preview" or a hosting service.
 
-On GitHub: every push runs the tests and a build automatically (Actions tab,
-"CI"). A green tick means all questions passed their checks.
+On GitHub: every push and pull request runs the tests and a build
+automatically (Actions tab, "CI"). A green tick means all checks passed.
+
+How changes reach the live site (main is the base everything builds on):
+  1. New work (questions, features, fixes) is done on its own branch, never
+     directly on main.
+  2. The branch gets a pull request. CI runs the tests on it, and once the
+     site is on Cloudflare Pages or Netlify, every pull request also gets its
+     own preview address, so new questions can be tried in a browser (and
+     reviewed, e.g. by Codex) before anyone else sees them.
+  3. When it looks right, merge the pull request. main, and the live site
+     built from it, only ever receive tested work.
+  Recommended: on GitHub, Settings → Branches → add a rule for main that
+  requires a pull request and a passing "CI" check before merging.
+
+To try a pull request on your own computer:
+  git fetch origin <branch-name>
+  git checkout <branch-name>
+  npm install
+  npm run dev
 
 
 -------------------------------------------------------------------------------
@@ -59,39 +82,60 @@ On GitHub: every push runs the tests and a build automatically (Actions tab,
 -------------------------------------------------------------------------------
 
 Site (dark theme, works on phones):
-  Home page               Overview and Phase 1 status.
-  Question bank           Browse IB Physics SL by theme and topic; filter by
-                          question type or standard; search titles.
+  Home page               Overview and status.
+  Question bank           IB Physics SL or HL, by theme and topic. Choose one or
+                          more standards (green ovals, "Select all", "Unselect
+                          all"; nothing is shown until at least one is chosen),
+                          filter by question type, search titles. The chosen
+                          standards are kept in the address, so coming back
+                          from a preview shows the same list.
   Question preview        Any question with the base numbers or any student's
-                          numbers; answer it interactively; switch worked
-                          solutions and the IB-style markscheme on or off;
-                          "Teacher details" shows the given data, exact answers
-                          and the accepted range for every part.
-  Assignment builder      Choose a topic, filter by standard, tick questions,
-                          save as an assignment. Release or hide solutions per
-                          assignment. Print / download a PDF of the base version
-                          or of one student's version, with or without worked
-                          solutions and markscheme.
+                          numbers; answer it interactively (unlimited tries);
+                          switch worked solutions and the IB-style markscheme
+                          on or off; "Teacher details" shows the given data,
+                          exact answers and the accepted range for every part.
+  Assignment builder      1. Choose the course (SL or HL), a topic and one or
+                             more standards, then tick questions.
+                          2. Settings: tries per part, due date and time,
+                             answer key for students (hidden / open now / open
+                             after the due date), class-grade rules (penalty
+                             per extra try, lowest score per part). Save.
+                          3. Print / download a PDF of the base version or of
+                             one student's version, with or without worked
+                             solutions and markscheme.
+                          Saved assignments: edit settings, print the key,
+                          open as a student, delete. Each assignment keeps the
+                          version of every question it was made with.
+                          An unsaved draft (course, topic, standards, questions,
+                          settings) survives visits to other pages.
   Printable view / PDF    Exam-style paper: name/class/date lines, answer lines
-                          with units, writing lines, blank graph grids, then a
-                          separate answer-key section. "Download PDF" opens the
-                          print dialog; choose "Save as PDF".
+                          with units, working space, blank graph grids, then a
+                          separate answer-key section; shows the due date of a
+                          saved assignment. "Download PDF" opens the print
+                          dialog; choose "Save as PDF".
   Student view (demo)     Sign in with a class code + username (no password in
-                          the demo). Assignment list with progress bars and
-                          scores. Work is saved after every change; signing out
-                          and back in restores answers, results and the same
-                          numbers. Released solutions use the student's numbers.
+                          the demo). Assignment list with due dates, a live
+                          countdown, progress, class grade and IB marks. Each
+                          assignment: tries left per part, correct parts lock,
+                          a countdown, warnings 5 and 1 minutes before the due
+                          time, then back to the list; afterwards the
+                          assignment is read-only and, if the teacher chose it,
+                          shows the answer key with the student's own numbers.
+                          Work is saved after every change; a visible warning
+                          appears if the browser refuses to save or sign in.
 
-Question types implemented:
+Question types implemented (all marked by the computer):
   Calculation       Typed number; checked with the rounding tolerance (section 4).
   Multiple choice   IB Paper 1A style, including "which row is correct" tables.
                     Options are shuffled per student (base version keeps the
                     printed order).
   Graph reading     A randomized graph is part of the question.
   Graph drawing     Students drag points that snap to the grid (mouse, touch
-                    or keyboard arrows). Marked point by point.
-  Short answer /    Free text, saved as typed, "Submit for marking". Marked by
-  long response     the teacher for now (AI marking is deliberately left out).
+                    or keyboard arrows). Marked segment by segment.
+  Written answers   Left out for now: every part must be marked by the
+                    computer (the tests enforce this). The two "explain"
+                    parts became multiple choice. The engine keeps the
+                    written-answer type for later (see FUTURE_FEATURES.md).
 
 Marking rules (one policy, online and on paper):
   - A correct final answer earns full marks for that part (markschemes say
@@ -103,26 +147,26 @@ Marking rules (one policy, online and on paper):
     wrong but uses their wrong value correctly in (b), (b) is marked correct
     and says so. This also works from a drawn graph (the lift question's
     distance is accepted if it matches the area under the student's graph).
-  - Follow-through also uses accepted rounded answers: a student who writes
-    0.33 for 0.325 in (a) and then uses 0.33 in (b) gets (b) marked correct.
+    See section 4 for how the earlier answers are combined.
   - ECF credit is re-checked whenever an earlier answer changes or is
-    cleared: correcting (a), or resetting a drawn graph, removes credit that
-    later parts had earned from the old answer.
+    cleared. In an assignment, a part that is already locked (correct, or out
+    of tries) keeps its mark.
   - ECF never uses inadmissible inputs (e.g. negative velocity components
     where the question defines them as positive) and never credits a
     physically impossible calculation (e.g. a negative time of flight).
   - Feedback hints: wrong sign, or out by a power of ten (units/prefixes).
   - Unreadable input (including a wrong unit typed after the number) is
-    reported as unreadable, not as wrong, and does not use up an attempt.
+    reported as unreadable, not as wrong, and does not use up a try.
 
-The 7 IB Physics SL · A.1 Kinematics questions:
+The 7 IB Physics SL · A.1 Kinematics questions (29 marks):
   1. Uniformly accelerating train           calculation (suvat), 4 marks
-  2. Reaction time and stopping distance    calculation + explain, 6 marks
+  2. Reaction time and stopping distance    calculation + multiple choice, 5 marks
   3. Velocity–time graph for a cyclist      graph reading + calculation, 5 marks
   4. Drawing a v–t graph for a lift         graph drawing + area, 5 marks
   5. Speed of a falling object              multiple choice, 1 mark
   6. Projectile at the highest point        multiple choice (table), 1 mark
-  7. Ball kicked across level ground        long response, 9 marks
+  7. Ball kicked across level ground        multi-part: components, height,
+                                            range, air resistance (table), 8 marks
 All are original questions written in IB style (command terms, "[2]" marks,
 IB units such as m s⁻¹, markschemes with ✓ per marking point, ECF/OWTTE
 notes). No past-paper questions are copied.
@@ -154,11 +198,13 @@ The system then re-runs the whole calculation many times:
   - by every method the worked solution shows. For example, the train's time
     can come from t = (v − u)/a or from distance ÷ average speed, each with
     its own rounding. Each method keeps its own range and an answer must fit
-    one of them: the gap between two methods is never accepted.
-  For each method, the smallest and largest results form the range. A small extra allowance of
-  0.5% of the exact answer is added to each end, to cover calculator and
-  rounding quirks that a single path cannot capture. Rounding is done the way
-  a person does it (halves round up), not the way binary floating point does.
+    one of them: the gap between two methods is never accepted. (The tests
+    check that every method gives the same answer at full precision.)
+  For each method, the smallest and largest results form the range. A small
+  extra allowance of 0.5% of the exact answer is added to each end, to cover
+  calculator and rounding quirks that a single path cannot capture. Rounding
+  is done the way a person does it (halves round up), not the way binary
+  floating point does.
 
 For a one-step answer, nothing is carried, so the range is just the exact
 answer ± 0.5%. For multi-step answers the range widens by exactly as much as
@@ -174,30 +220,49 @@ what they typed. In practice:
   - typing more digits is never penalized, provided the value is inside the
     range;
   - a 2 s.f. answer is accepted if it is the correct 2 s.f. rounding of some
-    value in the range;
+    value in the range (so 9.6 rounded to 10 is fine);
   - a 1 s.f. answer is read as 2 s.f. ("0.5" is treated as "0.50"), so very
     rough answers are not accepted;
   - whole numbers ending in zero ("200") get the benefit of the doubt (they
     could mean 1, 2 or 3 s.f.).
 
-Accepted input formats: 13.8, -0.48, .5, 3.0e8, 3.0x10^8, 3.0x10^(8),
-3.0x10^{8}, 3.0*10^8, 3.0·10^8, 3.0×10⁸ and a decimal comma (1,5). A unit may
-be typed after the number only if it is the expected one, in any common form
-("4 m/s", "4 m s^-1", "4 m s⁻¹", "4 m·s⁻¹"); any other unit ("13.8 km" when
-metres are expected) is refused with a message, so a wrong unit is never
-silently ignored. Malformed entries such as "0.48e", "0.48x2", "0.48m+999" or
-"0.48x10^(0}" are refused, as are the ambiguous "1,500" and fractions such as
-1/3, each with a message explaining why.
+Accepted input formats: 13.8, -0.48, .5, 3.0e8, 3.0E8, 3.0x10^8, 3.0X10^8,
+3.0x10^(8), 3.0x10^{8}, 3.0*10^8, 3.0*10**8, 3.0·10^8, 3.0×10⁸ and a decimal
+comma (1,5). A unit may be typed after the number only if it is the expected
+one, in any common form ("4 m/s", "4 m s^-1", "4 m s⁻¹", "4 m·s⁻¹"); any other
+unit ("13.8 km" when metres are expected) is refused with a message, so a
+wrong unit is never silently ignored. Malformed entries such as "0.48e",
+"0.48x2", "0.48m+999" or "0.48x10^(0}" are refused, as are the ambiguous
+"1,500" and fractions such as 1/3, each with a message explaining why.
 
-ERROR CARRIED FORWARD (ECF)
+ZERO ANSWERS AND SCIENTIFIC NOTATION
+  - An answer of zero (e.g. the displacement of a ball caught where it was
+    thrown) is accepted as 0, 0.0, -0, and any value inside its range (with
+    rounded working the range can include small values such as 0.58 m).
+    If a zero answer is computed as a difference that cancels, wrap it in
+    snapZero(value, ...terms) so it is a clean 0, not 1.1 × 10⁻¹⁵; the tests
+    flag answers that look like such left-over rounding noise.
+  - Given data can be shown in scientific notation with sci: <s.f.> in the
+    parameter (e.g. 3.84 × 10⁸ m); the tests check that every value is shown
+    exactly as it is used. Answers are shown in scientific notation outside
+    0.001 to 99 999, and the tests check that each answer is accepted when
+    typed in every format listed above.
 
-When a later part is marked wrong, the system re-runs the whole calculation
-(with all the rounding options above) using the student's own answers to the
-earlier parts in place of the carried values: wrong answers (error carried
-forward) and also accepted rounded ones (0.33 written for 0.325). If the later
-answer then fits one of the methods that use those answers, it is marked
-correct, with the message "Correct, using your answer to (a) (error carried
-forward)" or "Correct, following on from your rounded answer to (a)".
+ERROR CARRIED FORWARD (ECF), METHOD BY METHOD
+When a later part is marked wrong, the system re-runs the calculation (with
+all the rounding options above) using the student's own earlier answers in
+place of the carried values: wrong answers (error carried forward) and also
+accepted rounded ones (0.33 written for 0.325). It tries each earlier answer
+on its own first, then in pairs, and so on, because a student may use their
+own value from (a) but an unrounded value for (b). Example, stopping distance
+(base numbers: s₁ = 14 m, s₂ = 33.3 m, total 47.3 m): a student answers
+(a) 10 (wrong), (b) 33 (right, rounded) and (c) 43.3 (= 10 + 33.3): (c) is
+marked correct by ECF from (a).
+  - The message names only the earlier parts the method actually uses, e.g.
+    "Correct, using your answer to (a)(ii) (error carried forward)" or
+    "Correct, following on from your rounded answer to (a)". An earlier part
+    the method does not use (a wrong horizontal component when finding the
+    maximum height) earns nothing and is not mentioned.
   - Earlier answers that break the question's sign conventions (a negative
     component the question defines as positive) are never carried forward.
   - Each question can state its physical assumptions in compute() with
@@ -207,7 +272,7 @@ forward)" or "Correct, following on from your rounded answer to (a)".
     area under a graph the student drew. A graph left at, or moved back to,
     its starting layout counts as no answer, and "Reset points" clears it.
   - Later parts are re-marked automatically whenever an earlier answer is
-    edited or cleared.
+    edited or cleared (except parts already locked in an assignment).
 
 WORKED SOLUTIONS AND ROUNDING
 Worked solutions write intermediate values with one guard digit (4 s.f.)
@@ -215,7 +280,8 @@ unless they are exact (0.48, 104.5), and each displayed answer is the one that
 working produces, so every displayed step adds up. In rare cases this differs
 from the full-precision answer by one in the last digit; both are accepted.
 The tests check, for every allowed set of numbers, that each worked
-solution's own displayed answer is marked correct.
+solution's own displayed answer is marked correct, and that displayed sums
+and products (14 + 33.33 = 47.3) add up.
 
 WORKED EXAMPLES (base versions)
 
@@ -231,7 +297,7 @@ WORKED EXAMPLES (base versions)
       Accepted: 6.83, 6.830, 6.82, 6.8, 7.3, 7 (read as 7.0), 7.4
       Rejected: 6.78, 6.7, 7.5
     Rounding 11.57 to 12 and then squaring is what widens this range. See
-    section 9 for the stricter setting, which gives 6.789 to 6.899 here.
+    section 10 for the stricter setting, which gives 6.789 to 6.899 here.
 
   ECF: a student who answers 0.5 for train (a) and then 32 s for (b), since
   (20 − 4.0)/0.5 = 32, gets (a) wrong and (b) correct by ECF.
@@ -244,7 +310,6 @@ OTHER ANSWER TYPES
                     else sits between them. Points are matched to vertices in
                     any order, so one misplaced point only costs the segments
                     it touches (e.g. 2/3 for a wrong starting point).
-  Written answers   saved and shown as "submitted"; the teacher marks them.
 
 SETTINGS (src/config/site.ts)
   TOLERANCE.carrySigFigs  [3, 2]   rounding levels tried for carried values
@@ -260,20 +325,78 @@ significant figures"). Because of the second stage, an answer such as 7.4
 
 
 -------------------------------------------------------------------------------
-5. HOW THE PER-STUDENT NUMBERS WORK
+5. ASSIGNMENTS: TRIES, DUE DATES, ANSWER KEYS AND GRADES
+-------------------------------------------------------------------------------
+
+Each assignment has its own settings (builder step 2, or "Edit settings" on a
+saved assignment). Defaults are in ASSIGNMENT_DEFAULTS in src/config/site.ts.
+
+TRIES (per question part)
+  - Unlimited, or 1–10 tries per part (default 3). A try is used each time a
+    part is checked; unreadable input does not use one.
+  - Multiple choice gets half its number of choices, rounded up: 2 tries for
+    4 choices, 3 for 5 (half + 1 for an odd number is the same thing), or the
+    assignment's limit if that is lower (an assignment with 1 try gives every
+    part 1 try).
+  - A part locks when it is correct or out of tries. The question preview in
+    the bank always allows unlimited tries.
+
+DUE DATE AND TIME
+  - Optional. Entered in the teacher's time zone; shown to each student in
+    theirs.
+  - Students on the assignment page see a countdown. A pop-up warns them 5
+    minutes and again 1 minute before the due time ("Your time to submit is
+    4:59 (minutes:seconds) away"), with a live countdown. When the time runs
+    out they are taken back to their assignment list, with a "Time is up"
+    message.
+  - After the due time nothing can be checked or changed (answers can still
+    be read). Only answers checked before the due time count.
+  - Phase 1 runs in the browser, so the deadline uses the device's clock.
+    Phase 3 moves checking to the server, which uses the server's clock.
+
+ANSWER KEY FOR STUDENTS
+  Hidden, Open now, or Open after the due date. The key is the worked
+  solution and markscheme for every part, with that student's own numbers.
+
+GRADES
+  Two grades are shown for each question and for the whole assignment:
+  - IB marks: the marks the student's latest checked answers would earn on a
+    paper (e.g. 12/29). No penalty for extra tries.
+  - Class grade (percent): for each part, a correct answer earns 100% minus
+    the penalty for each extra try (default 7 percentage points: 100% on the
+    1st try, 93% on the 2nd, 86% on the 3rd). A partly correct graph earns its
+    fraction minus the same penalty. A part that is still wrong (including
+    when it is out of tries) earns the "lowest score" (default 0%), and no
+    attempted part drops below it. A part never attempted earns 0%. Parts are
+    weighted by their marks.
+  Grades are worked out from the saved marks only (questions are not rebuilt),
+  which keeps the assignment list fast and is how the Phase 3 gradebook will
+  read them.
+
+
+-------------------------------------------------------------------------------
+6. HOW THE PER-STUDENT NUMBERS WORK
 -------------------------------------------------------------------------------
 
 Each student's numbers come from a "seed" made of three things:
     student (class code + username)  ::  assignment  ::  question
 e.g. "PHYS1:jordan::hw-abc123::ibp-a1-train-acceleration". The seed drives a
 deterministic random-number generator (cyrb128 hash + sfc32), so:
-  - the same student always gets the same numbers for that assignment, on
-    any device, at every login. Nothing needs to be stored to achieve this;
+  - the same student always gets the same numbers for that assignment, at
+    every login;
   - different students get different numbers;
   - the same question in two different assignments gets different numbers
     (useful for retakes);
   - worked solutions, markschemes and the printed "student version" PDF use
     exactly the same numbers.
+The numbers are also pinned: the first time a student opens a question, the
+numbers they got are saved, so a later change to the question's ranges can
+never change numbers a student has already seen. (Phase 1 saves them in the
+browser; Phase 3 saves them in the database.)
+Each assignment also remembers the version of every question it uses. When a
+question that has been assigned is revised, the old version is kept in
+src/content/archive/ (section 8), so existing assignments keep the questions,
+answers and saved work they were made with.
 Given data are drawn from ranges with fixed steps (for example 2.0 to 8.0 in
 steps of 0.5), so the numbers printed are exactly the numbers used. Templates
 can add constraints (e.g. final speed at least 8 m s⁻¹ more than initial
@@ -282,22 +405,24 @@ for everyone; it is what printed worksheets use unless you pick a student.
 
 
 -------------------------------------------------------------------------------
-6. FILE-BY-FILE GUIDE
+7. FILE-BY-FILE GUIDE
 -------------------------------------------------------------------------------
 
 Top level
   README.md                 Short overview and quick start.
   PROJECT_GUIDE.txt         This file.
+  FUTURE_FEATURES.md        The "eventually" list: features planned for later.
   package.json              Project name, commands (dev/test/build), libraries.
   package-lock.json         Exact library versions (keeps installs repeatable).
   index.html                The single HTML page the app runs in.
   vite.config.ts            Build settings (relative paths so the site works
-                            from any folder or GitHub Pages) and test settings.
+                            from any folder or host) and test settings.
   tsconfig.json             TypeScript settings (strict type checking).
   .gitignore                Keeps node_modules/ and dist/ out of git.
   .nvmrc                    Node version (22) for tools that read it.
   public/favicon.svg        The Rice Education logo (browser tab icon).
-  .github/workflows/ci.yml  On every push: install, typecheck, test, build.
+  .github/workflows/ci.yml  On every push and pull request: install, typecheck,
+                            test, build.
   .github/workflows/deploy-pages.yml
                             Publishes the site to GitHub Pages. Runs only when
                             started by hand (Actions tab → "Deploy to GitHub
@@ -306,9 +431,9 @@ Top level
 
 src/config
   site.ts                   Organization and product names, answer tolerance
-                            settings, and physical constants by exam style
-                            (IB/AP/General). The one place to change branding or
-                            marking strictness.
+                            settings, assignment defaults (tries, penalty,
+                            lowest score, warning times), and physical
+                            constants by exam style (IB/AP/General).
 
 src/engine: the question engine (no user interface code)
   types.ts                  Definitions of a question template (what authors
@@ -318,23 +443,29 @@ src/engine: the question engine (no user interface code)
                             (catches misspelled parameter or answer names).
   rng.ts                    Seeded random numbers (cyrb128 hash + sfc32
                             generator) and a deterministic shuffle.
-  params.ts                 Randomized given data: ranges with steps, lists of
-                            choices, base values, constraints, display strings.
-  calc.ts                   The calculation context (carry() and g) and the
-                            rounding-tolerance engine (section 4, stage 1),
-                            including alternative methods ("t__avg"), the
-                            overrides used for ECF, and the "display path"
-                            that worked solutions are built from.
+  params.ts                 Randomized given data: ranges with steps (never past
+                            max), lists of choices, base values, constraints,
+                            display strings (decimal places or scientific
+                            notation), and the range-alignment check.
+  calc.ts                   The calculation context (carry(), assume() and g)
+                            and the rounding-tolerance engine (section 4,
+                            stage 1), including alternative methods
+                            ("t__avg"), the overrides used for ECF, and the
+                            "display path" that worked solutions are built from.
   numbers.ts                Reads typed numbers (formats, significant figures,
                             typed units), rounds like a person (halves up), and
                             formats numbers: fmt (fixed s.f.), fmtW (working
                             values with a guard digit), fmtA (final answers);
-                            plus trigonometry in degrees.
+                            snapZero for answers that cancel to zero; plus
+                            trigonometry in degrees.
   grading.ts                Marks each part: numeric (stage 2, unit check,
-                            positive-only quantities, ECF, hints), multiple
-                            choice, graphs (segment by segment), written
-                            answers. Re-marks later parts when an earlier answer
-                            changes. Also per-question score summaries.
+                            positive-only quantities, method-by-method ECF,
+                            hints), multiple choice, graphs (segment by
+                            segment). Re-marks later parts when an earlier
+                            answer changes. Also per-question mark summaries.
+  gradebook.ts              Tries per part (multiple choice: half the choices),
+                            class grade (penalty per extra try, lowest score)
+                            and IB marks, per question and per assignment.
   instance.ts               Builds one student's version of a question: draws
                             the numbers (or takes given ones), runs the
                             tolerance engine, shuffles options, sets up graph
@@ -347,62 +478,91 @@ src/engine: the question engine (no user interface code)
                             and formats **bold**. Shared by the site and tests.
 
 src/content: questions and the syllabus they are tagged with
-  catalog.ts                Courses, themes, topics and standards. IB Physics SL
-                            with all SL topics; A.1 standards paraphrase the IB
-                            guide's understandings (numbering A.1.1–A.1.7 is ours).
-                            Also the instructions printed at the top of PDFs.
-  registry.ts               The list of every question; lookups by id, topic,
-                            course. Add new topic folders here.
+  catalog.ts                Courses, themes, topics and standards: IB Physics SL
+                            and HL (HL includes SL, plus the HL-only topics).
+                            A.1 standards paraphrase the IB guide's
+                            understandings (numbering A.1.1–A.1.7 is ours). Also
+                            the instructions printed at the top of PDFs.
+  registry.ts               The list of every question; lookups by id, topic and
+                            course (HL-level questions only in HL); finds the
+                            exact version an assignment was made with.
+  archive/index.ts          Earlier versions of questions that were revised after
+                            being assigned (empty so far; see section 8).
   ib-physics/a1-kinematics/
     index.ts                The A.1 questions, in display order.
-    train-acceleration.ts   Q1: v² = u² + 2as and v = u + at, with ECF.
-    stopping-distance.ts    Q2: thinking and braking distance, plus an
-                            "explain" part (teacher-marked).
+    train-acceleration.ts   Q1: v² = u² + 2as and v = u + at (two methods for
+                            the time), with ECF.
+    stopping-distance.ts    Q2: thinking and braking distance; (d) multiple
+                            choice on why the distance does not double.
     vt-graph-cyclist.ts     Q3: randomized v–t graph; gradient, area, average speed.
     lift-vt-draw.ts         Q4: students draw a v–t graph by dragging points; then area.
     free-fall-mcq.ts        Q5: Paper 1A, v = √(2gh), distractors from common slips.
     projectile-top-mcq.ts   Q6: Paper 1A "which row", velocity and acceleration
                             at the top of a projectile's path.
-    projectile-kick.ts      Q7: Paper 2 long response: components, maximum
-                            height, range, and the effect of air resistance.
+    projectile-kick.ts      Q7: Paper 2 multi-part: components, maximum height,
+                            range, and (multiple choice) the effect of air
+                            resistance.
 
 src/components: reusable pieces of the interface
   Tex.tsx                   Renders text with KaTeX maths (cached).
   Graph.tsx                 SVG graph paper: axes, gridlines, labels, lines,
-                            and draggable snapping points for graph answers.
+                            draggable snapping points for graph answers, and a
+                            read-only view of a locked answer.
   QuestionView.tsx          A whole interactive question: stem, figure, parts,
-                            answer inputs, Check buttons, feedback, worked
-                            solutions (explanation beside each line of maths)
-                            and IB-style markschemes.
+                            answer inputs, Check buttons, feedback, tries left,
+                            locking, class grade and IB marks (in assignments),
+                            worked solutions and IB-style markschemes.
+  StandardPicker.tsx        The standards ovals (green when chosen) with "Select
+                            all" / "Unselect all" and the "Choose at least one
+                            standard" prompt. Used by the bank and the builder.
+  SettingsForm.tsx          An assignment's settings: tries, due date, answer
+                            key, class-grade rules (with a worked example).
+  Modal.tsx                 Pop-ups (the due-date warnings) and dialogs (edit
+                            settings).
+  time.ts                   The ticking clock, countdowns ("4:07"), due-date
+                            formatting, and date-input conversion.
   Layout.tsx                Logo, header with navigation, footer, page headings.
 
 src/pages: one file per screen
   HomePage.tsx              Landing page.
-  BankPage.tsx              Question bank (topic sidebar, filters, cards).
+  BankPage.tsx              Question bank (course switch, topic sidebar,
+                            standards picker, filters, cards).
   PreviewPage.tsx           Single-question preview with version/solution
                             controls and "Teacher details".
-  BuilderPage.tsx           Assignment builder, print options, saved assignments.
+  BuilderPage.tsx           Assignment builder: course, topic, standards,
+                            questions, settings, print options, saved
+                            assignments (edit settings, print key, delete).
                             Keeps an unsaved draft when you visit other pages.
   PrintPage.tsx             Printable paper and answer key ("Download PDF"):
                             instructions, working space for calculations,
-                            ruled writing lines, blank graph grids.
-  StudentPage.tsx           Student sign-in, assignment list, assignment page.
+                            blank graph grids; a saved assignment prints with
+                            the question versions and course it was made with.
+  StudentPage.tsx           Student sign-in, assignment list (due dates,
+                            countdowns, grades), assignment page (tries,
+                            countdown, warnings, return to the list at the due
+                            time, read-only afterwards, answer key).
 
 src/store: saved data (browser storage now, Supabase in Phase 3)
-  storage.ts                Safe wrapper around browser localStorage, with
-                            change notifications (also across tabs) and a
-                            one-time check that storage is allowed. Everything
-                            is stored under "rice-hw:v2"; work saved by earlier
-                            builds was reset when the marking rules changed.
-  progress.ts               Each student's saved responses, results and
-                            attempts, per question version (a revised question
-                            starts fresh instead of showing stale marks).
-  assignments.ts            Saved assignments, the built-in sample assignment,
-                            and the "release solutions" switch.
+  storage.ts                Safe wrapper around browser localStorage under
+                            "rice-hw:", with change notifications that say
+                            which key changed (also across tabs) and a one-time
+                            check that storage is allowed.
+  migrate.ts                One-time carry-over of assignments, settings, the
+                            sign-in and the builder draft saved by earlier
+                            builds (cached marks are not carried over).
+  assignments.ts            Saved assignments (question versions and settings),
+                            the built-in sample assignment, due-date and
+                            answer-key checks.
+  progress.ts               Each student's saved responses, latest results,
+                            tries and grading marks per question version, and
+                            the pinned numbers.
+  studentData.ts            A student's own version of a question (pinned
+                            numbers) and their grades for an assignment.
   session.ts                The signed-in student (class code + username).
 
 src/ (other)
-  main.tsx                  Starts the app and loads the stylesheets.
+  main.tsx                  Starts the app (after the storage migration) and
+                            loads the stylesheets.
   App.tsx                   Chooses which page to show for each address.
   router.ts                 Hash-based addresses (#/bank, #/q/<id>, ...), which
                             work on any static host.
@@ -413,77 +573,115 @@ src/styles
   print.css                 The white "paper" layout and print/PDF rules.
 
 tests (run with: npm test)
-  templates.test.ts         For EVERY question: valid metadata, a valid base
-                            version, and 150 random students. Checks that answers
-                            are finite and accepted when typed correctly, that
-                            answers 10% off are rejected, that MCQs have exactly
-                            one correct and no duplicate options, that graph
-                            points sit on the grid, that all LaTeX renders, and
-                            that numbers are deterministic and varied.
+  templates.test.ts         For EVERY question: valid metadata (topic, standards
+                            in that topic, HL rules, computer-marked parts only,
+                            ranges that end exactly on max, given data shown
+                            exactly as used), a valid base version, and 150
+                            random students. Checks that answers are accepted
+                            when typed correctly in every format (including
+                            scientific notation), that answers 10% off are
+                            rejected, zero answers, MCQs with exactly one
+                            correct and no duplicate options, graph points on
+                            the grid, LaTeX that renders, and numbers that are
+                            deterministic and varied.
   sweep.test.ts             For EVERY question and EVERY allowed set of numbers
-                            (about 19,000): valid answers and options, and each
-                            worked solution's own displayed answer is accepted.
+                            (a seeded sample of 3,000 plus the extremes for
+                            grids over 20,000, without building the whole
+                            grid): valid answers and options, alternative
+                            methods that agree, no rounding noise around zero,
+                            displayed arithmetic that adds up, and each worked
+                            solution's own displayed answer accepted.
   tolerance.test.ts         The acceptance rule, typed units, malformed input,
                             rounding ranges, constants, alternative methods,
                             ECF (including re-marking and negative values) and
                             segment-by-segment graph marking.
+  review3.test.ts           Method-by-method ECF, tries, class grade and IB
+                            marks, courses (SL/HL), question versions, zero
+                            answers and scientific notation.
+  store.test.ts             Saved data: migration from earlier builds,
+                            assignment settings, failed saves, damaged data,
+                            due dates, answer keys, pinned numbers and grades.
   numbers.test.ts           Reading and formatting numbers; random generator.
+  helpers.ts                Shared test tools: typed forms of numbers, and the
+                            sweep over combinations of given data.
 
 
 -------------------------------------------------------------------------------
-7. HOW TO ADD A QUESTION
+8. HOW TO ADD (OR REVISE) A QUESTION
 -------------------------------------------------------------------------------
 
+Adding a question
   1. Copy a similar file in src/content/ib-physics/a1-kinematics/ and give it
      a new, permanent id (never change an id after students have used it).
-  2. Define params (the given data): { min, max, step, base } for each value.
-     Add a constraint if some combinations make no sense.
-  3. Write compute(p, c): calculate every answer from p. Wrap any value a
+  2. Tag it: topic, one or more standards from that topic (these drive the
+     standards picker now and the per-standard reports and retakes later),
+     and level: 'HL' if it is HL-only (required in an HL-only topic).
+  3. Define params (the given data): { min, max, step, base } for each value,
+     with max reached in whole steps from min. Add dp to fix decimal places,
+     or sci: <s.f.> for scientific notation. Add a constraint if some
+     combinations make no sense.
+  4. Write compute(p, c): calculate every answer from p. Wrap any value a
      student would write down and reuse in c.carry(value, 'name'), using the
-     name of the earlier part's answer to enable ECF. Use c.g for g. If the
-     solution shows a second method, return it as "<answer>__<name>" (e.g.
-     t__avg) so its rounding is accepted too.
-  4. Write the stem and parts: prompt, marks, response type, worked solution
-     steps ({ text, math }) and markscheme lines ({ mark } or { note }).
-     State the sign convention ("take upwards as positive"). Show values that
-     are substituted into later steps with fmtW() and final answers with
-     fmtA(); the solution then displays exactly what its working gives.
-     Mark times, distances and speeds with positive: true. For ECF from a
-     drawn graph or other non-numeric answer, add followThrough.
-  5. Add the question to the topic's index.ts, then run: npm test
-     The tests will report LaTeX errors, impossible numbers, ranges that are
-     too wide, duplicate MCQ options, graph points off the grid, and any
-     worked solution whose own answer would be marked wrong.
-  6. Look at it in the browser: npm run dev, then Question bank → Preview,
+     name of the earlier part's answer to enable ECF. Use c.g for g. State
+     assumptions with c.assume(...). If the solution shows a second method,
+     return it as "<answer>__<name>" (e.g. t__avg) so its rounding is
+     accepted too; it must give the same answer at full precision. For an
+     answer that should be exactly zero, use snapZero().
+  5. Write the stem and parts: prompt, marks, response type (numeric, multiple
+     choice or graph; no written answers for now), worked solution steps
+     ({ text, math }) and markscheme lines ({ mark } or { note }). State the
+     sign convention ("take upwards as positive"). Show values that are
+     substituted into later steps with fmtW() and final answers with fmtA();
+     the solution then displays exactly what its working gives. Mark times,
+     distances and speeds with positive: true. For ECF from a drawn graph or
+     other non-numeric answer, add followThrough.
+  6. Add the question to the topic's index.ts, then run: npm test
+     The tests report LaTeX errors, impossible numbers, ranges that are too
+     wide or do not end on max, given data shown differently from the value
+     used, methods that disagree, rounding noise around zero, duplicate MCQ
+     options, graph points off the grid, written-answer parts, and any worked
+     solution whose own answer would be marked wrong.
+  7. Look at it in the browser: npm run dev, then Question bank → Preview,
      and try a few students' versions with solutions turned on.
 
+Revising a question that has already been assigned
+  Anything that changes its numbers or answers (ranges, formulas, parts):
+  1. Copy the current file into src/content/archive/, change its imports from
+     '../../../engine/...' to '../../engine/...', and add it to the list in
+     src/content/archive/index.ts.
+  2. Edit the original and increase its version.
+  Assignments made earlier keep the archived version; new assignments get the
+  new one. (Wording-only fixes that change no numbers or answers can be made
+  in place without a new version.)
+
 
 -------------------------------------------------------------------------------
-8. NEXT STEPS
+9. NEXT STEPS
 -------------------------------------------------------------------------------
 
-Phase 2: content (IB Physics SL first)
-  [ ] A.1 Kinematics: 3+ more questions to cover the rest of the topic: a
-      horizontal (or downward) launch from a cliff, terminal speed / the
-      effect of fluid resistance, and a displacement–time graph with
-      instantaneous velocity from a tangent (distance vs displacement could be
-      a fourth).
-  [ ] The remaining SL topics, about 10 questions each (~180 more): A.2, A.3,
-      B.1, B.2, B.3, B.5, C.1–C.5, D.1–D.3, E.1, E.3–E.5.
-      Each batch: write, npm test, review in the browser, then commit.
+Next: content, on its own branch and pull request
+  [ ] A.1 Kinematics: more questions to cover the whole topic: a horizontal
+      (or downward) launch from a cliff, terminal speed / the effect of fluid
+      resistance, a displacement–time graph with instantaneous velocity from a
+      tangent, and distance vs displacement.
+  [ ] A.2 Forces and momentum, SL and HL.
+  [ ] HL: add the HL standards to the catalog and HL questions (level: 'HL').
+  [ ] The batch should include (as the last review asked) an answer of zero,
+      an answer in scientific notation, and a multi-part question with two
+      methods, to exercise those parts of the engine with real content.
+  Then the remaining SL topics, about 10 questions each: A.3, B.1, B.2, B.3,
+  B.5, C.1–C.5, D.1–D.3, E.1, E.3–E.5, and the HL-only topics. Each batch:
+  write, npm test, review in the browser, then merge.
   [ ] Physical constants beyond g (c, e, h, G, k, N_A, ...) in site.ts.
   [ ] More graph tools as later topics need them: data plotting with a line of
       best fit and gradient, sketching curves (e.g. SHM).
-  [ ] Then IB Physics HL, AP Physics 1/2/C, general physics, and the maths
-      courses (AP Precalculus, AP Calculus AB/BC, IB Maths, general). Maths
-      will need answers that are expressions (e.g. 2x + 3), not just numbers;
-      plan a symbolic answer checker for that.
 
 Before any students use it (do not share the link until then)
   Today the whole question bank, every answer formula, every worked solution
   and every markscheme is sent to every visitor's browser, and the repository
   is public. A student with developer tools, or the GitHub link, could read
-  them, and the teacher pages have no login. So:
+  them, and the teacher pages have no login. Tries and due dates are also
+  enforced only by the browser. So:
   [ ] Make the GitHub repository private (Settings → General → Danger zone).
       Reviewers such as Codex then need access to it.
   [ ] Teacher login: the bank, builder, preview and answer keys open only for
@@ -492,30 +690,26 @@ Before any students use it (do not share the link until then)
       marking into Supabase Edge Functions (free tier; they run the same
       TypeScript as src/engine). A student's browser then receives only the
       text of their own questions with their own numbers; "Check" asks the
-      server and gets back only right/wrong and a hint; worked solutions are
-      sent only after the teacher releases them, and only that student's
-      version. (This stops answers being read from the site. It cannot stop
-      students sharing answers, but different numbers per student limit that.)
+      server, which counts tries, refuses checks after the due time (server
+      clock), and returns only right/wrong and a hint; answer keys are sent
+      only when they open, and only that student's version. (This stops
+      answers being read from the site. It cannot stop students sharing
+      answers, but different numbers per student limit that.)
 
 Phase 3: accounts and the gradebook (Supabase, free tier), built around the above
   [ ] Create a free Supabase project and put its URL and public "anon" key in
       the hosting settings.
   [ ] Database tables: teachers, classes (with class codes), students,
-      assignments (questions, due date, attempts allowed, solution release),
-      and responses (one row per student × question × part, with attempts and
-      timestamps).
+      assignments (question versions and settings, as today), pinned numbers,
+      and responses (one row per student × question × part, with tries,
+      marks and timestamps).
   [ ] Student accounts: class code + username + password, without needing
       school IT. Supabase Auth needs an email, so generate a private one
       behind the scenes (e.g. jordan@phys1.example.invalid) and add a "reset
       student password" button for the teacher.
-  [ ] Save each student's numbers when they first open a question, so later
-      edits to a template never change numbers a student has already seen.
-      (Phase 1 already keys saved work by question version for the same reason.)
   [ ] Row-level security, so students can only read and write their own work.
-  [ ] Teacher gradebook: by class, by assignment, by student, with live
-      progress as students work, and teacher marking of written answers.
-  [ ] Assignment settings: due dates, number of attempts, when feedback is
-      shown.
+  [ ] Teacher gradebook: by class, by assignment, by student and by standard,
+      with live progress as students work.
 
 Deployment (school wifi blocks GitHub, so do not rely on GitHub Pages)
   The site loads nothing from GitHub at run time; GitHub only stores the code.
@@ -525,27 +719,25 @@ Deployment (school wifi blocks GitHub, so do not rely on GitHub Pages)
       and supabase.co all open.
   [ ] Host on Cloudflare Pages (free, yoursite.pages.dev) or Netlify (free,
       yoursite.netlify.app). Both connect to the GitHub repository (private
-      is fine) and rebuild the site on their own servers after every push.
+      is fine), rebuild the site from main after every merge, and give every
+      pull request its own preview address (section 2).
       Build command: npm run build. Output folder: dist.
   [ ] Optional: a custom domain (about $10–15 a year) is less likely to be
       caught by a filter category.
   [ ] The GitHub Pages workflow (.github/workflows/deploy-pages.yml) stays as
-      an option for home use; it needs the work merged into main, Settings →
-      Pages → Source "GitHub Actions", and a public repository on the free plan.
+      an option for home use; it needs Settings → Pages → Source "GitHub
+      Actions", and a public repository on the free plan.
   [ ] Before real student data is stored (Phase 3), check your school's
       student-data privacy rules. Collect as little as possible: class code,
       username, and work.
 
-Later
-  [ ] Optional AI marking of written answers against the markscheme (left out
-      for now). Estimated cost for 150 students: about $2–7 a month with
-      Claude Haiku 5.5, or $33–130 with Sonnet 5.5.
-  [ ] Accessibility review (screen readers, keyboard-only use, contrast) and a
-      light theme option.
+Later: see FUTURE_FEATURES.md (retakes weighted to missed standards, links to
+your simulations, mixed IB/AP/TEKS/college courses, per-standard charts,
+written answers with optional AI marking, and more).
 
 
 -------------------------------------------------------------------------------
-9. DECISIONS TO REVIEW
+10. DECISIONS TO REVIEW
 -------------------------------------------------------------------------------
 
   - How lenient the rounding allowance is (kept lenient on purpose). Students
@@ -555,6 +747,19 @@ Later
     −9%). For a stricter "keep at least 3 s.f. in working" policy, set
     TOLERANCE.carrySigFigs to [3] in src/config/site.ts; the same example then
     accepts 6.789 to 6.899 m (6.8 and 6.9 accepted, 7.0 and above rejected).
+  - Grades: the 7-point penalty per extra try applies to the class grade; the
+    IB grade is the marks of the latest answers with no penalty. Tries are
+    counted per part (not per question). The lowest score applies to attempted
+    parts; a part never attempted counts 0%.
+  - Multiple choice tries: half the choices, rounded up, capped by the
+    assignment's limit (so "1 try" means 1 try everywhere).
+  - In an assignment, a part that is correct or out of tries is locked and
+    keeps its mark, even if an earlier answer it followed on from is changed
+    later.
+  - At the due time, answers that were typed but not checked do not count
+    (the warnings tell students to check their answers).
+  - The question bank, like the builder, shows no questions until at least
+    one standard is chosen.
   - Marking policy: a correct final answer earns full marks, online and in
     the printed markschemes ("Award [2] for a bald correct answer"); on paper,
     correct working earns marks when the answer is wrong. For stricter hand

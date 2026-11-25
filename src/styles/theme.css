@@ -131,6 +131,8 @@ button {
 
 input[type='text'],
 input[type='search'],
+input[type='number'],
+input[type='datetime-local'],
 input:not([type]),
 select,
 textarea {

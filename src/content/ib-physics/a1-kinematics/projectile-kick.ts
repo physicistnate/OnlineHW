@@ -4,14 +4,14 @@ import { Q, knowns, tex, unitTex as u } from '../../../engine/units';
 
 export default defineQuestion({
   id: 'ibp-a1-projectile-kick',
-  version: 2,
+  version: 3,
   title: 'Ball kicked across level ground',
   courses: ['ib-physics-sl'],
   topic: 'ibp.A.1',
   standards: ['ibp.A.1.6', 'ibp.A.1.7'],
   style: 'IB',
   paper: 'Paper 2 style',
-  types: ['long-response', 'calculation', 'short-answer'],
+  types: ['long-response', 'calculation', 'multiple-choice'],
   difficulty: 3,
 
   params: {
@@ -119,10 +119,19 @@ export default defineQuestion({
     },
     {
       label: '(d)',
-      marks: 2,
+      marks: 1,
       prompt: () =>
-        'In practice, air resistance acting on the ball is not negligible. Explain how air resistance affects the maximum height reached and the horizontal distance travelled by the ball.',
-      response: { kind: 'text', lines: 5 },
+        'In practice, air resistance acting on the ball is not negligible. Which row gives the effect of air resistance on the maximum height reached and on the horizontal distance travelled?',
+      response: {
+        kind: 'mcq',
+        columns: ['Maximum height', 'Horizontal distance'],
+        options: () => [
+          { cells: ['smaller', 'smaller'], correct: true },
+          { cells: ['smaller', 'unchanged'] },
+          { cells: ['unchanged', 'smaller'] },
+          { cells: ['larger', 'smaller'] },
+        ],
+      },
       solution: () => [
         {
           text: 'Air resistance (drag) acts opposite to the velocity of the ball, and it increases with speed.',
@@ -138,9 +147,7 @@ export default defineQuestion({
         },
       ],
       markscheme: () => [
-        { mark: 'Maximum height is lower, because drag has a downward component while rising / increases the vertical deceleration' },
-        { mark: 'Horizontal distance is shorter, because the horizontal velocity decreases / is not constant' },
-        { note: 'Award [1 max] for "both are smaller" with no reasons. OWTTE.' },
+        { note: 'Drag has a downward component while the ball rises (lower maximum height) and a horizontal component opposite the motion (shorter horizontal distance).' },
       ],
     },
   ],

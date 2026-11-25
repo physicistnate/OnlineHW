@@ -1,17 +1,20 @@
 /**
- * Every allowed combination of given data for every question (not a sample).
- * Checks that answers are finite and inside their accepted ranges, that positive
- * quantities are positive, that MCQs have one correct and no duplicate options,
- * that graph points sit on the grid, and that a worked solution's displayed
- * working (intermediate values with a guard digit) reproduces its displayed answer.
+ * Every allowed combination of given data for every question (a seeded sample for
+ * very large grids; see helpers.ts). Checks that answers are finite and inside their
+ * accepted ranges, that positive quantities are positive, that zero answers are a
+ * clean 0, that alternative methods agree at full precision, that MCQs have one
+ * correct and no duplicate options, that graph points sit on the grid, and that a
+ * worked solution's displayed working (intermediate values with a guard digit)
+ * reproduces its displayed answer, typed the ways a student would type it.
  */
 import { describe, expect, it } from 'vitest';
 import { ALL_QUESTIONS } from '../src/content/registry';
-import { computeDisplayPath } from '../src/engine/calc';
+import { answerRanges, computeAnswerRanges, computeDisplayPath } from '../src/engine/calc';
 import { buildInstance } from '../src/engine/instance';
-import { checkNumeric } from '../src/engine/grading';
+import { checkNumeric, rangesOf } from '../src/engine/grading';
 import { exponentOf, fmtA, roundSig } from '../src/engine/numbers';
-import { isChoice, rangeValues, type ParamSpecs } from '../src/engine/params';
+import type { ParamSpecs } from '../src/engine/params';
+import { EXHAUSTIVE_LIMIT, SAMPLE_SIZE, combosToCheck, everyCombo, gridSize, sampleCombos, typedForms } from './helpers';
 
 /**
  * Finds displayed arithmetic such as "14 + 33.33 = 47.3" or "2 \times 100.6 = 201.2"
@@ -38,15 +41,6 @@ export function arithmeticErrors(text: string | undefined): string[] {
   return errors;
 }
 
-function allCombos(specs: ParamSpecs): Record<string, number | string>[] {
-  let combos: Record<string, number | string>[] = [{}];
-  for (const [name, spec] of Object.entries(specs)) {
-    const values: (number | string)[] = isChoice(spec) ? [...spec.choices] : rangeValues(spec);
-    combos = combos.flatMap((c) => values.map((v) => ({ ...c, [name]: v })));
-  }
-  return combos;
-}
-
 describe('displayed-arithmetic checker', () => {
   it('catches a wrong equality and accepts correct ones', () => {
     expect(arithmeticErrors('less than double ($2 \\times 100.6 = 201.3$ m)')).toHaveLength(1); // 2 × 100.6 = 201.2
@@ -65,13 +59,39 @@ describe('displayed-arithmetic checker', () => {
   });
 });
 
+describe('combinations of given data', () => {
+  const specs: ParamSpecs = {
+    a: { min: 1, max: 3, step: 1, base: 1 },
+    b: { choices: ['x', 'y'], base: 'x' },
+  };
+  it('walks every combination one at a time', () => {
+    const all = [...everyCombo(specs)];
+    expect(all).toHaveLength(gridSize(specs));
+    expect(new Set(all.map((c) => JSON.stringify(c))).size).toBe(6);
+  });
+  it('samples a huge grid instead of building it, including the corners', () => {
+    const huge: ParamSpecs = Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`p${i}`, { min: 0, max: 99, step: 1, base: 0 }]));
+    expect(gridSize(huge)).toBe(1e16);
+    const start = Date.now();
+    const sample = sampleCombos(huge, SAMPLE_SIZE);
+    expect(Date.now() - start).toBeLessThan(2000);
+    expect(sample.length).toBe(256 + SAMPLE_SIZE);
+    expect(sample[0]).toEqual(Object.fromEntries(Object.keys(huge).map((k) => [k, 0])));
+    expect(sample[255]).toEqual(Object.fromEntries(Object.keys(huge).map((k) => [k, 99])));
+    expect(sampleCombos(huge, 10)).toEqual(sampleCombos(huge, 10)); // seeded: the same every run
+    expect([...combosToCheck(huge)].length).toBe(256 + SAMPLE_SIZE);
+    expect(gridSize(specs)).toBeLessThanOrEqual(EXHAUSTIVE_LIMIT);
+  });
+});
+
 describe.each(ALL_QUESTIONS.map((t) => [t.id, t] as const))('%s', (_id, t) => {
   it('is valid for every allowed combination of given data', () => {
-    const combos = allCombos(t.params as ParamSpecs).filter((p) => !t.constraint || t.constraint(p as never));
-    expect(combos.length).toBeGreaterThan(0);
-
-    for (const p of combos) {
+    let checked = 0;
+    for (const p of combosToCheck(t.params as ParamSpecs)) {
+      if (t.constraint && !t.constraint(p as never)) continue;
+      checked++;
       const inst = buildInstance(t, p);
+      const report = computeAnswerRanges(t.compute, p, t.style);
       const shown = computeDisplayPath(t.compute, p, t.style);
       for (const part of inst.parts) {
         const r = part.response;
@@ -80,16 +100,27 @@ describe.each(ALL_QUESTIONS.map((t) => [t.id, t] as const))('%s', (_id, t) => {
         const bad = shownText.flatMap(arithmeticErrors);
         expect(bad, `${at}: displayed arithmetic does not add up`).toEqual([]);
         switch (r.kind) {
-          case 'numeric':
-            expect(Number.isFinite(r.range.exact), `${at}: answer not finite`).toBe(true);
-            expect(r.range.lo <= r.range.exact && r.range.exact <= r.range.hi, `${at}: answer outside its range`).toBe(true);
-            if (r.positive) expect(r.range.exact > 0, `${at}: positive quantity is not positive`).toBe(true);
-            // The worked solution shows the answer its displayed working produces;
-            // that answer, as displayed, must be accepted by the grader.
-            expect(checkNumeric(fmtA(shown[r.answer]), r.range, { unit: r.unit }).status, `${at}: the worked solution's own answer (${fmtA(shown[r.answer])}) would be marked wrong`).toBe('correct');
+          case 'numeric': {
+            const { exact, lo, hi } = r.range;
+            expect(Number.isFinite(exact), `${at}: answer not finite`).toBe(true);
+            expect(lo <= exact && exact <= hi, `${at}: answer outside its range`).toBe(true);
+            if (r.positive) expect(exact > 0, `${at}: positive quantity is not positive`).toBe(true);
+            // A zero answer must be a clean 0, not floating-point noise such as 1e-15
+            // (which would be shown as "1.11 × 10^-15"): use snapZero() in compute().
+            expect(exact === 0 || Math.abs(exact) > 1e-9 * Math.max(Math.abs(lo), Math.abs(hi)), `${at}: answer ${exact} looks like rounding noise around zero`).toBe(true);
+            // Alternative methods are other routes to the same quantity: at full precision they must agree.
+            for (const alt of answerRanges(report, r.answer).slice(1)) {
+              expect(Math.abs(alt.exact - exact) <= 1e-9 * Math.max(Math.abs(exact), Math.abs(alt.exact)), `${at}: an alternative method gives ${alt.exact}, not ${exact}`).toBe(true);
+            }
+            // The worked solution shows the answer its displayed working produces; that
+            // answer, typed in any of the usual ways, must be accepted by the grader.
+            for (const typed of typedForms(fmtA(shown[r.answer]))) {
+              expect(checkNumeric(typed, rangesOf(r), { unit: r.unit }).status, `${at}: the worked solution's own answer, typed "${typed}", would be marked wrong`).toBe('correct');
+            }
             // And it differs from the full-precision answer by at most one in the last digit.
-            expect(Math.abs(roundSig(shown[r.answer], 3) - roundSig(r.range.exact, 3)) <= 1.0001 * 10 ** (exponentOf(r.range.exact) - 2), `${at}: displayed answer drifts`).toBe(true);
+            expect(Math.abs(roundSig(shown[r.answer], 3) - roundSig(exact, 3)) <= 1.0001 * 10 ** (exponentOf(exact) - 2), `${at}: displayed answer drifts`).toBe(true);
             break;
+          }
           case 'mcq': {
             expect(r.options.filter((o) => o.correct).length, `${at}: one correct option`).toBe(1);
             const texts = r.options.map((o) => o.text ?? (o.cells ?? []).join('|'));
@@ -107,5 +138,6 @@ describe.each(ALL_QUESTIONS.map((t) => [t.id, t] as const))('%s', (_id, t) => {
         }
       }
     }
+    expect(checked, 'no combination of given data satisfies the constraint').toBeGreaterThan(0);
   });
 });

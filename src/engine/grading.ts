@@ -131,12 +131,15 @@ function list(labels: string[]): string {
 }
 
 /**
- * Follow-through for a numeric part: re-work it with the student's own answers to
- * earlier numeric parts (wrong ones, and also correct ones that were rounded, such
- * as 0.33 for 0.325) in place of the values the calculation carries forward.
- * Earlier answers that are inadmissible (negative where only positive values make
- * sense) are never carried forward, and a calculation whose physical assumptions
- * fail (Calc.assume) earns nothing.
+ * Follow-through for a numeric part. The student's own answers to earlier numeric
+ * parts may replace the values the calculation carries forward: wrong answers
+ * (error carried forward) and correctly rounded ones (0.33 written for 0.325).
+ * Each earlier answer is optional, because a student may have kept full precision
+ * in their working: every combination is tried, smallest first. Credit is given
+ * by the method that accepts the answer, and feedback names only the earlier
+ * parts that method actually uses. Inadmissible earlier answers (negative where
+ * only positive values make sense) are never substituted, and a calculation whose
+ * physical assumptions fail (Calc.assume) earns nothing.
  */
 function followThrough(
   template: AnyTemplate,
@@ -150,9 +153,8 @@ function followThrough(
   const tolerance = tSpec?.kind === 'numeric' ? tSpec.tolerance : undefined;
   const opts = { unit: spec.unit, positive: spec.positive };
 
-  const overrides: Record<string, number> = {};
-  const wrong: string[] = [];
-  const rounded: string[] = [];
+  // Earlier answers that may be substituted: name -> { value, label, wrong? }.
+  const candidates: { name: string; value: number; label: string; wrong: boolean }[] = [];
   for (const earlier of instance.parts) {
     if (earlier.id === part.id) break;
     if (earlier.response.kind !== 'numeric') continue;
@@ -161,24 +163,54 @@ function followThrough(
     const verdict = checkNumeric(r.value, rangesOf(earlier.response), { unit: earlier.response.unit });
     if (verdict.status === 'invalid') continue;
     if (earlier.response.positive && verdict.value <= 0) continue; // inadmissible: never carried forward
-    overrides[earlier.response.answer] = verdict.value;
-    (verdict.status === 'incorrect' ? wrong : rounded).push(earlier.label);
+    candidates.push({ name: earlier.response.answer, value: verdict.value, label: earlier.label, wrong: verdict.status === 'incorrect' });
   }
 
-  if (Object.keys(overrides).length > 0) {
-    let ranges: AnswerRange[] = [];
+  // Method ranges (exact values too) for a set of substitutions, cached by subset.
+  const cache = new Map<number, { exact: number; range: AnswerRange }[] | null>();
+  const methodsFor = (mask: number) => {
+    if (cache.has(mask)) return cache.get(mask)!;
+    const overrides: Record<string, number> = {};
+    candidates.forEach((c, i) => {
+      if (mask & (1 << i)) overrides[c.name] = c.value;
+    });
+    let out: { exact: number; range: AnswerRange }[] | null;
     try {
       const report = computeAnswerRanges(template.compute, instance.params, template.style, overrides);
-      ranges = answerRanges(report, spec.answer)
-        .filter((raw) => Number.isFinite(raw.exact) && !(spec.positive && raw.exact <= 0))
-        .map((raw) => padRange(raw, tolerance));
+      out = answerRanges(report, spec.answer).map((raw) => ({ exact: raw.exact, range: padRange(raw, tolerance) }));
     } catch {
-      ranges = []; // a physical assumption failed: no credit
+      out = null; // a physical assumption failed: no credit from this combination
     }
-    if (ranges.length > 0 && checkNumeric(input, ranges, opts).status === 'correct') {
-      return wrong.length > 0
-        ? { status: 'correct', score: part.marks, max: part.marks, ecf: true, message: `Correct, using your answer to ${list(wrong)} (error carried forward).` }
-        : { status: 'correct', score: part.marks, max: part.marks, message: `Correct, following on from your rounded answer to ${list(rounded)}.` };
+    cache.set(mask, out);
+    return out;
+  };
+
+  const n = Math.min(candidates.length, 8);
+  const masks = Array.from({ length: (1 << n) - 1 }, (_, i) => i + 1).sort((a, b) => popcount(a) - popcount(b) || a - b);
+  for (const mask of masks) {
+    const methods = methodsFor(mask);
+    if (!methods) continue;
+    for (let m = 0; m < methods.length; m++) {
+      const { exact, range } = methods[m];
+      if (!Number.isFinite(exact) || (spec.positive && exact <= 0)) continue;
+      if (checkNumeric(input, range, opts).status !== 'correct') continue;
+      // Which substituted answers does this method actually depend on?
+      const used = candidates.filter((_, i) => {
+        if (!(mask & (1 << i))) return false;
+        const without = methodsFor(mask & ~(1 << i));
+        return !without || !without[m] || Math.abs(without[m].exact - exact) > 1e-9 * Math.max(1, Math.abs(exact));
+      });
+      const wrong = used.filter((c) => c.wrong).map((c) => c.label);
+      const rounded = used.filter((c) => !c.wrong).map((c) => c.label);
+      if (wrong.length > 0) {
+        return { status: 'correct', score: part.marks, max: part.marks, ecf: true, message: `Correct, using your answer to ${list(wrong)} (error carried forward).` };
+      }
+      return {
+        status: 'correct',
+        score: part.marks,
+        max: part.marks,
+        message: rounded.length > 0 ? `Correct, following on from your rounded answer to ${list(rounded)}.` : undefined,
+      };
     }
   }
 
@@ -191,6 +223,15 @@ function followThrough(
     }
   }
   return null;
+}
+
+function popcount(x: number): number {
+  let c = 0;
+  while (x) {
+    c += x & 1;
+    x >>= 1;
+  }
+  return c;
 }
 
 /**

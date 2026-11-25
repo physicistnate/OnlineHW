@@ -4,14 +4,14 @@ import { Q, knowns, tex, unitTex as u } from '../../../engine/units';
 
 export default defineQuestion({
   id: 'ibp-a1-stopping-distance',
-  version: 2,
+  version: 3,
   title: 'Reaction time and stopping distance',
   courses: ['ib-physics-sl'],
   topic: 'ibp.A.1',
   standards: ['ibp.A.1.4', 'ibp.A.1.1'],
   style: 'IB',
   paper: 'Paper 2 style',
-  types: ['calculation', 'short-answer'],
+  types: ['calculation', 'multiple-choice'],
   difficulty: 2,
 
   params: {
@@ -87,10 +87,18 @@ export default defineQuestion({
     },
     {
       label: '(d)',
-      marks: 2,
+      marks: 1,
       prompt: () =>
-        'The driver is tired and their reaction time doubles. The car travels at the same speed and decelerates at the same rate. Explain why the total stopping distance does **not** double.',
-      response: { kind: 'text', lines: 4 },
+        'The driver is tired and their reaction time doubles. The car travels at the same speed and decelerates at the same rate. Which statement explains why the total stopping distance does **not** double?',
+      response: {
+        kind: 'mcq',
+        options: () => [
+          { text: 'The reaction distance doubles, but the braking distance does not change.', correct: true },
+          { text: 'The braking distance doubles, but the reaction distance does not change.' },
+          { text: 'Both distances double, but the car spends less time braking.' },
+          { text: 'The deceleration halves, so the braking distance decreases.' },
+        ],
+      },
       solution: ({ r }) => [
         {
           text: `Only the reaction distance depends on the reaction time. Since $s_1 = v\\,t_r$, it is proportional to $t_r$, so it doubles from $${fmtA(r.s1)}$ m to $${fmtA(r.s1Double)}$ m.`,
@@ -104,9 +112,7 @@ export default defineQuestion({
         },
       ],
       markscheme: () => [
-        { mark: 'The reaction (thinking) distance doubles / is proportional to the reaction time' },
-        { mark: 'The braking distance is unchanged / does not depend on the reaction time' },
-        { note: 'Accept a correct numerical argument. Each mark needs a reason: only restating that the distance does not double earns no marks.' },
+        { note: 'The reaction distance is proportional to the reaction time; the braking distance does not depend on it.' },
       ],
     },
   ],

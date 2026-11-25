@@ -5,6 +5,7 @@
  * what is printed in the question (for example step 0.5 gives 4.0, 4.5, 5.0, ...).
  * Answers are computed from the printed values, never from hidden extra digits.
  */
+import { fmt } from './numbers';
 import { randInt, type Rng } from './rng';
 
 export interface RangeParam {
@@ -15,6 +16,12 @@ export interface RangeParam {
   base: number;
   /** Decimal places to display. Defaults to the decimal places of `step`. */
   dp?: number;
+  /**
+   * Show in scientific notation with this many significant figures, e.g. sci: 3 shows
+   * 384000000 as 3.84 × 10^8 (LaTeX, so use it inside $...$ or Q()). The tests check
+   * that the shown value is exactly the value used.
+   */
+  sci?: number;
 }
 
 export interface ChoiceParam<T extends string | number = string | number> {
@@ -22,6 +29,8 @@ export interface ChoiceParam<T extends string | number = string | number> {
   base: T;
   /** Decimal places to display numeric choices with. */
   dp?: number;
+  /** Scientific notation with this many significant figures (see RangeParam.sci). */
+  sci?: number;
 }
 
 export type ParamSpec = RangeParam | ChoiceParam;
@@ -50,11 +59,17 @@ function rangeDp(spec: RangeParam): number {
   return spec.dp ?? Math.max(decimalsOf(spec.step), decimalsOf(spec.min));
 }
 
-/** All values a range parameter can take. */
+/** All values a range parameter can take (never above max, even if max is not min + k·step). */
 export function rangeValues(spec: RangeParam): number[] {
-  const n = Math.round((spec.max - spec.min) / spec.step) + 1;
+  const n = Math.floor((spec.max - spec.min) / spec.step + 1e-9) + 1;
   const dp = Math.max(decimalsOf(spec.step), decimalsOf(spec.min));
-  return Array.from({ length: n }, (_, k) => Number((spec.min + k * spec.step).toFixed(dp)));
+  return Array.from({ length: Math.max(0, n) }, (_, k) => Number((spec.min + k * spec.step).toFixed(dp)));
+}
+
+/** True if max is reached exactly in whole steps from min (an authoring check). */
+export function rangeIsAligned(spec: RangeParam): boolean {
+  const k = (spec.max - spec.min) / spec.step;
+  return Math.abs(k - Math.round(k)) < 1e-9;
 }
 
 function draw(spec: ParamSpec, rng: Rng): string | number {
@@ -101,7 +116,7 @@ export function displayParams<PS extends ParamSpecs>(specs: PS, values: Params<P
     const v = (values as Record<string, string | number>)[name];
     if (typeof v === 'number') {
       const dp = isChoice(spec) ? spec.dp : rangeDp(spec);
-      out[name] = dp === undefined ? String(v) : v.toFixed(dp);
+      out[name] = spec.sci ? fmt(v, spec.sci) : dp === undefined ? String(v) : v.toFixed(dp);
     } else {
       out[name] = v;
     }

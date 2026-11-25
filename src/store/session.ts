@@ -19,8 +19,9 @@ export function getSession(): StudentSession | null {
   return readJson<StudentSession | null>('session', null);
 }
 
-export function signIn(classCode: string, username: string): void {
-  writeJson('session', { classCode: classCode.trim().toUpperCase(), username: username.trim().toLowerCase() });
+/** Signs a student in. Returns false if the browser refused to remember it (storage blocked). */
+export function signIn(classCode: string, username: string): boolean {
+  return writeJson('session', { classCode: classCode.trim().toUpperCase(), username: username.trim().toLowerCase() });
 }
 
 export function signOut(): void {
@@ -29,6 +30,12 @@ export function signOut(): void {
 
 export function useSession(): StudentSession | null {
   const [session, setSession] = useState(getSession);
-  useEffect(() => subscribe(() => setSession(getSession())), []);
+  useEffect(
+    () =>
+      subscribe((key) => {
+        if (key === null || key === 'session') setSession(getSession());
+      }),
+    [],
+  );
   return session;
 }

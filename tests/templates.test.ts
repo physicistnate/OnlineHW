@@ -6,12 +6,13 @@ import katex from 'katex';
 import { describe, expect, it } from 'vitest';
 import { findStandard, findTopic } from '../src/content/catalog';
 import { ALL_QUESTIONS } from '../src/content/registry';
-import { checkNumeric } from '../src/engine/grading';
+import { checkNumeric, rangesOf } from '../src/engine/grading';
 import { instantiate, seedFor } from '../src/engine/instance';
 import { splitMath } from '../src/engine/markup';
 import { fmt } from '../src/engine/numbers';
-import { isChoice, rangeValues, type ParamSpecs } from '../src/engine/params';
+import { displayParams, isChoice, rangeIsAligned, rangeValues, type ParamSpecs } from '../src/engine/params';
 import type { QuestionInstance } from '../src/engine/types';
+import { displayedValue, typedForms } from './helpers';
 
 const STUDENTS = 150;
 
@@ -56,14 +57,27 @@ function checkInstance(inst: QuestionInstance, where: string) {
     switch (r.kind) {
       case 'numeric': {
         const { exact, lo, hi } = r.range;
+        const ranges = rangesOf(r);
         expect(Number.isFinite(exact), `${at}: answer is not finite`).toBe(true);
         expect(lo <= exact && exact <= hi, `${at}: exact answer outside its range`).toBe(true);
-        expect((hi - lo) / Math.abs(exact), `${at}: accepted range is too wide`).toBeLessThan(0.15);
-        for (const sf of [3, 4, 6]) {
-          expect(checkNumeric(fmt(exact, sf).replace('\\times 10^{', 'e').replace('}', ''), r.range).status, `${at}: correct answer (${sf} s.f.) rejected`).toBe('correct');
+        if (exact === 0) {
+          // A zero answer: "0" is right, and so is any value inside its (absolute) range.
+          for (const typed of ['0', '0.0', '-0', '0.00']) expect(checkNumeric(typed, ranges).status, `${at}: "${typed}" rejected for a zero answer`).toBe('correct');
+          const far = Math.max(1, 10 * (hi - lo));
+          expect(checkNumeric(String(hi + far), ranges).status, `${at}: a value far above zero accepted`).toBe('incorrect');
+          expect(checkNumeric(String(lo - far), ranges).status, `${at}: a value far below zero accepted`).toBe('incorrect');
+          break;
         }
-        expect(checkNumeric(String(exact * 1.1), r.range).status, `${at}: 10% too high accepted`).toBe('incorrect');
-        expect(checkNumeric(String(exact * 0.9), r.range).status, `${at}: 10% too low accepted`).toBe('incorrect');
+        expect((hi - lo) / Math.abs(exact), `${at}: accepted range is too wide`).toBeLessThan(0.15);
+        // The correct answer, rounded to 3, 4 or 6 s.f. and typed the ways students type
+        // scientific notation (3.00e8, 3.00x10^8, 3.00 × 10^8, 3.00×10⁸, ...), is accepted.
+        for (const sf of [3, 4, 6]) {
+          for (const typed of typedForms(fmt(exact, sf))) {
+            expect(checkNumeric(typed, ranges).status, `${at}: correct answer typed "${typed}" rejected`).toBe('correct');
+          }
+        }
+        expect(checkNumeric(String(exact * 1.1), ranges).status, `${at}: 10% too high accepted`).toBe('incorrect');
+        expect(checkNumeric(String(exact * 0.9), ranges).status, `${at}: 10% too low accepted`).toBe('incorrect');
         break;
       }
       case 'mcq': {
@@ -88,8 +102,8 @@ function checkInstance(inst: QuestionInstance, where: string) {
         break;
       }
       case 'text':
-        expect(part.markscheme.some((l) => 'mark' in l), `${at}: written answers need markscheme points`).toBe(true);
-        break;
+        // Typed (written) answers are left out for now: every part must be marked by the computer.
+        throw new Error(`${at}: written-answer parts are not used yet (convert it to multiple choice, numeric or graph)`);
     }
   }
 }
@@ -97,12 +111,28 @@ function checkInstance(inst: QuestionInstance, where: string) {
 describe.each(ALL_QUESTIONS.map((t) => [t.id, t] as const))('%s', (_id, t) => {
   it('has valid metadata and base parameters', () => {
     expect(findTopic(t.topic), `unknown topic ${t.topic}`).toBeDefined();
-    for (const s of t.standards) expect(findStandard(s), `unknown standard ${s}`).toBeDefined();
+    expect(t.standards.length, 'needs at least one standard').toBeGreaterThan(0);
+    for (const s of t.standards) {
+      expect(findStandard(s), `unknown standard ${s}`).toBeDefined();
+      expect(findTopic(t.topic)?.standards.some((x) => x.id === s), `standard ${s} is not in topic ${t.topic}`).toBe(true);
+    }
+    if (findTopic(t.topic)?.hlOnly) expect(t.level, 'questions in an HL-only topic must be level HL').toBe('HL');
+    for (const part of t.parts) expect(part.response.kind, `${part.label}: written answers are not used yet`).not.toBe('text');
     for (const [name, spec] of Object.entries(t.params as ParamSpecs)) {
       if (isChoice(spec)) {
         expect(spec.choices, `${name}: base not among choices`).toContain(spec.base);
       } else {
+        expect(spec.step, `${name}: step must be positive`).toBeGreaterThan(0);
+        expect(spec.max, `${name}: max below min`).toBeGreaterThanOrEqual(spec.min);
+        // e.g. min 0, max 10, step 4 never reaches 10: say max 8 (or another step).
+        expect(rangeIsAligned(spec), `${name}: max ${spec.max} is not min + a whole number of steps`).toBe(true);
         expect(rangeValues(spec), `${name}: base ${spec.base} is not min + k*step`).toContain(spec.base);
+      }
+      // Every value is shown exactly as it is used in the calculation (no hidden digits).
+      const values = isChoice(spec) ? spec.choices.filter((c): c is number => typeof c === 'number') : rangeValues(spec);
+      for (const v of values) {
+        const shown = displayParams({ [name]: spec }, { [name]: v } as never)[name];
+        expect(Math.abs(displayedValue(shown) - v) <= 1e-12 * Math.abs(v), `${name}: ${v} is shown as "${shown}"`).toBe(true);
       }
     }
     if (t.constraint) expect(t.constraint(Object.fromEntries(Object.entries(t.params as ParamSpecs).map(([k, s]) => [k, s.base])) as never)).toBe(true);

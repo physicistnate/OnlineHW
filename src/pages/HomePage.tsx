@@ -1,5 +1,5 @@
-import { SITE, TOLERANCE } from '../config/site';
-import { IB_PHYSICS_SL, allTopics } from '../content/catalog';
+import { ASSIGNMENT_DEFAULTS, SITE, TOLERANCE } from '../config/site';
+import { IB_PHYSICS_HL, IB_PHYSICS_SL, allTopics } from '../content/catalog';
 import { ALL_QUESTIONS, questionsForTopic } from '../content/registry';
 import { Logo } from '../components/Layout';
 
@@ -17,14 +17,19 @@ const FEATURES = [
     body: 'Step-by-step worked solutions put the explanation beside the maths, and markschemes award marks the IB way, including error carried forward.',
   },
   {
+    title: 'Tries, due dates and two grades',
+    body: `Each part has a set number of tries (multiple choice: half the choices). Assignments close at their due time, with a warning ${ASSIGNMENT_DEFAULTS.warningMinutes.join(' and ')} minutes before, and can open each student’s own answer key afterwards. Students see a class grade (${ASSIGNMENT_DEFAULTS.penaltyPerTry} points off per extra try) and their IB marks.`,
+  },
+  {
     title: 'Printable assignments',
-    body: 'Choose questions by topic or standard and download a PDF of the base version or any student’s version, with or without full solutions.',
+    body: 'Choose questions by course, topic and standards, and download a PDF of the base version or any student’s version, with or without full solutions.',
   },
 ];
 
 export function HomePage() {
   const topics = allTopics(IB_PHYSICS_SL);
-  const withQuestions = topics.filter((t) => questionsForTopic(t.id).length > 0);
+  const withQuestions = topics.filter((t) => questionsForTopic(t.id, IB_PHYSICS_SL.id).length > 0);
+  const hlOnly = allTopics(IB_PHYSICS_HL).filter((t) => t.hlOnly).length;
   const marks = ALL_QUESTIONS.reduce((sum, q) => sum + q.parts.reduce((s, p) => s + p.marks, 0), 0);
 
   return (
@@ -54,9 +59,9 @@ export function HomePage() {
             <div className="stat-label">questions ({marks} marks)</div>
           </div>
           <div className="stat">
-            <div className="stat-num">{IB_PHYSICS_SL.name}</div>
+            <div className="stat-num">IB Physics SL &amp; HL</div>
             <div className="stat-label">
-              {withQuestions.length} of {topics.length} SL topics started
+              {withQuestions.length} of {topics.length} SL topics started · {hlOnly} HL-only topics to come
             </div>
           </div>
           <div className="stat">
@@ -82,19 +87,20 @@ export function HomePage() {
             <h4 className="ok">Working now</h4>
             <ul>
               <li>Question engine: seeded randomization, rounding-aware marking, error carried forward</li>
-              <li>IB Physics SL · A.1 Kinematics: {questionsForTopic('ibp.A.1').length} questions (calculation, graph reading and drawing, multiple choice, written)</li>
+              <li>IB Physics SL · A.1 Kinematics: {questionsForTopic('ibp.A.1').length} questions (calculation, graph reading and drawing, multiple choice), all marked by the computer</li>
               <li>Question preview with any student’s numbers, worked solutions and markschemes</li>
-              <li>Assignment builder and printable PDFs (base or per-student version)</li>
-              <li>Student demo: sign in with a class code, work is saved and numbers stay fixed</li>
+              <li>Assignment builder: SL or HL, several standards at once, tries per part, due date, answer key release, class-grade rules</li>
+              <li>Printable PDFs (base or per-student version)</li>
+              <li>Student demo: sign in with a class code; numbers are pinned, work is saved, countdown before the due time, class grade and IB marks</li>
             </ul>
           </div>
           <div>
             <h4 className="next">Coming next</h4>
             <ul>
-              <li>Remaining questions for A.1, then the other SL topics</li>
-              <li>Supabase database: real teacher and student accounts, classes and saved work across devices</li>
-              <li>Teacher gradebook by class, assignment and student, with live progress</li>
-              <li>Deployment to GitHub Pages</li>
+              <li>More A.1 questions, then A.2 Forces and momentum, including HL questions and standards</li>
+              <li>Supabase database: real teacher and student accounts, classes, saved work across devices, server-side marking and deadlines</li>
+              <li>Teacher gradebook by class, assignment, student and standard</li>
+              <li>Hosting on a host school networks allow (Cloudflare Pages or Netlify)</li>
             </ul>
           </div>
         </div>

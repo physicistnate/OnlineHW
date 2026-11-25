@@ -154,6 +154,25 @@ export function Graph({ spec, points, onPointsChange, snap, pointStatus, classNa
           </g>
         ))}
 
+        {points && !interactive && (
+          // A student's answer shown read-only (e.g. after the due date or once correct).
+          <>
+            <polyline className="g-line g-student" points={sorted.map(([a, b]) => `${sx(a)},${sy(b)}`).join(' ')} />
+            {points.map((pt, i) => {
+              const status = pointStatus?.[i];
+              return (
+                <circle
+                  key={i}
+                  className={`g-dot g-static${status === true ? ' is-right' : status === false ? ' is-wrong' : ''}`}
+                  cx={sx(pt[0])}
+                  cy={sy(pt[1])}
+                  r={6}
+                />
+              );
+            })}
+          </>
+        )}
+
         {interactive && (
           <>
             <polyline className="g-line g-student" points={sorted.map(([a, b]) => `${sx(a)},${sy(b)}`).join(' ')} />

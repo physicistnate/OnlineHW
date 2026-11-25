@@ -22,7 +22,7 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   'short-answer': 'Short answer',
   'graph-reading': 'Graph reading',
   'graph-drawing': 'Graph drawing',
-  'long-response': 'Long response',
+  'long-response': 'Extended (multi-part)',
 };
 
 /** What every template callback receives. */
@@ -164,6 +164,8 @@ export interface QuestionTemplate<PS extends ParamSpecs = ParamSpecs, R extends 
   paper?: string;
   types: QuestionType[];
   difficulty: 1 | 2 | 3;
+  /** 'HL' for higher-level-only content (shown in HL courses only). Default 'SL'. */
+  level?: 'SL' | 'HL';
   params: PS;
   constraint?: (p: Params<PS>) => boolean;
   compute: (p: Params<PS>, c: Calc) => R;

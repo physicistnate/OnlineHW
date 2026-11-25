@@ -20,7 +20,15 @@ export function App() {
       page = <HomePage />;
       break;
     case 'bank':
-      page = <BankPage topicId={route.query.get('topic') ?? undefined} />;
+      // Keyed by course and topic, so following a topic link starts with no standards chosen.
+      page = (
+        <BankPage
+          key={`${route.query.get('course')}|${route.query.get('topic')}`}
+          courseId={route.query.get('course')}
+          topicId={route.query.get('topic') ?? undefined}
+          standards={(route.query.get('std') ?? '').split(',').filter(Boolean)}
+        />
+      );
       title = 'Question bank';
       break;
     case 'q':
@@ -38,7 +46,12 @@ export function App() {
       title = route.query.get('title') ?? 'Print';
       break;
     case 'student':
-      page = route.segments[1] === 'a' && route.segments[2] ? <StudentAssignment id={route.segments[2]} /> : <StudentHome />;
+      page =
+        route.segments[1] === 'a' && route.segments[2] ? (
+          <StudentAssignment key={route.segments[2]} id={route.segments[2]} />
+        ) : (
+          <StudentHome closedId={route.query.get('closed')} />
+        );
       title = 'Student view';
       break;
     default:

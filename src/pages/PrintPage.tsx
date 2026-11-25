@@ -4,36 +4,48 @@
  */
 import { useMemo } from 'react';
 import { CONSTANTS, SITE } from '../config/site';
-import { findCourse } from '../content/catalog';
+import { courseOrDefault } from '../content/catalog';
 import { getQuestion } from '../content/registry';
 import { Graph } from '../components/Graph';
 import { Logo } from '../components/Layout';
 import { Markscheme, SolutionSteps, questionMeta } from '../components/QuestionView';
+import { formatDue } from '../components/time';
 import { Tex } from '../components/Tex';
-import { instantiate, seedFor } from '../engine/instance';
+import { instantiate } from '../engine/instance';
 import { unitTex } from '../engine/units';
 import type { AnyTemplate, PartInstance, QuestionInstance } from '../engine/types';
+import { getAssignment } from '../store/assignments';
+import { assignmentTemplates, studentInstance } from '../store/studentData';
 import { marksLabel } from './BankPage';
 
+/**
+ * ?a=<assignment id>: a saved assignment, with the question versions it was made with.
+ * ?ids=<id,id,...>&course=<course id>&title=...: the builder's current selection.
+ * &student=<CLASS:username>: that student's numbers (the ones they see online, if this
+ * browser has them pinned), otherwise the base version. &sol=1, &ms=1: answer key.
+ */
 export function PrintPage({ query }: { query: URLSearchParams }) {
-  const ids = (query.get('ids') ?? '').split(',').filter(Boolean);
-  const title = query.get('title') || 'Homework';
-  const assignmentKey = query.get('a') || 'worksheet';
+  const assignment = query.get('a') ? getAssignment(query.get('a')!) : undefined;
+  const ids = query.get('ids') ?? '';
+  const title = query.get('title') || assignment?.title || 'Homework';
+  const assignmentKey = assignment?.id ?? 'worksheet';
   const student = query.get('student') || '';
   const withSolutions = query.get('sol') === '1';
   const withMarkscheme = query.get('ms') === '1';
 
-  const items = useMemo(
-    () =>
-      ids
-        .map((id) => getQuestion(id))
-        .filter((t): t is AnyTemplate => t !== undefined)
-        .map((t) => ({ template: t, instance: instantiate(t, student ? seedFor(student, assignmentKey, t.id) : null) })),
-    [ids.join(','), student, assignmentKey],
-  );
+  const items = useMemo(() => {
+    const templates: AnyTemplate[] = assignment
+      ? assignmentTemplates(assignment).map((r) => r.template)
+      : ids
+          .split(',')
+          .filter(Boolean)
+          .map((id) => getQuestion(id))
+          .filter((t): t is AnyTemplate => t !== undefined);
+    return templates.map((t) => ({ template: t, instance: student ? studentInstance(t, student, assignmentKey, false) : instantiate(t, null) }));
+  }, [assignment?.id, ids, student, assignmentKey]);
 
   const marks = items.reduce((s, it) => s + it.instance.totalMarks, 0);
-  const course = items[0] ? findCourse(items[0].template.courses[0]) : undefined;
+  const course = courseOrDefault(assignment?.courseId ?? query.get('course') ?? items[0]?.template.courses[0]);
 
   return (
     <div className="print-page">
@@ -61,7 +73,8 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
           </div>
           <h1>{title}</h1>
           <div className="paper-meta">
-            {course?.name} · {items.length} question{items.length === 1 ? '' : 's'} · {marksLabel(marks)}
+            {course.name} · {items.length} question{items.length === 1 ? '' : 's'} · {marksLabel(marks)}
+            {assignment?.settings.dueAt ? ` · due ${formatDue(assignment.settings.dueAt)}` : ''}
           </div>
           {student ? (
             <div className="paper-student">
@@ -79,7 +92,7 @@ export function PrintPage({ query }: { query: URLSearchParams }) {
           )}
         </header>
 
-        {course && course.printInstructions.length > 0 && (
+        {course.printInstructions.length > 0 && (
           <div className="paper-instructions">
             <strong>Instructions</strong>
             <ul>

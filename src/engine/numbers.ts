@@ -167,6 +167,18 @@ export function fmtRange(lo: number, hi: number): [string, string] {
   return [fmt(lo, 6), fmt(hi, 6)];
 }
 
+/**
+ * An answer that should be exactly zero but is computed as a difference (for example
+ * the displacement of a ball caught at its launch height) can come out as 1e-15
+ * because of floating-point rounding. snapZero(value, ...terms) returns 0 when the
+ * value is negligible next to the terms it came from, so the question shows and
+ * marks a clean 0. The tests flag answers that look like such left-over noise.
+ */
+export function snapZero(value: number, ...terms: number[]): number {
+  const scale = Math.max(...terms.map(Math.abs), 0);
+  return Math.abs(value) <= 1e-9 * scale ? 0 : value;
+}
+
 /** Trigonometry in degrees. */
 export const sinD = (deg: number) => Math.sin((deg * Math.PI) / 180);
 export const cosD = (deg: number) => Math.cos((deg * Math.PI) / 180);

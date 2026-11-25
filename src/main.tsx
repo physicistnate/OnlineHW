@@ -5,6 +5,9 @@ import './styles/theme.css';
 import './styles/app.css';
 import './styles/print.css';
 import { App } from './App';
+import { migrateStorage } from './store/migrate';
+
+migrateStorage(); // carry over assignments, drafts and sign-in saved by earlier builds
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

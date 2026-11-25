@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { IB_PHYSICS_SL, findStandard, findTopic } from '../content/catalog';
+import { COURSES, allTopics, courseOrDefault, findStandard, findTopic } from '../content/catalog';
 import { questionsForTopic } from '../content/registry';
 import { PageHeader } from '../components/Layout';
+import { StandardPicker, countByStandard } from '../components/StandardPicker';
 import { QUESTION_TYPE_LABELS, type AnyTemplate, type QuestionType } from '../engine/types';
 import { href } from '../router';
 
@@ -36,26 +37,48 @@ export function Difficulty({ level }: { level: 1 | 2 | 3 }) {
   );
 }
 
-export function BankPage({ topicId }: { topicId?: string }) {
-  const course = IB_PHYSICS_SL;
-  const active = topicId && findTopic(topicId) ? topicId : 'ibp.A.1';
+/**
+ * Browse questions by course and topic. The chosen standards are kept in the address
+ * (?std=...), so coming back from a preview shows the same questions.
+ */
+export function BankPage({ courseId, topicId, standards: initialStandards = [] }: { courseId?: string | null; topicId?: string; standards?: string[] }) {
+  const course = courseOrDefault(courseId);
+  const topics = allTopics(course);
+  const active = topicId && topics.some((t) => t.id === topicId) ? topicId : (topics.find((t) => questionsForTopic(t.id, course.id).length > 0) ?? topics[0]).id;
   const topic = findTopic(active)!;
   const [type, setType] = useState<QuestionType | ''>('');
-  const [standard, setStandard] = useState('');
+  const [standards, setStandardsState] = useState<string[]>(() => initialStandards.filter((s) => topic.standards.some((x) => x.id === s)));
   const [search, setSearch] = useState('');
+  const setStandards = (ids: string[]) => {
+    setStandardsState(ids);
+    window.history.replaceState(null, '', href('/bank', { course: course.id, topic: active, std: ids.join(',') }));
+  };
 
-  const questions = questionsForTopic(active).filter(
+  const inTopic = questionsForTopic(active, course.id);
+  const questions = inTopic.filter(
     (q) =>
       (!type || q.types.includes(type)) &&
-      (!standard || q.standards.includes(standard)) &&
+      q.standards.some((s) => standards.includes(s)) &&
       (!search || q.title.toLowerCase().includes(search.toLowerCase())),
   );
-  const typesHere = [...new Set(questionsForTopic(active).flatMap((q) => q.types))];
+  const typesHere = [...new Set(inTopic.flatMap((q) => q.types))];
 
   return (
     <div className="container">
-      <PageHeader eyebrow={course.name} title="Question bank">
-        Preview any question with a student’s numbers, then add it to an assignment.
+      <PageHeader
+        eyebrow={course.name}
+        title="Question bank"
+        actions={
+          <div className="segmented" role="group" aria-label="Course">
+            {COURSES.map((c) => (
+              <a key={c.id} href={href('/bank', { course: c.id, topic: active })} className={c.id === course.id ? 'is-active' : ''} aria-current={c.id === course.id ? 'page' : undefined}>
+                {c.name}
+              </a>
+            ))}
+          </div>
+        }
+      >
+        Preview any question with a student’s numbers, then add it to an assignment. HL includes every SL question plus the HL-only topics.
       </PageHeader>
 
       <div className="bank-layout">
@@ -66,11 +89,12 @@ export function BankPage({ topicId }: { topicId?: string }) {
                 {theme.code} · {theme.name}
               </div>
               {theme.topics.map((t) => {
-                const n = questionsForTopic(t.id).length;
+                const n = questionsForTopic(t.id, course.id).length;
                 return (
-                  <a key={t.id} href={href('/bank', { topic: t.id })} className={`side-topic${t.id === active ? ' is-active' : ''}${n === 0 ? ' is-empty' : ''}`}>
+                  <a key={t.id} href={href('/bank', { course: course.id, topic: t.id })} className={`side-topic${t.id === active ? ' is-active' : ''}${n === 0 ? ' is-empty' : ''}`}>
                     <span>
                       {t.code} {t.name}
+                      {t.hlOnly && <span className="chip chip-small chip-hl">HL</span>}
                     </span>
                     <span className="count">{n || 'soon'}</span>
                   </a>
@@ -85,10 +109,10 @@ export function BankPage({ topicId }: { topicId?: string }) {
             <h2>
               {topic.code} {topic.name}
             </h2>
-            <span className="muted">{questionsForTopic(active).length} questions</span>
+            <span className="muted">{inTopic.length} questions</span>
           </div>
 
-          {questionsForTopic(active).length === 0 ? (
+          {inTopic.length === 0 ? (
             <div className="card empty">No questions for this topic yet. They are on the list in PROJECT_GUIDE.txt.</div>
           ) : (
             <>
@@ -102,25 +126,17 @@ export function BankPage({ topicId }: { topicId?: string }) {
                     </option>
                   ))}
                 </select>
-                {topic.standards.length > 0 && (
-                  <select value={standard} onChange={(e) => setStandard(e.target.value)} aria-label="Filter by standard">
-                    <option value="">All standards</option>
-                    {topic.standards.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.code} {s.text}
-                      </option>
-                    ))}
-                  </select>
-                )}
               </div>
+              <StandardPicker topic={topic} selected={standards} onChange={setStandards} counts={countByStandard(inTopic)} />
 
-              <div className="q-list">
+              <div className="q-list" hidden={standards.length === 0}>
                 {questions.map((q) => (
                   <article key={q.id} className="card q-card">
                     <div className="q-card-main">
                       <a className="q-card-title" href={href(`/q/${q.id}`)}>
                         {q.title}
                       </a>
+                      {q.level === 'HL' && <span className="chip chip-small chip-hl">HL</span>}
                       <div className="q-card-meta">
                         <TypeChips types={q.types} />
                         <span className="muted small">{q.paper}</span>
@@ -145,14 +161,14 @@ export function BankPage({ topicId }: { topicId?: string }) {
                         <a className="btn btn-sm btn-primary" href={href(`/q/${q.id}`)}>
                           Preview
                         </a>
-                        <a className="btn btn-sm" href={href('/builder', { add: q.id })}>
+                        <a className="btn btn-sm" href={href('/builder', { add: q.id, course: course.id })}>
                           Add to assignment
                         </a>
                       </div>
                     </div>
                   </article>
                 ))}
-                {questions.length === 0 && <div className="card empty">No questions match these filters.</div>}
+                {questions.length === 0 && standards.length > 0 && <div className="card empty">No questions match these filters.</div>}
               </div>
             </>
           )}

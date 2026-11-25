@@ -4,6 +4,7 @@ import { getQuestion } from '../content/registry';
 import { QuestionView } from '../components/QuestionView';
 import { computeAnswerRanges } from '../engine/calc';
 import { instantiate, seedFor } from '../engine/instance';
+import { studentInstance } from '../store/studentData';
 import { fmtRange } from '../engine/numbers';
 import { Tex } from '../components/Tex';
 import { href } from '../router';
@@ -15,7 +16,7 @@ const NAMES = ['alex', 'sam', 'jordan', 'priya', 'mateo', 'aisha', 'liam', 'mei'
 
 export function PreviewPage({ id, query }: { id: string; query: URLSearchParams }) {
   const template = getQuestion(id);
-  const assignments = useAssignments().filter((a) => a.questionIds.includes(id));
+  const assignments = useAssignments().filter((a) => a.items.some((item) => item.id === id));
 
   const [mode, setMode] = useState<'base' | 'student'>(query.get('student') ? 'student' : 'base');
   const [classCode, setClassCode] = useState(query.get('class') ?? 'DEMO');
@@ -26,7 +27,11 @@ export function PreviewPage({ id, query }: { id: string; query: URLSearchParams 
 
   const sKey = studentKey(classCode || 'DEMO', username || 'student');
   const seed = template && mode === 'student' ? seedFor(sKey, assignmentKey, template.id) : null;
-  const instance = useMemo(() => (template ? instantiate(template, seed) : null), [template, seed]);
+  // A student's version uses the numbers pinned for them in this browser, if any (same as the student view).
+  const instance = useMemo(
+    () => (template ? (mode === 'student' ? studentInstance(template, sKey, assignmentKey, false) : instantiate(template, null)) : null),
+    [template, mode, sKey, assignmentKey],
+  );
   const { work, update, reset } = useQuestionWork(`preview|${seed ?? 'base'}`, 'preview', template ? workIdFor(template) : id);
 
   if (!template || !instance) {
@@ -47,7 +52,7 @@ export function PreviewPage({ id, query }: { id: string; query: URLSearchParams 
       <nav className="breadcrumb" aria-label="Breadcrumb">
         <a href="#/bank">Question bank</a>
         <span>/</span>
-        <a href={href('/bank', { topic: template.topic })}>
+        <a href={href('/bank', { course: template.courses[0], topic: template.topic })}>
           {topic?.code} {topic?.name}
         </a>
         <span>/</span>

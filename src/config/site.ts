@@ -31,6 +31,18 @@ export const TOLERANCE = {
   maxRuns: 6000,
 };
 
+/** Defaults for new assignments and the student countdown (each assignment can change the first four). */
+export const ASSIGNMENT_DEFAULTS = {
+  /** Tries per question part (null = unlimited). Multiple choice: half the choices, rounded up. */
+  maxAttempts: 3 as number | null,
+  /** Class grade: percentage points taken off for each try after the first. */
+  penaltyPerTry: 7,
+  /** Class grade: the lowest score a question part can drop to once attempted (percent). */
+  lowestScore: 0,
+  /** Minutes before the due time at which students get a warning pop-up. */
+  warningMinutes: [5, 1],
+};
+
 export type Style = 'IB' | 'AP' | 'General';
 export type ConstantName = 'g';
 

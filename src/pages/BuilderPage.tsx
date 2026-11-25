@@ -1,54 +1,95 @@
+/**
+ * Assignment builder: choose a course, a topic and one or more standards, pick
+ * questions, set the assignment's rules (tries, due date, answer key, grading),
+ * then save it for students or print it.
+ */
 import { useEffect, useState } from 'react';
-import { IB_PHYSICS_SL, findStandard, findTopic } from '../content/catalog';
-import { getQuestion, questionsForTopic } from '../content/registry';
+import { COURSES, allTopics, courseOrDefault, findStandard, findTopic, type Course } from '../content/catalog';
+import { getQuestion, questionsForCourse, questionsForTopic } from '../content/registry';
 import { PageHeader } from '../components/Layout';
+import { Dialog } from '../components/Modal';
+import { SettingsForm } from '../components/SettingsForm';
+import { StandardPicker, countByStandard } from '../components/StandardPicker';
+import { formatDue } from '../components/time';
 import { Difficulty, TypeChips, marksLabel, marksOf } from './BankPage';
 import { href } from '../router';
-import { createAssignment, deleteAssignment, setReleaseSolutions, useAssignments, type Assignment } from '../store/assignments';
+import {
+  DEFAULT_SETTINGS,
+  createAssignment,
+  deleteAssignment,
+  isPastDue,
+  solutionsOpen,
+  updateSettings,
+  useAssignments,
+  type Assignment,
+  type AssignmentSettings,
+} from '../store/assignments';
 import { studentKey } from '../store/session';
-import { readJson, removeKey, writeJson } from '../store/storage';
+import { readJson, writeJson } from '../store/storage';
+import { assignmentTemplates } from '../store/studentData';
 
-/** The unsaved selection, kept so that opening Preview or Print and coming back loses nothing. */
+/** The unsaved assignment, kept so that opening Preview or Print and coming back loses nothing. */
 interface Draft {
+  courseId: string;
   topicId: string;
-  standard: string;
+  standards: string[];
   selected: string[];
   title: string;
+  settings: AssignmentSettings;
 }
 const DRAFT_KEY = 'builder-draft';
 
-function initialDraft(preselect: string | null): Draft {
-  const saved = readJson<Draft | null>(DRAFT_KEY, null);
+function firstTopicWithQuestions(course: Course): string {
+  const topics = allTopics(course);
+  return (topics.find((t) => questionsForTopic(t.id, course.id).length > 0) ?? topics[0]).id;
+}
+
+function inCourse(courseId: string, questionId: string): boolean {
+  return questionsForCourse(courseId).some((q) => q.id === questionId);
+}
+
+function initialDraft(query: URLSearchParams): Draft {
+  const saved = readJson<Partial<Draft> | null>(DRAFT_KEY, null);
+  const added = query.get('add') ? getQuestion(query.get('add')!) : undefined;
+  let course = courseOrDefault(saved?.courseId ?? query.get('course'));
+  // A question added from the bank switches course only if the current one does not contain it.
+  if (added && !inCourse(course.id, added.id)) course = courseOrDefault(query.get('course') ?? added.courses[0]);
+
   const draft: Draft = {
-    topicId: saved?.topicId && findTopic(saved.topicId) ? saved.topicId : 'ibp.A.1',
-    standard: saved?.standard ?? '',
-    selected: (saved?.selected ?? []).filter((id) => getQuestion(id)),
-    title: saved?.title ?? '',
+    courseId: course.id,
+    topicId: saved?.topicId && allTopics(course).some((t) => t.id === saved.topicId) ? saved.topicId : firstTopicWithQuestions(course),
+    standards: Array.isArray(saved?.standards) ? saved.standards.filter((s) => findStandard(s)) : [],
+    selected: Array.isArray(saved?.selected) ? saved.selected.filter((id) => inCourse(course.id, id)) : [],
+    title: typeof saved?.title === 'string' ? saved.title : '',
+    settings: { ...DEFAULT_SETTINGS, ...(saved?.settings ?? {}) },
   };
-  const q = preselect ? getQuestion(preselect) : undefined;
-  if (q) {
-    draft.topicId = q.topic;
-    draft.standard = '';
-    if (!draft.selected.includes(q.id)) draft.selected = [...draft.selected, q.id];
+  if (added && inCourse(course.id, added.id)) {
+    if (draft.topicId !== added.topic) draft.standards = [];
+    draft.topicId = added.topic;
+    draft.standards = [...new Set([...draft.standards, ...added.standards])]; // so the added question is visible
+    if (!draft.selected.includes(added.id)) draft.selected = [...draft.selected, added.id];
   }
+  const topic = findTopic(draft.topicId);
+  draft.standards = (topic?.standards ?? []).map((s) => s.id).filter((s) => draft.standards.includes(s));
   return draft;
 }
 
 export function BuilderPage({ query }: { query: URLSearchParams }) {
-  const course = IB_PHYSICS_SL;
-  const [initial] = useState(() => initialDraft(query.get('add')));
-
+  const [initial] = useState(() => initialDraft(query));
+  const [courseId, setCourseId] = useState(initial.courseId);
   const [topicId, setTopicId] = useState(initial.topicId);
-  const [standard, setStandard] = useState(initial.standard);
+  const [standards, setStandards] = useState<string[]>(initial.standards);
   const [selected, setSelected] = useState<string[]>(initial.selected);
   const [title, setTitle] = useState(initial.title);
+  const [settings, setSettings] = useState<AssignmentSettings>(initial.settings);
   const [savedMsg, setSavedMsg] = useState('');
   const [saveError, setSaveError] = useState('');
+  const [notice, setNotice] = useState('');
   const assignments = useAssignments();
 
   useEffect(() => {
-    writeJson(DRAFT_KEY, { topicId, standard, selected, title } satisfies Draft, false);
-  }, [topicId, standard, selected, title]);
+    writeJson(DRAFT_KEY, { courseId, topicId, standards, selected, title, settings } satisfies Draft, false);
+  }, [courseId, topicId, standards, selected, title, settings]);
 
   // "Add to assignment" links (?add=...) are applied once, then dropped from the
   // address, so coming back to this page later does not re-add a removed question.
@@ -56,14 +97,37 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
     if (query.get('add')) window.history.replaceState(null, '', '#/builder');
   }, [query]);
 
-  const topic = findTopic(topicId)!;
-  const questions = questionsForTopic(topicId).filter((q) => !standard || q.standards.includes(standard));
+  const course = courseOrDefault(courseId);
+  const topic = findTopic(topicId) ?? findTopic(firstTopicWithQuestions(course))!;
+  const topicQuestions = questionsForTopic(topic.id, course.id);
+  const shown = topicQuestions.filter((q) => q.standards.some((s) => standards.includes(s)));
   const toggle = (id: string) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   const selectedTemplates = selected.map((id) => getQuestion(id)).filter((q) => q !== undefined);
   const totalMarks = selectedTemplates.reduce((s, q) => s + marksOf(q), 0);
+  const defaultTitle = `${topic.code} ${topic.name} homework`;
+
+  const changeCourse = (id: string) => {
+    const next = courseOrDefault(id);
+    setCourseId(next.id);
+    const kept = selected.filter((q) => inCourse(next.id, q));
+    const dropped = selected.length - kept.length;
+    setSelected(kept);
+    setNotice(dropped > 0 ? `Removed ${dropped} HL-only question${dropped === 1 ? '' : 's'} from the selection.` : '');
+    if (!allTopics(next).some((t) => t.id === topicId)) {
+      setTopicId(firstTopicWithQuestions(next));
+      setStandards([]);
+    }
+  };
+  const changeTopic = (id: string) => {
+    setTopicId(id);
+    setStandards([]);
+  };
 
   const save = () => {
-    const a = createAssignment(title || `${topic.code} ${topic.name} homework`, course.id, selected);
+    if (settings.dueAt && Date.parse(settings.dueAt) <= Date.now()) {
+      if (!window.confirm('The due date is in the past, so students will not be able to answer. Save anyway?')) return;
+    }
+    const a = createAssignment(title || defaultTitle, course.id, selected, settings);
     if (!a) {
       setSavedMsg('');
       setSaveError('Could not save: this browser is blocking storage (for example in a private window). Your selection has been kept.');
@@ -73,27 +137,35 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
     setSavedMsg(`Saved “${a.title}”. Students can now open it in the student view.`);
     setSelected([]);
     setTitle('');
-    removeKey(DRAFT_KEY);
+    setSettings((s) => ({ ...s, dueAt: null, solutions: s.solutions === 'after-due' ? 'hidden' : s.solutions }));
   };
 
   return (
     <div className="container">
       <PageHeader eyebrow={course.name} title="Assignment builder">
-        Choose a topic or standard, pick questions, then save the assignment for students or print it.
+        Choose a course, a topic and its standards, pick questions, set the rules, then save the assignment for students or print it.
       </PageHeader>
 
       <div className="builder-layout">
         <section className="card">
           <h2 className="card-title">1 · Choose questions</h2>
           <div className="filters">
-            <select value={topicId} onChange={(e) => { setTopicId(e.target.value); setStandard(''); }} aria-label="Topic">
+            <div className="segmented" role="group" aria-label="Course">
+              {COURSES.map((c) => (
+                <button key={c.id} className={c.id === course.id ? 'is-active' : ''} aria-pressed={c.id === course.id} onClick={() => changeCourse(c.id)}>
+                  {c.name}
+                </button>
+              ))}
+            </div>
+            <select value={topic.id} onChange={(e) => changeTopic(e.target.value)} aria-label="Topic">
               {course.themes.map((theme) => (
                 <optgroup key={theme.code} label={`${theme.code} · ${theme.name}`}>
                   {theme.topics.map((t) => {
-                    const n = questionsForTopic(t.id).length;
+                    const n = questionsForTopic(t.id, course.id).length;
                     return (
                       <option key={t.id} value={t.id} disabled={n === 0}>
-                        {t.code} {t.name} ({n || 'coming soon'})
+                        {t.code} {t.name}
+                        {t.hlOnly ? ' (HL)' : ''} ({n || 'coming soon'})
                       </option>
                     );
                   })}
@@ -101,62 +173,65 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
               ))}
             </select>
           </div>
-          {topic.standards.length > 0 && (
-            <div className="std-filter" role="group" aria-label="Filter by standard">
-              <button className={`chip chip-btn${standard === '' ? ' is-active' : ''}`} onClick={() => setStandard('')}>
-                All standards
-              </button>
-              {topic.standards.map((s) => {
-                const n = questionsForTopic(topicId).filter((q) => q.standards.includes(s.id)).length;
-                return (
-                  <button key={s.id} className={`chip chip-btn${standard === s.id ? ' is-active' : ''}`} onClick={() => setStandard(s.id)} title={s.text} disabled={n === 0}>
-                    {s.code} <span className="muted">({n})</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-          {standard && <p className="muted small">{findStandard(standard)?.text}</p>}
+          {notice && <p className="muted small">{notice}</p>}
 
-          <div className="pick-actions">
-            <button className="btn btn-sm btn-ghost" onClick={() => setSelected((s) => [...new Set([...s, ...questions.map((q) => q.id)])])}>
-              Select all shown
-            </button>
-            <button className="btn btn-sm btn-ghost" onClick={() => setSelected([])} disabled={selected.length === 0}>
-              Clear selection
-            </button>
-          </div>
-
-          <ul className="pick-list">
-            {questions.map((q) => (
-              <li key={q.id} className={selected.includes(q.id) ? 'is-picked' : ''}>
-                <label>
-                  <input type="checkbox" checked={selected.includes(q.id)} onChange={() => toggle(q.id)} />
-                  <span className="pick-main">
-                    <span className="pick-title">{q.title}</span>
-                    <span className="pick-meta">
-                      <TypeChips types={q.types} />
+          {topic.standards.length === 0 || topicQuestions.length === 0 ? (
+            <div className="empty-inline">No questions for this topic yet.</div>
+          ) : (
+            <>
+              <StandardPicker topic={topic} selected={standards} onChange={setStandards} counts={countByStandard(topicQuestions)} />
+              {standards.length > 0 && (
+                <>
+                  <div className="pick-actions">
+                    <span className="muted small">
+                      {shown.length} question{shown.length === 1 ? '' : 's'} for the chosen standard{standards.length === 1 ? '' : 's'}
                     </span>
-                  </span>
-                  <span className="pick-side">
-                    <span className="muted small">{marksLabel(marksOf(q))}</span>
-                    <Difficulty level={q.difficulty} />
-                  </span>
-                </label>
-                <a className="pick-preview" href={href(`/q/${q.id}`)} title="Preview this question">
-                  Preview
-                </a>
-              </li>
-            ))}
-          </ul>
+                    <button className="btn btn-sm btn-ghost" onClick={() => setSelected((s) => [...new Set([...s, ...shown.map((q) => q.id)])])} disabled={shown.length === 0}>
+                      Add all shown
+                    </button>
+                    <button className="btn btn-sm btn-ghost" onClick={() => setSelected([])} disabled={selected.length === 0}>
+                      Clear selection
+                    </button>
+                  </div>
+                  <ul className="pick-list">
+                    {shown.map((q) => (
+                      <li key={q.id} className={selected.includes(q.id) ? 'is-picked' : ''}>
+                        <label>
+                          <input type="checkbox" checked={selected.includes(q.id)} onChange={() => toggle(q.id)} />
+                          <span className="pick-main">
+                            <span className="pick-title">
+                              {q.title}
+                              {q.level === 'HL' && <span className="chip chip-small chip-hl">HL</span>}
+                            </span>
+                            <span className="pick-meta">
+                              <TypeChips types={q.types} />
+                              <span className="std-codes">{q.standards.map((s) => findStandard(s)?.code ?? s).join(', ')}</span>
+                            </span>
+                          </span>
+                          <span className="pick-side">
+                            <span className="muted small">{marksLabel(marksOf(q))}</span>
+                            <Difficulty level={q.difficulty} />
+                          </span>
+                        </label>
+                        <a className="pick-preview" href={href(`/q/${q.id}`)} title="Preview this question">
+                          Preview
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                  {shown.length === 0 && <div className="empty-inline">No questions for these standards yet.</div>}
+                </>
+              )}
+            </>
+          )}
         </section>
 
         <div className="builder-side">
           <section className="card">
-            <h2 className="card-title">2 · Save for students</h2>
+            <h2 className="card-title">2 · Settings and save</h2>
             <label className="field">
               <span>Assignment title</span>
-              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={`${topic.code} ${topic.name} homework`} />
+              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={defaultTitle} />
             </label>
             <div className="selection-summary">
               <strong>{selected.length}</strong> question{selected.length === 1 ? '' : 's'} selected · <strong>{totalMarks}</strong> {totalMarks === 1 ? 'mark' : 'marks'}
@@ -170,6 +245,7 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
                 ))}
               </ol>
             )}
+            <SettingsForm value={settings} onChange={setSettings} />
             <button className="btn btn-primary btn-block" disabled={selected.length === 0} onClick={save}>
               Save assignment
             </button>
@@ -181,20 +257,21 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
             )}
           </section>
 
-          <PrintPanel selected={selected} title={title || `${topic.code} ${topic.name} homework`} assignments={assignments} />
+          <PrintPanel selected={selected} courseId={course.id} title={title || defaultTitle} assignments={assignments} />
         </div>
       </div>
 
       <section className="card saved">
         <h2 className="card-title">Saved assignments</h2>
-        <p className="muted small">Stored in this browser for now. Releasing solutions lets students see worked solutions and markschemes with their own numbers.</p>
+        <p className="muted small">Stored in this browser for now. Each assignment keeps the version of every question it was made with.</p>
         <div className="table-wrap">
           <table className="data-table assignments-table">
             <thead>
               <tr>
                 <th>Assignment</th>
                 <th>Questions</th>
-                <th>Solutions</th>
+                <th>Due</th>
+                <th>Rules</th>
                 <th aria-label="Actions" />
               </tr>
             </thead>
@@ -210,27 +287,48 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
   );
 }
 
+function keyLabel(a: Assignment): string {
+  if (a.settings.solutions === 'released') return 'Answer key open';
+  if (a.settings.solutions === 'after-due') return solutionsOpen(a) ? 'Answer key open (past due)' : 'Answer key after due date';
+  return 'Answer key hidden';
+}
+
 function AssignmentRow({ a }: { a: Assignment }) {
-  const marks = a.questionIds.reduce((s, id) => s + (getQuestion(id) ? marksOf(getQuestion(id)!) : 0), 0);
+  const [editing, setEditing] = useState(false);
+  const resolved = assignmentTemplates(a);
+  const marks = resolved.reduce((s, r) => s + marksOf(r.template), 0);
+  const revised = resolved.filter((r) => !r.exact).length;
+  const s = a.settings;
   return (
     <tr>
       <td>
         <strong>{a.title}</strong>
         {a.builtIn && <span className="chip chip-small">sample</span>}
-        <div className="muted small">Created {new Date(a.createdAt).toLocaleDateString()}</div>
+        <div className="muted small">
+          {courseOrDefault(a.courseId).name} · created {new Date(a.createdAt).toLocaleDateString()}
+        </div>
       </td>
       <td>
-        {a.questionIds.length} · {marksLabel(marks)}
+        {resolved.length} · {marksLabel(marks)}
+        {revised > 0 && <div className="muted small">{revised} updated since set (newest version used)</div>}
       </td>
       <td>
-        <label className="switch">
-          <input type="checkbox" checked={a.releaseSolutions} onChange={(e) => setReleaseSolutions(a.id, e.target.checked)} />
-          <span>{a.releaseSolutions ? 'Released' : 'Hidden'}</span>
-        </label>
+        {s.dueAt ? formatDue(s.dueAt) : <span className="muted">No due date</span>}
+        {isPastDue(a) && <span className="chip chip-small chip-closed">closed</span>}
+      </td>
+      <td className="small">
+        <div>{s.maxAttempts === null ? 'Unlimited tries' : `${s.maxAttempts} ${s.maxAttempts === 1 ? 'try' : 'tries'} per part`}</div>
+        <div className="muted">{keyLabel(a)}</div>
+        <div className="muted">
+          −{s.penaltyPerTry} per extra try · lowest {s.lowestScore}%
+        </div>
       </td>
       <td>
         <div className="row-actions">
-          <a className="btn btn-sm" href={href('/print', { ids: a.questionIds.join(','), title: a.title, a: a.id, sol: true, ms: true })}>
+          <button className="btn btn-sm" onClick={() => setEditing(true)}>
+            Edit settings
+          </button>
+          <a className="btn btn-sm" href={href('/print', { a: a.id, sol: true, ms: true })}>
             Print key
           </a>
           <a className="btn btn-sm btn-ghost" href={href(`/student/a/${a.id}`)}>
@@ -242,12 +340,40 @@ function AssignmentRow({ a }: { a: Assignment }) {
             </button>
           )}
         </div>
+        {editing && <EditSettings a={a} onClose={() => setEditing(false)} />}
       </td>
     </tr>
   );
 }
 
-function PrintPanel({ selected, title, assignments }: { selected: string[]; title: string; assignments: Assignment[] }) {
+function EditSettings({ a, onClose }: { a: Assignment; onClose: () => void }) {
+  const [value, setValue] = useState<AssignmentSettings>(a.settings);
+  const [error, setError] = useState('');
+  const save = () => {
+    if (updateSettings(a.id, value)) onClose();
+    else setError('Could not save: this browser is blocking storage (for example in a private window).');
+  };
+  return (
+    <Dialog title={`Settings · ${a.title}`} onClose={onClose}>
+      <SettingsForm value={value} onChange={setValue} />
+      {error && (
+        <p className="error-msg" role="alert">
+          {error}
+        </p>
+      )}
+      <div className="modal-actions">
+        <button className="btn btn-ghost" onClick={onClose}>
+          Cancel
+        </button>
+        <button className="btn btn-primary" onClick={save}>
+          Save settings
+        </button>
+      </div>
+    </Dialog>
+  );
+}
+
+function PrintPanel({ selected, courseId, title, assignments }: { selected: string[]; courseId: string; title: string; assignments: Assignment[] }) {
   const [target, setTarget] = useState('selection');
   const [version, setVersion] = useState<'base' | 'student'>('base');
   const [classCode, setClassCode] = useState('DEMO');
@@ -256,12 +382,12 @@ function PrintPanel({ selected, title, assignments }: { selected: string[]; titl
   const [ms, setMs] = useState(true);
 
   const saved = assignments.find((a) => a.id === target);
-  const ids = saved ? saved.questionIds : selected;
-  const printTitle = saved ? saved.title : title;
-  const assignmentKey = saved ? saved.id : 'worksheet';
+  const count = saved ? saved.items.length : selected.length;
   const student = version === 'student' && username.trim() ? studentKey(classCode || 'DEMO', username) : '';
-  const disabled = ids.length === 0 || (version === 'student' && !username.trim());
-  const url = href('/print', { ids: ids.join(','), title: printTitle, a: assignmentKey, student, sol, ms });
+  const disabled = count === 0 || (version === 'student' && !username.trim());
+  const url = saved
+    ? href('/print', { a: saved.id, student, sol, ms })
+    : href('/print', { ids: selected.join(','), course: courseId, title, student, sol, ms });
 
   return (
     <section className="card">

@@ -3,16 +3,19 @@
  * Phase 3 replaces these stores with the Supabase database (same function names).
  * Every access is wrapped in try/catch because storage can be blocked (private
  * windows, strict privacy settings).
+ *
+ * Keys live under "rice-hw:". Teacher data (assignments, drafts) and the session
+ * use stable keys and are migrated when their format changes (migrate.ts); cached
+ * marks ("work") carry their own schema version and are simply dropped when the
+ * marking rules change (see progress.ts).
  */
 
-/**
- * Namespace for everything this site stores. Bumped to v2 when marking rules
- * changed, so demo work saved by earlier builds is not shown with stale marks.
- */
-export const PREFIX = 'rice-hw:v2';
+export const PREFIX = 'rice-hw';
 const PROBE_KEY = `${PREFIX}:__probe`;
 
-const listeners = new Set<() => void>();
+/** Called with the changed key (without the "rice-hw:" prefix), or null if storage was cleared. */
+export type StorageListener = (key: string | null) => void;
+const listeners = new Set<StorageListener>();
 
 export function readJson<T>(key: string, fallback: T): T {
   try {
@@ -20,6 +23,24 @@ export function readJson<T>(key: string, fallback: T): T {
     return raw ? (JSON.parse(raw) as T) : fallback;
   } catch {
     return fallback;
+  }
+}
+
+/** Reads a key stored by an earlier build under a different namespace (for migration). */
+export function readLegacyJson<T>(fullKey: string): T | undefined {
+  try {
+    const raw = window.localStorage.getItem(fullKey);
+    return raw ? (JSON.parse(raw) as T) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function hasKey(key: string): boolean {
+  try {
+    return window.localStorage.getItem(`${PREFIX}:${key}`) !== null;
+  } catch {
+    return false;
   }
 }
 
@@ -35,7 +56,7 @@ export function writeJson(key: string, value: unknown, notify = true): boolean {
   } catch {
     ok = false; // storage unavailable: the page still works, it just won't remember
   }
-  if (notify) listeners.forEach((fn) => fn());
+  if (notify) listeners.forEach((fn) => fn(key));
   return ok;
 }
 
@@ -64,29 +85,16 @@ export function removeKey(key: string): void {
   } catch {
     /* ignore */
   }
-  listeners.forEach((fn) => fn());
-}
-
-/** Keys (without the prefix) that start with `start`. */
-export function keysStartingWith(start: string): string[] {
-  const out: string[] = [];
-  try {
-    for (let i = 0; i < window.localStorage.length; i++) {
-      const k = window.localStorage.key(i);
-      if (k && k.startsWith(`${PREFIX}:${start}`)) out.push(k.slice(PREFIX.length + 1));
-    }
-  } catch {
-    /* ignore */
-  }
-  return out;
+  listeners.forEach((fn) => fn(key));
 }
 
 /** Subscribe to any change made through this module (or in another tab). */
-export function subscribe(fn: () => void): () => void {
+export function subscribe(fn: StorageListener): () => void {
   listeners.add(fn);
   const onStorage = (e: StorageEvent) => {
     if (e.key === PROBE_KEY) return; // another tab's availability test, not a data change
-    if (!e.key || e.key.startsWith(PREFIX)) fn();
+    if (!e.key) fn(null);
+    else if (e.key.startsWith(`${PREFIX}:`)) fn(e.key.slice(PREFIX.length + 1));
   };
   window.addEventListener('storage', onStorage);
   return () => {
