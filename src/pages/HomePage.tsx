@@ -32,6 +32,7 @@ export function HomePage() {
   const ib = (topicId: string) => questionsForTopic(topicId, IB_PHYSICS_HL.id);
   const withQuestions = topics.filter((t) => questionsForTopic(t.id, IB_PHYSICS_SL.id).length > 0);
   const hlOnlyToCome = allTopics(IB_PHYSICS_HL).filter((t) => t.hlOnly && ib(t.id).length === 0).length;
+  const themeB = allTopics(IB_PHYSICS_HL).filter((t) => t.id.startsWith('ibp.B.'));
   const themeD = allTopics(IB_PHYSICS_HL).filter((t) => t.id.startsWith('ibp.D.'));
   const themeE = allTopics(IB_PHYSICS_HL).filter((t) => t.id.startsWith('ibp.E.'));
   const hlCount = (topicId: string) => ib(topicId).filter((q) => q.level === 'HL').length;
@@ -105,6 +106,10 @@ export function HomePage() {
                 Calculation, graph reading and drawing, and multiple choice, all marked by the computer
               </li>
               <li>
+                IB Physics · Theme B The particulate nature of matter: {themeCounts(themeB)}, including energy balance of the Earth, a p–V cycle and
+                graphs for absolute zero and internal resistance
+              </li>
+              <li>
                 IB Physics · Theme D Fields: {themeCounts(themeD)}, including a velocity selector and graphs of potential and of a changing field
               </li>
               <li>
@@ -135,7 +140,7 @@ export function HomePage() {
           <div>
             <h4 className="next">Coming next</h4>
             <ul>
-              <li>B.1 Thermal energy transfers (the next SL topic), the HL-only topics A.4 and A.5, then themes B and C; more AP and university units if the trial units work well</li>
+              <li>Theme C Wave behaviour (the remaining SL topics), the HL-only topics A.4 and A.5; more AP and university units if the trial units work well</li>
               <li>Supabase database: real teacher and student accounts, classes, saved work across devices, server-side marking and deadlines</li>
               <li>Teacher gradebook by class, assignment, student and standard</li>
               <li>Hosting on a host school networks allow (Cloudflare Pages or Netlify)</li>

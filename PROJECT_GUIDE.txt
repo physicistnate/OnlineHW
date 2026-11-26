@@ -39,8 +39,10 @@ listed as Physics/Math). HL includes every SL topic and question plus the
 HL-only topics (A.4, A.5, B.4, D.4, E.2); a question marked level 'HL'
 appears only in HL.
 
-Questions so far (158, 1029 marks): A.1 Kinematics (12), A.2 Forces and
-momentum (15, two of them HL only), A.3 Work, energy and power (13), D.1
+Questions so far (186, 1198 marks): A.1 Kinematics (12), A.2 Forces and
+momentum (15, two of them HL only), A.3 Work, energy and power (13), B.1
+Thermal energy transfers (6), B.2 Greenhouse effect (5), B.3 Gas laws (6),
+B.4 Thermodynamics (5, an HL-only topic), B.5 Current and circuits (6), D.1
 Gravitational fields (6, two HL only), D.2 Electric and magnetic fields (6,
 two HL only), D.3 Motion in electromagnetic fields (6), D.4 Induction (5, an
 HL-only topic), E.1
@@ -56,7 +58,8 @@ constant) and the whole of E.2; each has HL-only standards and questions.
 In Theme D they are in D.1 (gravitational potential and potential energy,
 potential gradients, escape speed and orbital energy, atmospheric drag), D.2
 (electric potential and potential energy, potential gradients, work) and
-the whole of D.4. HL-only standards are hidden in SL courses.
+the whole of D.4. Theme B's only HL content is the whole of B.4. HL-only
+standards are hidden in SL courses.
 
 One assignment can mix questions from any courses and topics (section 3,
 "Assignment builder").
@@ -396,6 +399,93 @@ University Physics I, Topic 3 Work, energy and power: 10 questions (67 marks)
       powers up                              and cities, dE/dt = P, 7 marks
   10. A home's daily power curve and         integral of a daily cosine load,
       time-of-use prices                     peak-hour energy, cost, battery, 8 marks
+
+B.1 Thermal energy transfers: 6 questions (37 marks), in bank order
+   1. Heating and boiling water in an         Q = mcΔT, time from the power, time to
+      electric kettle                        boil some away (Q = mL), why the
+                                             temperature stays at 100 °C, 6 marks
+   2. Measuring the specific heat capacity    energy gained by the water, c of the
+      of a metal by the method of mixtures   metal, which metal, the effect of
+                                             losses, 5 marks
+   3. Cooling a drink with ice: latent heat   energy to melt the ice, the final
+      of fusion                              temperature, the most ice the drink
+                                             can melt, why ice cools more, 7 marks
+   4. Thermal energy lost through a window    ΔQ/Δt = kAΔT/Δx, energy in kW h,
+      by conduction                          double glazing, convection, 5 marks
+   5. Radiation from a glowing heater         Wien's peak wavelength, P = σAT⁴,
+      element                                intensity b = P/4πd², doubling T,
+                                             6 marks
+   6. Boiling liquid nitrogen: density,       volume from density, Q = mL, volume
+      molecular spacing and internal energy  ratio, spacing ratio, kinetic energy
+                                             ratio, internal energy, 8 marks
+
+B.2 Greenhouse effect: 5 questions (29 marks), in bank order
+   1. The Earth's energy balance and its      (1 − α)S/4, black-body temperature, the
+      equilibrium temperature                emissivity that gives the mean surface
+                                             temperature, greenhouse gases, 6 marks
+   2. Melting sea ice and the Earth's albedo  absorbed intensities, extra power from
+                                             melted ice, compared with world energy
+                                             use, positive feedback, 6 marks
+   3. Equilibrium temperatures of other       Mercury, Venus, Mars or the Moon at three
+      worlds                                 distances: intensity, temperature,
+                                             greenhouse or not, the factor of 4,
+                                             5 marks
+   4. Why greenhouse gases trap the Earth's   peak wavelengths of the Sun and the
+      radiation but not the Sun's            Earth, σT⁴, resonance, the enhanced
+                                             greenhouse effect, 5 marks
+   5. What would make the Earth warmer?       the effective emissivity, the albedo or
+                                             emissivity for a warmer Earth, 7 marks
+
+B.3 Gas laws: 6 questions (36 marks), in bank order
+   1. The air in a car tyre                   n = pV/RT, molecules, pressure after a
+                                             drive, the kinetic explanation, 6 marks
+   2. A weather balloon rising through the    mass of helium, volume at altitude, when
+      atmosphere                             a real gas is ideal, 5 marks
+   3. How fast do gas molecules move?         (3/2)kT, rms speed, density from
+                                             p = ⅓ρv², helium against nitrogen,
+                                             6 marks
+   4. The internal energy of helium in a      n, U = (3/2)nRT, energy to warm it, why
+      cylinder                               there is no potential energy, 6 marks
+   5. How long does a scuba tank last?        mass of air, volume at the surface,
+                                             breaths at depth, real gases, 6 marks
+   6. Finding absolute zero with a            gradient from a table and graph, the
+      constant-volume gas thermometer        extrapolated zero, n from the gradient,
+                                             the meaning of absolute zero, 7 marks
+
+B.4 Thermodynamics (HL only): 5 questions (33 marks), in bank order
+   1. Heating a gas at constant pressure      V₂, W = pΔV, ΔU = (3/2)nRΔT,
+                                             Q = ΔU + W, why more energy than at
+                                             constant volume, 6 marks
+   2. A heat engine cycle on a p–V diagram    net work (area), heat taken in,
+                                             efficiency, the Carnot limit, the second
+                                             law, 7 marks
+   3. A power station as a heat engine        Carnot efficiency, waste heat, the rate
+                                             of entropy increase, why 0.75 is
+                                             impossible, 6 marks
+   4. A rapid (adiabatic) compression of      pV^(5/3), final temperature, work done
+      argon                                  on the gas, why it warms, 7 marks
+   5. Entropy: melting ice and a gas          ΔS = Q/T for ice and room, S = k ln Ω
+      spreading out                          for a free expansion, the second law,
+                                             7 marks
+
+B.5 Current and circuits: 6 questions (34 marks), in bank order
+   1. A phone battery                         charge from mA h, electrons, energy,
+                                             charging time, secondary cells, 5 marks
+   2. The resistance of a wire from its       R = ρL/A, current, power, twice as
+      resistivity                            long and twice as wide, 5 marks
+   3. The I–V characteristic of a filament    resistance at two p.d.s from a table and
+      lamp                                   graph, power, why R rises, ohmic or
+                                             not, 5 marks
+   4. Resistors in series and in parallel     total resistance, current, p.d.s and
+                                             branch current, removing a branch,
+                                             7 marks
+   5. A light sensor: a potential divider     output in the dark and in bright light,
+      with a light-dependent resistor        the fixed resistor for a switch-on
+                                             level, why the output is across the
+                                             LDR, 5 marks
+   6. The emf and internal resistance of a    emf and r from a V–I graph, short-
+      battery from a graph                   circuit current, power in a load, lost
+                                             volts, 7 marks
 
 D.1 Gravitational fields: 6 questions (42 marks), in bank order
    1. Gravitational field strength at the    g = GM/r² at the space station, the
@@ -766,8 +856,9 @@ that standard finds them. IB Mathematics standards (Topics 4 and 5, SL and
 AHL) paraphrase the IB guide's content headings; the numbering 4.1, 4.2, ...
 is ours, as for physics. Topics 1–3 are listed with no standards yet.
 
-Theme D and Theme E standards paraphrase the understandings in the IB guide
-(first assessment 2025); the numbering D.1.1, E.1.1, ... is ours. The IB's own site
+Theme B, Theme D and Theme E standards paraphrase the understandings in the
+IB guide (first assessment 2025); the numbering B.1.1, D.1.1, E.1.1, ... is
+ours. The IB's own site
 could not be reached from the environment they were written in, so their
 wording and the SL/HL split were checked against published summaries of the
 guide, not the guide itself. Please compare them with your copy of the guide
@@ -1246,6 +1337,19 @@ src/content: questions and the syllabus they are tagged with
     diagram drawn to scale), home-energy (appliance table), data-centre (AI
     data centre vs cities), hydroelectric, power-station, energy-density. See
     the list in section 3.
+  ib-physics/b1-thermal-energy-transfers/ … b5-current-and-circuits/ (one
+                            file per question; index.ts sets the order; B.4
+                            questions are HL only)
+    B.1: kettle, method-of-mixtures, ice-drink, window-conduction,
+         radiant-heater, liquid-nitrogen.
+    B.2: earth-balance, sea-ice-albedo, planet-temperatures,
+         greenhouse-gases, warmer-earth.
+    B.3: tyre-pressure, weather-balloon, molecular-speeds, helium-cylinder,
+         scuba-tank, absolute-zero.
+    B.4: piston-heating, pv-cycle, power-station-entropy,
+         adiabatic-compression, entropy-melting.
+    B.5: phone-battery, resistivity-wire, filament-lamp, series-parallel,
+         potential-divider, internal-resistance.
   ib-physics/d1-gravitational-fields/ … d4-induction/ (one file per question;
                             index.ts sets the order; HL-only questions have
                             courses ['ib-physics-hl'] and level 'HL')
@@ -1256,9 +1360,9 @@ src/content: questions and the syllabus they are tagged with
     D.3: electron-deflection, proton-circle, velocity-selector,
          fine-beam-tube, wire-force, parallel-wires.
     D.4: flux-coil, faraday-graph, moving-rod, lenz-magnet, generator.
-  ib-physics/constants.ts   Data-booklet constants for Themes D and E (c, e, h,
-                            mₑ, u, k, ε₀, μ₀, G, the Earth, σ, Wien, R₀, pc, ly,
-                            AU, the Sun).
+  ib-physics/constants.ts   Data-booklet constants (c, e, h, mₑ, u, k, ε₀, μ₀,
+                            G, the Earth, σ, Wien, R₀, pc, ly, AU, the Sun, R,
+                            k_B, N_A, the solar constant, 0 °C = 273 K).
   ib-physics/e1-structure-of-the-atom/ … e5-fusion-and-stars/ (one file per
                             question; index.ts sets the order; HL-only questions
                             have courses ['ib-physics-hl'] and level 'HL')
@@ -1463,8 +1567,9 @@ tests (run with: npm test)
                             assignment settings, failed saves, damaged data,
                             due dates, answer keys, pinned numbers and grades.
   topics.test.ts            Later topics and combined topics: which topics a
-                            question uses, the filter, that every A.1–A.3, D.1–
-                            D.4, E.1–E.5 (SL and HL), AP Unit 3, University Topic 3 and
+                            question uses, the filter, that every A.1–A.3,
+                            B.1–B.5, D.1–D.4, E.1–E.5 (SL and HL), AP Unit 3,
+                            University Topic 3 and
                             Modern Physics standard has a question without
                             later topics, and that each course's questions stay
                             in that course.
@@ -1631,6 +1736,10 @@ Content (each batch on its own branch and pull request)
       all), with real contexts such as medical tracers, reactors and stars.
   [x] University Modern Physics: 12 calculus-based questions for the same
       ideas (integrals, differentials, a differential equation).
+  [x] Theme B The particulate nature of matter: 28 questions covering every
+      SL and HL standard of B.1–B.5 (B.4 is HL only), including the Earth's
+      energy balance, a p–V cycle and graphs for absolute zero, a filament
+      lamp and internal resistance.
   [x] Theme D Fields: 23 questions covering every SL and HL standard of
       D.1–D.4 (D.4 is HL only), including a velocity selector before a mass
       spectrometer, graphs of potential and of a changing field, and a
@@ -1642,7 +1751,7 @@ Content (each batch on its own branch and pull request)
       pairings (the mathematics in front, the physics as the context); more
       pairings (Themes B and C, Topics 1–3); and enough questions at each level
       that every combination of Physics SL/HL and Math SL/HL has several.
-  [ ] Check the Theme D and E standards against your copy of the IB guide
+  [ ] Check the Theme B, D and E standards against your copy of the IB guide
       (see the note in section 3).
   [x] Trial units for other courses: AP Physics C: Mechanics Unit 3 and
       University Physics I Topic 3 (10 questions each, with integrals for
@@ -1652,11 +1761,11 @@ Content (each batch on its own branch and pull request)
       units are listed in the catalog, with no questions yet).
   [ ] More questions for standards with only one or two, so retakes have
       choice later, and more questions that combine topics.
-  [ ] The remaining SL topics, about 10 questions each: B.1 Thermal energy
-      transfers next, then B.2, B.3, B.5, C.1–C.5.
+  [ ] The remaining SL topics, about 6 questions each: C.1–C.5 (Theme C,
+      Wave behaviour).
   [ ] Once a year: check the real-world figures listed in section 3 (EIA,
       IEA, Epoch AI) and update the questions that quote them.
-  [ ] HL-only topics (A.4, A.5, B.4) and the HL additions inside shared
+  [ ] HL-only topics (A.4, A.5) and the HL additions inside shared
       topics (for example B.3, C.1), each with its HL standards
       marked 'HL' in the catalog.
   [ ] University Modern Physics Topic 1, special relativity.

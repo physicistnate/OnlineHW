@@ -75,6 +75,22 @@ describe('questions that use ideas from other topics', () => {
     expect(questionsForTopic('ibp.E.2', SL)).toEqual([]);
   });
 
+  it('has a question for every Theme B standard, in SL and in HL, without later topics', () => {
+    for (const course of [IB_PHYSICS_SL, IB_PHYSICS_HL]) {
+      const themeB = allTopics(course).filter((t) => t.id.startsWith('ibp.B.'));
+      // SL leaves out the HL-only topic B.4.
+      expect(themeB.map((t) => t.code)).toEqual(course === IB_PHYSICS_SL ? ['B.1', 'B.2', 'B.3', 'B.5'] : ['B.1', 'B.2', 'B.3', 'B.4', 'B.5']);
+      for (const topic of themeB) {
+        const { visible } = filterLater(questionsForTopic(topic.id, course.id), course.id, false);
+        expect(visible.length, `${course.id} ${topic.code}`).toBeGreaterThanOrEqual(4);
+        for (const s of topic.standards) {
+          expect(visible.some((q) => q.standards.includes(s.id)), `${course.id} ${s.code} has no question that avoids later topics`).toBe(true);
+        }
+      }
+    }
+    expect(questionsForTopic('ibp.B.4', SL)).toEqual([]);
+  });
+
   it('has a question for every Theme D standard, in SL and in HL, without later topics', () => {
     for (const course of [IB_PHYSICS_SL, IB_PHYSICS_HL]) {
       const themeD = allTopics(course).filter((t) => t.id.startsWith('ibp.D.'));
