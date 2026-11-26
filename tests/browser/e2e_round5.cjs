@@ -23,7 +23,7 @@ const UP_T3 = ['dot-product-3d', 'exponential-force', 'nonlinear-spring', 'pumpi
   console.log('Home page');
   await go('#/');
   const stats = await p.locator('.hero-stats').innerText();
-  expect(stats.includes('5 courses') && stats.includes('AP Physics C: Mechanics') && stats.includes('University Modern Physics'), 'the stats name all five courses');
+  expect(stats.includes('6 courses') && stats.includes('AP Physics C: Mechanics') && stats.includes('University Modern Physics') && stats.includes('IB++ Physics/Math'), 'the stats name all six courses (IB++ Physics/Math added in round 8)');
   const status = await p.locator('.status-card').innerText();
   expect(status.includes('A.3 Work, energy and power: 13 questions'), 'status lists A.3 with 13 questions (12 plus the Sankey diagram from round 6)');
   expect(status.includes('Unit 3 Work, Energy, and Power (10 questions)') && status.includes('Topic 3 Work, energy and power (10 questions'), 'status lists the two trial units');
@@ -31,7 +31,7 @@ const UP_T3 = ['dot-product-3d', 'exponential-force', 'nonlinear-spring', 'pumpi
   console.log('Course menu: grouped IB, AP and University');
   await go('#/bank');
   const groups = await p.locator('select[aria-label="Course"] optgroup').evaluateAll((els) => els.map((e) => e.label));
-  expect(JSON.stringify(groups) === JSON.stringify(['IB', 'AP', 'University']), `groups ${JSON.stringify(groups)}`);
+  expect(JSON.stringify(groups) === JSON.stringify(['IB', 'AP', 'University', 'IB++']), `groups ${JSON.stringify(groups)}`);
   const selectAll = () => p.getByRole('button', { name: 'Select all', exact: true }).click();
   await p.selectOption('select[aria-label="Course"]', 'ap-physics-c-mech');
   await p.waitForSelector('.topic-head');

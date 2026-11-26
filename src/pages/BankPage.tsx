@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { allTopics, courseOrDefault, courseTopic, findStandard } from '../content/catalog';
 import { dualQuestions, questionsCombining, questionsForCourse, questionsForTopic, type DualChoice } from '../content/registry';
-import { DualStandardPicker, cleanDualChoice } from '../components/DualStandardPicker';
+import { DualStandardPicker, cleanDualChoice, dualFromQuery, dualQuery } from '../components/DualStandardPicker';
 import { PageHeader } from '../components/Layout';
 import { StandardPicker, countByStandard } from '../components/StandardPicker';
 import { CombineTopics, CourseSelect, LaterTopicsToggle, ModeSwitch, UsesChips, courseNote, filterLater, type ChooseMode } from '../components/TopicFilters';
@@ -212,14 +212,21 @@ function DualBank({ courseId, initial }: { courseId: string; initial?: Partial<D
   const [choice, setChoiceState] = useState<DualChoice>(() => cleanDualChoice(course, initial));
   const [type, setType] = useState<QuestionType | ''>('');
   const [search, setSearch] = useState('');
+  // Choices are written to the address without navigating (so it can be bookmarked or shared).
   const setChoice = (c: DualChoice) => {
     setChoiceState(c);
-    window.history.replaceState(
-      null,
-      '',
-      href('/bank', { course: course.id, pt: c.physicsTopic, mt: c.mathTopic, ps: c.physics.join(','), ms: c.math.join(','), pl: c.physicsLevel, ml: c.mathLevel }),
-    );
+    window.history.replaceState(null, '', href('/bank', { course: course.id, ...dualQuery(c) }));
   };
+  // Following a link to this bank with other choices (or going back) starts from that link's choices.
+  useEffect(() => {
+    const onHash = () => {
+      const [path, qs = ''] = window.location.hash.replace(/^#/, '').split('?');
+      const query = new URLSearchParams(qs);
+      if (path === '/bank' && query.get('course') === course.id) setChoiceState(cleanDualChoice(course, dualFromQuery(query)));
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, [course]);
   const pool = dualQuestions(course.id, choice);
   const questions = pool.filter((q) => (!type || q.types.includes(type)) && (!search || q.title.toLowerCase().includes(search.toLowerCase())));
   const listShown = choice.physics.length + choice.math.length > 0;

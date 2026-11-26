@@ -28,10 +28,12 @@ const FEATURES = [
 
 export function HomePage() {
   const topics = allTopics(IB_PHYSICS_SL);
+  // IB Physics questions only (HL includes every SL question); IB++ questions share these topics.
+  const ib = (topicId: string) => questionsForTopic(topicId, IB_PHYSICS_HL.id);
   const withQuestions = topics.filter((t) => questionsForTopic(t.id, IB_PHYSICS_SL.id).length > 0);
-  const hlOnlyToCome = allTopics(IB_PHYSICS_HL).filter((t) => t.hlOnly && questionsForTopic(t.id).length === 0).length;
+  const hlOnlyToCome = allTopics(IB_PHYSICS_HL).filter((t) => t.hlOnly && ib(t.id).length === 0).length;
   const themeE = allTopics(IB_PHYSICS_HL).filter((t) => t.id.startsWith('ibp.E.'));
-  const hlCount = (topicId: string) => questionsForTopic(topicId).filter((q) => q.level === 'HL').length;
+  const hlCount = (topicId: string) => ib(topicId).filter((q) => q.level === 'HL').length;
   const marks = ALL_QUESTIONS.reduce((sum, q) => sum + q.parts.reduce((s, p) => s + p.marks, 0), 0);
   const ibpp = questionsForCourse(IBPP_PHYSICS_MATH.id);
 
@@ -88,15 +90,15 @@ export function HomePage() {
             <ul>
               <li>Question engine: seeded randomization, rounding-aware marking, error carried forward</li>
               <li>
-                IB Physics · A.1 Kinematics: {questionsForTopic('ibp.A.1').length} questions; A.2 Forces and momentum: {questionsForTopic('ibp.A.2').length} questions (
-                {questionsForTopic('ibp.A.2').filter((q) => q.level === 'HL').length} HL only); A.3 Work, energy and power: {questionsForTopic('ibp.A.3').length} questions.
+                IB Physics · A.1 Kinematics: {ib('ibp.A.1').length} questions; A.2 Forces and momentum: {ib('ibp.A.2').length} questions (
+                {hlCount('ibp.A.2')} HL only); A.3 Work, energy and power: {ib('ibp.A.3').length} questions.
                 Calculation, graph reading and drawing, and multiple choice, all marked by the computer
               </li>
               <li>
                 IB Physics · Theme E Nuclear and quantum physics:{' '}
                 {themeE
                   .map((t) => {
-                    const n = questionsForTopic(t.id).length;
+                    const n = ib(t.id).length;
                     const hl = hlCount(t.id);
                     return `${t.code} ${t.name}: ${n} questions${t.hlOnly ? ' (HL only)' : hl ? ` (${hl} HL only)` : ''}`;
                   })

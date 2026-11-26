@@ -36,6 +36,24 @@ export function defaultDualChoice(course: Course): DualChoice {
   return { physicsTopic: firstTopic('physics'), mathTopic: firstTopic('math'), physics: [], math: [], physicsLevel: 'HL', mathLevel: 'HL' };
 }
 
+/** A choice as a bank address writes it: pt, mt (topics), ps, ms (standards), pl, ml (levels). */
+export function dualFromQuery(query: URLSearchParams): Partial<DualChoice> {
+  const list = (k: string) => (query.get(k) ?? '').split(',').filter(Boolean);
+  return {
+    physicsTopic: query.get('pt') ?? undefined,
+    mathTopic: query.get('mt') ?? undefined,
+    physics: list('ps'),
+    math: list('ms'),
+    physicsLevel: query.get('pl') === 'SL' ? 'SL' : 'HL',
+    mathLevel: query.get('ml') === 'SL' ? 'SL' : 'HL',
+  };
+}
+
+/** The address parameters for a choice (the inverse of dualFromQuery). */
+export function dualQuery(c: DualChoice): Record<string, string> {
+  return { pt: c.physicsTopic, mt: c.mathTopic, ps: c.physics.join(','), ms: c.math.join(','), pl: c.physicsLevel, ml: c.mathLevel };
+}
+
 /**
  * Repairs a saved or linked choice: unknown topics and standards are dropped, and so are
  * HL standards and topics in a subject set to SL.

@@ -69,6 +69,18 @@ Still needed:
 - A builder filter for it, which can be combined with topics, like the combined-topics mode.
 - New questions written for each context.
 
+Started for mathematics: the IB++ Physics/Math course (round 8) tags each question with the IB Mathematics topic and standards it needs, and the bank and builder have a second standards box for them (see item 7).
+
+### 7. IB++: problems that need two IB subjects on purpose
+IB++ Physics/Math is a trial: IB Physics problems that need IB Mathematics: analysis and approaches in a non-trivial way, physics-led for now. It has 20 questions, five for each pairing of Themes A and E with Topics 4 (statistics and probability) and 5 (calculus), three SL and two HL in each pairing. Teachers choose physics and mathematics standards side by side, with SL or HL for each subject.
+
+Next, if the review goes well:
+- **Math-led questions:** a switch between physics-led and math-led questions for the same pairings, where the mathematics is in front and the physics is the context.
+- **More pairings:** Themes B, C and D with Topics 1–5, and Topics 1–3 (number and algebra, functions, geometry and trigonometry) with every theme.
+- **Every level combination:** enough questions that each of Physics SL/HL × Math SL/HL has several questions per pairing (an SL-only teacher currently sees three per pairing).
+- **Interactive figures:** slope fields (for example, for the energy of a ball among hills of different heights) and first- and second-derivative tests on graphs students drag.
+- **Other subject pairs:** for example Chemistry/Math or Physics/Chemistry, using the same two-box chooser.
+
 ### 6. Your own teaching order
 The "leave out questions that need later topics" option uses the IB guide's order (A.1, A.2, A.3, …, E.5). Because the IB lets schools teach topics in any order, a teacher could set their own order for each class, and "later topics" would follow it.
 
