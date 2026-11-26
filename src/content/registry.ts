@@ -21,8 +21,9 @@ import ibPhysicsE5 from './ib-physics/e5-fusion-and-stars';
 import apPhysicsCMechU3 from './ap-physics-c-mech/u3-work-energy-power';
 import universityPhysics1T3 from './university-physics-1/t3-work-energy-power';
 import universityModernPhysics from './university-modern-physics';
+import ibpp from './ibpp';
 
-export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1, ...ibPhysicsA2, ...ibPhysicsA3, ...ibPhysicsE1, ...ibPhysicsE2, ...ibPhysicsE3, ...ibPhysicsE4, ...ibPhysicsE5, ...apPhysicsCMechU3, ...universityPhysics1T3, ...universityModernPhysics];
+export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1, ...ibPhysicsA2, ...ibPhysicsA3, ...ibPhysicsE1, ...ibPhysicsE2, ...ibPhysicsE3, ...ibPhysicsE4, ...ibPhysicsE5, ...apPhysicsCMechU3, ...universityPhysics1T3, ...universityModernPhysics, ...ibpp];
 
 const byId = new Map(ALL_QUESTIONS.map((q) => [q.id, q]));
 const archived = new Map(ARCHIVED_REVISIONS.map((q) => [`${q.id}@v${q.version}`, q]));
@@ -90,4 +91,37 @@ export function questionsCombining(topicIds: string[], courseId: string): AnyTem
 export function questionsForTopic(topicId: string, courseId?: string): AnyTemplate[] {
   const pool = courseId ? questionsForCourse(courseId) : ALL_QUESTIONS;
   return pool.filter((q) => q.topic === topicId);
+}
+
+// ---------- IB++ ----------
+
+/** What a teacher has chosen in the two standards boxes of an IB++ course. */
+export interface DualChoice {
+  /** The topic each box is showing (choices in other topics stay chosen). */
+  physicsTopic: string;
+  mathTopic: string;
+  /** Chosen standard ids, from any topic of each subject. */
+  physics: string[];
+  math: string[];
+  physicsLevel: 'SL' | 'HL';
+  mathLevel: 'SL' | 'HL';
+}
+
+/** Questions of an IB++ course at the chosen levels (HL includes SL). */
+export function dualQuestionsAtLevels(courseId: string, physicsLevel: 'SL' | 'HL', mathLevel: 'SL' | 'HL'): AnyTemplate[] {
+  return questionsForCourse(courseId).filter((q) => !(physicsLevel === 'SL' && q.level === 'HL') && !(mathLevel === 'SL' && q.math?.level === 'HL'));
+}
+
+/**
+ * Questions that match an IB++ choice: any chosen physics standard (if some are chosen)
+ * and any chosen mathematics standard (if some are chosen). Nothing is listed until at
+ * least one standard is chosen.
+ */
+export function dualQuestions(courseId: string, choice: DualChoice): AnyTemplate[] {
+  if (choice.physics.length === 0 && choice.math.length === 0) return [];
+  return dualQuestionsAtLevels(courseId, choice.physicsLevel, choice.mathLevel).filter(
+    (q) =>
+      (choice.physics.length === 0 || q.standards.some((s) => choice.physics.includes(s))) &&
+      (choice.math.length === 0 || (q.math?.standards ?? []).some((s) => choice.math.includes(s))),
+  );
 }

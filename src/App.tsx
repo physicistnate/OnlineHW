@@ -30,6 +30,14 @@ export function App() {
           includeLater={route.query.get('later') === '1'}
           mode={route.query.get('mode') === 'combine' ? 'combine' : 'topic'}
           combine={(route.query.get('topics') ?? '').split(',').filter(Boolean)}
+          dual={{
+            physicsTopic: route.query.get('pt') ?? undefined,
+            mathTopic: route.query.get('mt') ?? undefined,
+            physics: (route.query.get('ps') ?? '').split(',').filter(Boolean),
+            math: (route.query.get('ms') ?? '').split(',').filter(Boolean),
+            physicsLevel: route.query.get('pl') === 'SL' ? 'SL' : 'HL',
+            mathLevel: route.query.get('ml') === 'SL' ? 'SL' : 'HL',
+          }}
         />
       );
       title = 'Question bank';

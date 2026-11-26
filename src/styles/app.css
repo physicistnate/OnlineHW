@@ -2179,3 +2179,159 @@ h4.next {
   max-width: 100%;
   min-width: 0;
 }
+
+/* ---------- IB++: one standards box per subject ---------- */
+
+.dual-picker {
+  display: grid;
+  gap: 14px;
+  margin: 10px 0 14px;
+  min-width: 0;
+}
+.dual-boxes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 760px) {
+  .dual-boxes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.dual-box {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-strong);
+  border-top-width: 4px;
+  background: var(--bg-elev);
+  min-width: 0;
+}
+.dual-box.is-physics {
+  border-color: rgba(90, 167, 255, 0.55);
+}
+.dual-box.is-math {
+  border-color: rgba(183, 148, 246, 0.6);
+}
+.dual-box-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dual-box-head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.dual-box.is-physics .dual-box-head h3 {
+  color: #8cc2ff;
+}
+.dual-box.is-math .dual-box-head h3 {
+  color: #cdb4ff;
+}
+.dual-box select {
+  max-width: 100%;
+  min-width: 0;
+}
+.dual-box.is-math .std-chip.is-on {
+  background: #6d4bb8;
+  border-color: #b794f6;
+}
+.dual-box.is-math .std-chip.is-on:hover {
+  background: #7b57cc;
+}
+.dual-box.is-physics .std-chip.is-on {
+  background: #1d6fbf;
+  border-color: #5aa7ff;
+}
+.dual-box.is-physics .std-chip.is-on:hover {
+  background: #2280d9;
+}
+.dual-box-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.segmented-sm button {
+  padding: 3px 10px;
+  font-size: 0.82rem;
+}
+.dual-chosen {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 760px) {
+  .dual-chosen {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.dual-chosen-col {
+  min-width: 0;
+  padding: 8px 10px;
+  border-left: 3px solid var(--border-strong);
+}
+.dual-chosen-col.is-physics {
+  border-left-color: #5aa7ff;
+}
+.dual-chosen-col.is-math {
+  border-left-color: #b794f6;
+}
+.dual-chosen-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+.dual-chosen-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+}
+.dual-chosen-col li {
+  min-width: 0;
+}
+.dual-chosen-chip {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-align: left;
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.dual-chosen-chip span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dual-chosen-chip:hover {
+  border-color: var(--bad);
+  color: var(--text);
+}
+.dual-chosen-col.is-physics .dual-chosen-chip strong {
+  color: #8cc2ff;
+}
+.dual-chosen-col.is-math .dual-chosen-chip strong {
+  color: #cdb4ff;
+}
+.std-codes .math-codes {
+  color: #cdb4ff;
+}
+.std.std-math {
+  color: #cdb4ff;
+}

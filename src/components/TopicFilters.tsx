@@ -19,7 +19,7 @@ export function CourseSelect({ value, onChange }: { value: string; onChange: (id
         <optgroup key={g.label} label={g.label}>
           {g.courses.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.name}
+              {c.menuName ?? c.name}
             </option>
           ))}
         </optgroup>
@@ -31,6 +31,8 @@ export function CourseSelect({ value, onChange }: { value: string; onChange: (id
 /** One line about the chosen course, under the page heading. */
 export function courseNote(course: Course): string {
   if (course.family === 'IB') return 'HL includes every SL question plus the HL-only topics.';
+  if (course.family === 'IB++')
+    return 'IB Physics problems that need IB Mathematics. Choose standards from either subject, or both, and SL or HL for each.';
   return 'Pilot course: so far only work, energy and power has questions.';
 }
 
@@ -76,6 +78,7 @@ const LATER_MEANS: Record<Course['family'], string> = {
   IB: 'later in the IB guide’s order, e.g. kinetic energy (A.3) in an A.2 question',
   AP: 'later in the course’s unit order, e.g. momentum (Unit 4) in a Unit 3 question',
   University: 'later in the course’s topic order, e.g. momentum (Topic 4) in a Topic 3 question',
+  'IB++': 'later in the IB guides’ order',
 };
 
 export function LaterTopicsToggle({ checked, onChange, hidden, course }: { checked: boolean; onChange: (v: boolean) => void; hidden: number; course: Course }) {

@@ -40,12 +40,25 @@ export interface Theme {
   topics: Topic[];
 }
 
+export interface Subject {
+  key: 'physics' | 'math';
+  name: string;
+  themes: Theme[];
+}
+
 export interface Course {
   id: string;
   name: string;
   shortName: string;
   /** For grouping in course menus. */
-  family: 'IB' | 'AP' | 'University';
+  family: 'IB' | 'AP' | 'University' | 'IB++';
+  /** The name in course menus, if shorter than `name` (e.g. "Physics/Math" under IB++). */
+  menuName?: string;
+  /**
+   * IB++ courses combine two subjects. Each has its own topics, standards and level
+   * (SL or HL), chosen separately in the bank and the builder.
+   */
+  subjects?: Subject[];
   style: Style;
   level?: 'SL' | 'HL';
   /** Courses whose questions also belong to this one (HL includes SL). */
@@ -380,7 +393,84 @@ export const UNIVERSITY_MODERN_PHYSICS: Course = {
   themes: [{ code: 'M', name: 'Modern physics', topics: Object.values(UNIVERSITY_MODERN_TOPICS) }],
 };
 
-export const COURSES: Course[] = [IB_PHYSICS_SL, IB_PHYSICS_HL, AP_PHYSICS_C_MECH, UNIVERSITY_PHYSICS_1, UNIVERSITY_MODERN_PHYSICS];
+// ---------- IB Mathematics: analysis and approaches (used by IB++) ----------
+// Standards paraphrase the IB Mathematics: analysis and approaches guide (first assessment
+// 2021): SL content, then the additional higher level (AHL) content, marked 'HL'. Only
+// Topics 4 and 5 have standards so far, the ones the first IB++ questions use.
+
+function mathTopic(n: string, name: string, standards: [string, string, 'HL'?][] = []): Topic {
+  return makeTopic('ibm', `Topic ${n}`, name, standards, false, n);
+}
+
+const MATH_TOPICS = {
+  T1: mathTopic('1', 'Number and algebra'),
+  T2: mathTopic('2', 'Functions'),
+  T3: mathTopic('3', 'Geometry and trigonometry'),
+  T4: mathTopic('4', 'Statistics and probability', [
+    ['4.1', 'Populations, samples and sampling; discrete and continuous data; reliability of data'],
+    ['4.2', 'Presenting data: frequency tables, histograms, cumulative frequency, box plots and outliers'],
+    ['4.3', 'Mean, median, mode, quartiles, range, variance and standard deviation; effect of changing the data'],
+    ['4.4', 'Bivariate data: scatter diagrams, Pearson’s correlation coefficient r, the regression line of y on x and predictions'],
+    ['4.5', 'Probability: trials, outcomes, sample spaces, relative frequency and expected numbers of occurrences'],
+    ['4.6', 'Combined, mutually exclusive, conditional and independent events; Venn and tree diagrams'],
+    ['4.7', 'Discrete random variables, their probability distributions and expected values'],
+    ['4.8', 'The binomial distribution, its mean and variance'],
+    ['4.9', 'The normal distribution and normal probability calculations'],
+    ['4.10', 'The regression line of x on y'],
+    ['4.11', 'Conditional probability and independence: formal definitions and formulae'],
+    ['4.12', 'Standardizing normal variables (z-values); inverse normal calculations with unknown mean or standard deviation'],
+    ['4.13', 'Bayes’ theorem (AHL)', 'HL'],
+    ['4.14', 'Variance of a discrete random variable; continuous random variables and probability density functions; their mean, median, mode and variance; linear transformations (AHL)', 'HL'],
+  ]),
+  T5: mathTopic('5', 'Calculus', [
+    ['5.1', 'Limits; the derivative as a gradient function and as a rate of change'],
+    ['5.2', 'Increasing and decreasing functions: the meaning of f′(x) > 0, f′(x) = 0 and f′(x) < 0'],
+    ['5.3', 'Differentiating ax^n and sums of such terms'],
+    ['5.4', 'Tangents and normals at a point, and their equations'],
+    ['5.5', 'Integration as anti-differentiation of ax^n; definite integrals and areas under curves using technology'],
+    ['5.6', 'Derivatives of x^n, sin x, cos x, e^x and ln x; the chain, product and quotient rules'],
+    ['5.7', 'The second derivative; the graphs of f, f′ and f″'],
+    ['5.8', 'Local maxima and minima, optimization, and points of inflexion'],
+    ['5.9', 'Kinematics: displacement, velocity, acceleration and total distance travelled'],
+    ['5.10', 'Indefinite integrals of x^n, sin x, cos x, 1/x and e^x and their linear composites; integration by substitution'],
+    ['5.11', 'Definite integrals; areas under curves and between curves'],
+    ['5.12', 'Continuity and differentiability; differentiation from first principles (AHL)', 'HL'],
+    ['5.13', 'Limits using l’Hôpital’s rule or Maclaurin series (AHL)', 'HL'],
+    ['5.14', 'Implicit differentiation; related rates of change; optimization (AHL)', 'HL'],
+    ['5.15', 'Derivatives of tan x, sec x, a^x, log_a x and the inverse trigonometric functions; partial fractions (AHL)', 'HL'],
+    ['5.16', 'Integration by substitution and by parts (AHL)', 'HL'],
+    ['5.17', 'Areas bounded by curves and the y-axis; volumes of revolution (AHL)', 'HL'],
+    ['5.18', 'First-order differential equations: Euler’s method, separating variables, integrating factors (AHL)', 'HL'],
+    ['5.19', 'Maclaurin series and their use in approximations (AHL)', 'HL'],
+  ]),
+};
+
+const MATH_THEMES: Theme[] = [{ code: 'Math', name: 'Mathematics: analysis and approaches', topics: Object.values(MATH_TOPICS) }];
+
+// ---------- IB++: IB Physics problems that deliberately need IB Mathematics ----------
+
+export const IBPP_PHYSICS_MATH: Course = {
+  id: 'ibpp-physics-math',
+  name: 'IB++ Physics/Math',
+  menuName: 'Physics/Math',
+  shortName: 'IB++ Phys/Math',
+  family: 'IB++',
+  style: 'IB',
+  level: 'HL',
+  printInstructions: [
+    'Answer all questions in the spaces provided. Each question needs both physics and mathematics.',
+    'Show your working, including any derivatives, integrals and statistics. If a final answer is wrong, correct working can still earn marks.',
+    'A graphic display calculator, the IB Physics data booklet and the IB Mathematics formula booklet may be used.',
+    'Take $g = {g}\\ \\mathrm{m\\,s^{-2}}$.',
+  ],
+  themes: [...IB_PHYSICS_THEMES, ...MATH_THEMES],
+  subjects: [
+    { key: 'physics', name: 'Physics', themes: IB_PHYSICS_THEMES },
+    { key: 'math', name: 'Mathematics', themes: MATH_THEMES },
+  ],
+};
+
+export const COURSES: Course[] = [IB_PHYSICS_SL, IB_PHYSICS_HL, AP_PHYSICS_C_MECH, UNIVERSITY_PHYSICS_1, UNIVERSITY_MODERN_PHYSICS, IBPP_PHYSICS_MATH];
 
 /** The course a question belongs to, for labels: an HL-level IB question shows as IB Physics HL. */
 export function courseOfQuestion(q: { courses: string[]; level?: 'SL' | 'HL' }): Course {
@@ -426,6 +516,7 @@ export const COURSE_GROUPS: { label: string; courses: Course[] }[] = [
   { label: 'IB', courses: COURSES.filter((c) => c.family === 'IB') },
   { label: 'AP', courses: COURSES.filter((c) => c.family === 'AP') },
   { label: 'University', courses: COURSES.filter((c) => c.family === 'University') },
+  { label: 'IB++', courses: COURSES.filter((c) => c.family === 'IB++') },
 ];
 
 export function allTopics(course: Course): Topic[] {
@@ -438,6 +529,7 @@ export const ALL_TOPICS: Topic[] = [
   ...Object.values(AP_C_MECH_TOPICS),
   ...Object.values(UNIVERSITY_1_TOPICS),
   ...Object.values(UNIVERSITY_MODERN_TOPICS),
+  ...Object.values(MATH_TOPICS),
 ];
 
 /** A topic with all of its standards, including HL-only ones. */

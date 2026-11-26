@@ -6,8 +6,9 @@
  * assignment can be loaded back ("Edit questions") to add or remove questions.
  */
 import { useEffect, useState } from 'react';
-import { allTopics, courseOfQuestion, courseOfQuestionIn, courseOrDefault, courseTopic, findStandard, findTopic, type Course } from '../content/catalog';
-import { getQuestion, questionsCombining, questionsForCourse, questionsForTopic } from '../content/registry';
+import { IBPP_PHYSICS_MATH, allTopics, courseOfQuestion, courseOfQuestionIn, courseOrDefault, courseTopic, findStandard, findTopic, type Course } from '../content/catalog';
+import { dualQuestions, getQuestion, questionsCombining, questionsForCourse, questionsForTopic, type DualChoice } from '../content/registry';
+import { DualStandardPicker, cleanDualChoice, dualCodes } from '../components/DualStandardPicker';
 import { keyNamesPhrase, sharedKeyName } from '../config/site';
 import { PageHeader } from '../components/Layout';
 import { Dialog } from '../components/Modal';
@@ -52,6 +53,8 @@ interface Draft {
   settings: AssignmentSettings;
   /** The saved assignment being edited ("Edit questions"), or null for a new one. */
   editingId: string | null;
+  /** IB++: the standards chosen in the physics and mathematics boxes. */
+  dual?: DualChoice;
 }
 const DRAFT_KEY = 'builder-draft';
 
@@ -125,8 +128,22 @@ function initialDraft(query: URLSearchParams): Draft {
     title: typeof saved?.title === 'string' ? saved.title : '',
     settings: { ...DEFAULT_SETTINGS, ...(saved?.settings ?? {}) },
     editingId: editing && !editing.builtIn ? editing.id : null,
+    dual: cleanDualChoice(IBPP_PHYSICS_MATH, saved?.dual),
   };
-  if (added) {
+  if (added && course.subjects) {
+    // An IB++ question added from the bank: choose its standards in both boxes, so it is visible.
+    const d = draft.dual!;
+    draft.dual = {
+      ...d,
+      physicsTopic: added.topic,
+      mathTopic: added.math?.topic ?? d.mathTopic,
+      physics: [...new Set([...d.physics, ...added.standards])],
+      math: [...new Set([...d.math, ...(added.math?.standards ?? [])])],
+      physicsLevel: added.level === 'HL' ? 'HL' : d.physicsLevel,
+      mathLevel: added.math?.level === 'HL' ? 'HL' : d.mathLevel,
+    };
+    if (!draft.selected.includes(added.id)) draft.selected = [...draft.selected, added.id];
+  } else if (added) {
     draft.mode = 'topic';
     if (draft.topicId !== added.topic) draft.standards = [];
     draft.topicId = added.topic;
@@ -151,6 +168,7 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
   const [title, setTitle] = useState(initial.title);
   const [settings, setSettings] = useState<AssignmentSettings>(initial.settings);
   const [editingId, setEditingId] = useState<string | null>(initial.editingId);
+  const [dual, setDual] = useState<DualChoice>(initial.dual ?? cleanDualChoice(IBPP_PHYSICS_MATH, null));
   const [savedMsg, setSavedMsg] = useState('');
   const [saveError, setSaveError] = useState('');
   const assignments = useAssignments();
@@ -170,10 +188,11 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
         title,
         settings,
         editingId,
+        dual,
       } satisfies Draft,
       false,
     );
-  }, [courseId, mode, topicId, standards, includeLater, combine, selected, title, settings, editingId]);
+  }, [courseId, mode, topicId, standards, includeLater, combine, selected, title, settings, editingId, dual]);
 
   // "Add to assignment" links (?add=...) are applied once, then dropped from the
   // address, so coming back to this page later does not re-add a removed question.
@@ -185,8 +204,10 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
   const topic = courseTopic(course, topicId) ?? courseTopic(course, firstTopicWithQuestions(course))!;
   const topicAll = questionsForTopic(topic.id, course.id);
   const { visible: topicQuestions, hidden: hiddenLater } = filterLater(topicAll, course.id, includeLater);
-  const shown =
-    mode === 'combine'
+  const isDual = !!course.subjects;
+  const shown = isDual
+    ? dualQuestions(course.id, dual)
+    : mode === 'combine'
       ? combine.length >= 2
         ? questionsCombining(combine, course.id)
         : []
@@ -204,8 +225,9 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
   // The course the assignment will be filed under: labels name shared SL questions HL in an HL assignment.
   const filedUnderCourse = mainCourse(selectedTemplates, course);
   const totalMarks = selectedTemplates.reduce((s, q) => s + marksOf(q), 0);
-  const browsingTitle =
-    mode === 'combine' && combine.length >= 2
+  const browsingTitle = isDual
+    ? `${course.shortName} homework`
+    : mode === 'combine' && combine.length >= 2
       ? `${combine.map((id) => findTopic(id)?.code ?? id).join(' + ')} homework`
       : `${topic.code} ${topic.name} homework`;
   const defaultTitle = titleFor(selectedTemplates, browsingTitle);
@@ -294,7 +316,7 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
           <h2 className="card-title">1 · Choose questions</h2>
           <div className="filters">
             <CourseSelect value={course.id} onChange={changeCourse} />
-            <ModeSwitch mode={mode} onChange={setMode} />
+            {!isDual && <ModeSwitch mode={mode} onChange={setMode} />}
           </div>
           <p className="muted small">{courseNote(course)}</p>
           {otherCourses > 0 && (
@@ -304,7 +326,9 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
             </p>
           )}
 
-          {mode === 'topic' ? (
+          {isDual ? (
+            <DualStandardPicker course={course} choice={dual} onChange={setDual} />
+          ) : mode === 'topic' ? (
             <>
               <div className="filters">
                 <select value={topic.id} onChange={(e) => changeTopic(e.target.value)} aria-label="Topic">
@@ -343,12 +367,12 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
             <CombineTopics course={course} selected={combine} onChange={setCombine} />
           )}
 
-          {(mode === 'topic' ? standards.length > 0 : combine.length >= 2) && (
+          {(isDual ? dual.physics.length + dual.math.length > 0 : mode === 'topic' ? standards.length > 0 : combine.length >= 2) && (
             <>
               <div className="pick-actions">
                 <span className="muted small">
                   {shown.length} question{shown.length === 1 ? '' : 's'}{' '}
-                  {mode === 'topic' ? `for the chosen standard${standards.length === 1 ? '' : 's'}` : 'that combine every chosen topic'}
+                  {isDual || mode === 'topic' ? 'for the chosen standards' : 'that combine every chosen topic'}
                 </span>
                 <button
                   className="btn btn-sm btn-ghost"
@@ -366,11 +390,12 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
                       <span className="pick-main">
                         <span className="pick-title">
                           {q.title}
-                          {q.level === 'HL' && <span className="chip chip-small chip-hl">HL</span>}
+                          {q.level === 'HL' && <span className="chip chip-small chip-hl">{isDual ? 'Physics HL' : 'HL'}</span>}
+                          {q.math?.level === 'HL' && <span className="chip chip-small chip-hl">Math HL</span>}
                         </span>
                         <span className="pick-meta">
                           <TypeChips types={q.types} />
-                          <span className="std-codes">{q.standards.map((s) => findStandard(s)?.code ?? s).join(', ')}</span>
+                          <span className="std-codes">{isDual ? dualCodes(q) : q.standards.map((s) => findStandard(s)?.code ?? s).join(', ')}</span>
                           <UsesChips q={q} courseId={course.id} />
                         </span>
                       </span>
@@ -387,7 +412,11 @@ export function BuilderPage({ query }: { query: URLSearchParams }) {
               </ul>
               {shown.length === 0 && (
                 <div className="empty-inline">
-                  {mode === 'topic' ? 'No questions for these standards yet.' : 'No questions combine all of these topics yet. Try choosing fewer topics.'}
+                  {isDual
+                    ? 'No questions match these standards yet. Try fewer standards, or one subject only.'
+                    : mode === 'topic'
+                      ? 'No questions for these standards yet.'
+                      : 'No questions combine all of these topics yet. Try choosing fewer topics.'}
                 </div>
               )}
             </>

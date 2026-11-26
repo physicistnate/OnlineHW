@@ -48,6 +48,12 @@ function samePoints(a: [number, number][], b: [number, number][]): boolean {
 export function questionMeta(template: AnyTemplate, context?: Course): string {
   const course = context ? courseOfQuestionIn(template, context) : findCourse(template.courses[0]);
   const topic = findTopic(template.topic);
+  if (template.math) {
+    // IB++: the physics topic, the mathematics topic, and the level of each.
+    const mathTopic = findTopic(template.math.topic);
+    const levels = `Physics ${template.level === 'HL' ? 'HL' : 'SL'}, Math ${template.math.level === 'HL' ? 'HL' : 'SL'}`;
+    return [course?.name, topic && `${topic.code} ${topic.name} + Math ${mathTopic?.code ?? ''} ${mathTopic?.name ?? ''}`.trim(), levels, template.paper].filter(Boolean).join(' · ');
+  }
   const hlTag = template.level === 'HL' && !course?.name.includes('HL') ? 'HL' : '';
   return [course?.name, topic && `${topic.code} ${topic.name}`, hlTag, template.paper].filter(Boolean).join(' · ');
 }

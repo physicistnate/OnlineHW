@@ -133,7 +133,7 @@ describe('courses and revisions', () => {
     expect(questionsForTopic('ibp.A.1', IB_PHYSICS_HL.id).length).toBe(questionsForTopic('ibp.A.1', IB_PHYSICS_SL.id).length);
     expect(courseOrDefault(null).id).toBe(IB_PHYSICS_SL.id);
     expect(courseOrDefault('no-such-course').id).toBe(IB_PHYSICS_SL.id);
-    expect(COURSES.map((c) => c.id)).toEqual(['ib-physics-sl', 'ib-physics-hl', 'ap-physics-c-mech', 'university-physics-1', 'university-modern-physics']);
+    expect(COURSES.map((c) => c.id)).toEqual(['ib-physics-sl', 'ib-physics-hl', 'ap-physics-c-mech', 'university-physics-1', 'university-modern-physics', 'ibpp-physics-math']);
   });
 
   it('shows HL-only standards and questions in HL only (A.2: collisions in two dimensions)', () => {

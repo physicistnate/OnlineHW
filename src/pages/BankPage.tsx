@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { allTopics, courseOrDefault, courseTopic, findStandard } from '../content/catalog';
-import { questionsCombining, questionsForTopic } from '../content/registry';
+import { dualQuestions, questionsCombining, questionsForCourse, questionsForTopic, type DualChoice } from '../content/registry';
+import { DualStandardPicker, cleanDualChoice } from '../components/DualStandardPicker';
 import { PageHeader } from '../components/Layout';
 import { StandardPicker, countByStandard } from '../components/StandardPicker';
 import { CombineTopics, CourseSelect, LaterTopicsToggle, ModeSwitch, UsesChips, courseNote, filterLater, type ChooseMode } from '../components/TopicFilters';
@@ -53,7 +54,15 @@ export function BankPage(props: {
   includeLater?: boolean;
   mode?: ChooseMode;
   combine?: string[];
+  /** IB++ courses: the choices in the physics and mathematics boxes. */
+  dual?: Partial<DualChoice>;
 }) {
+  const course = courseOrDefault(props.courseId);
+  if (course.subjects) return <DualBank courseId={course.id} initial={props.dual} />;
+  return <SingleBank {...props} />;
+}
+
+function SingleBank(props: { courseId?: string | null; topicId?: string; standards?: string[]; includeLater?: boolean; mode?: ChooseMode; combine?: string[] }) {
   const course = courseOrDefault(props.courseId);
   const topics = allTopics(course);
   const active =
@@ -197,6 +206,61 @@ export function BankPage(props: {
   );
 }
 
+/** The bank for an IB++ course: one standards box per subject, then the matching questions. */
+function DualBank({ courseId, initial }: { courseId: string; initial?: Partial<DualChoice> }) {
+  const course = courseOrDefault(courseId);
+  const [choice, setChoiceState] = useState<DualChoice>(() => cleanDualChoice(course, initial));
+  const [type, setType] = useState<QuestionType | ''>('');
+  const [search, setSearch] = useState('');
+  const setChoice = (c: DualChoice) => {
+    setChoiceState(c);
+    window.history.replaceState(
+      null,
+      '',
+      href('/bank', { course: course.id, pt: c.physicsTopic, mt: c.mathTopic, ps: c.physics.join(','), ms: c.math.join(','), pl: c.physicsLevel, ml: c.mathLevel }),
+    );
+  };
+  const pool = dualQuestions(course.id, choice);
+  const questions = pool.filter((q) => (!type || q.types.includes(type)) && (!search || q.title.toLowerCase().includes(search.toLowerCase())));
+  const listShown = choice.physics.length + choice.math.length > 0;
+  const typesHere = [...new Set(questionsForCourse(course.id).flatMap((q) => q.types))];
+
+  return (
+    <div className="container">
+      <PageHeader
+        eyebrow={course.name}
+        title="Question bank"
+        actions={<CourseSelect value={course.id} onChange={(id) => navigate(href('/bank', { course: id }).slice(1))} />}
+      >
+        Preview any question with a student’s numbers, then add it to an assignment. {courseNote(course)}
+      </PageHeader>
+      <DualStandardPicker course={course} choice={choice} onChange={setChoice} />
+      {listShown && (
+        <div className="filters">
+          <input className="search" type="search" placeholder="Search titles" value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Search question titles" />
+          <select value={type} onChange={(e) => setType(e.target.value as QuestionType | '')} aria-label="Filter by question type">
+            <option value="">All question types</option>
+            {typesHere.map((t) => (
+              <option key={t} value={t}>
+                {QUESTION_TYPE_LABELS[t]}
+              </option>
+            ))}
+          </select>
+          <span className="muted small">
+            {questions.length} question{questions.length === 1 ? '' : 's'}
+          </span>
+        </div>
+      )}
+      <div className="q-list" hidden={!listShown}>
+        {questions.map((q) => (
+          <QuestionCard key={q.id} q={q} courseId={course.id} />
+        ))}
+        {questions.length === 0 && listShown && <div className="card empty">No questions match these standards yet. Try fewer standards, or one subject only.</div>}
+      </div>
+    </div>
+  );
+}
+
 function QuestionCard({ q, courseId }: { q: AnyTemplate; courseId: string }) {
   return (
     <article className="card q-card">
@@ -204,7 +268,8 @@ function QuestionCard({ q, courseId }: { q: AnyTemplate; courseId: string }) {
         <a className="q-card-title" href={href(`/q/${q.id}`)}>
           {q.title}
         </a>
-        {q.level === 'HL' && <span className="chip chip-small chip-hl">HL</span>}
+        {q.level === 'HL' && <span className="chip chip-small chip-hl">{q.math ? 'Physics HL' : 'HL'}</span>}
+        {q.math?.level === 'HL' && <span className="chip chip-small chip-hl">Math HL</span>}
         <div className="q-card-meta">
           <TypeChips types={q.types} />
           <span className="muted small">{q.paper}</span>
@@ -216,6 +281,14 @@ function QuestionCard({ q, courseId }: { q: AnyTemplate; courseId: string }) {
             return (
               <span key={s} className="std" title={st?.text}>
                 {st?.code} {st?.text}
+              </span>
+            );
+          })}
+          {(q.math?.standards ?? []).map((s) => {
+            const st = findStandard(s);
+            return (
+              <span key={s} className="std std-math" title={st?.text}>
+                Math {st?.code} {st?.text}
               </span>
             );
           })}

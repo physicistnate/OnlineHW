@@ -226,6 +226,12 @@ export interface QuestionTemplate<PS extends ParamSpecs = ParamSpecs, R extends 
   /** 'HL' for higher-level-only content (shown in HL courses only). Default 'SL'. */
   level?: 'SL' | 'HL';
   /**
+   * IB++ only: the IB Mathematics topic and standards the question needs on purpose
+   * (`topic`, `standards` and `level` above are its physics side), and 'HL' if the
+   * mathematics is higher level.
+   */
+  math?: { topic: string; standards: string[]; level?: 'SL' | 'HL' };
+  /**
    * Ideas from other topics that the question also needs, as topic ids ('ibp.A.3') or
    * standard ids ('ibp.A.3.3'), e.g. a collision question that asks for kinetic energy.
    * Used to leave out questions that need topics not yet taught, and to find questions
