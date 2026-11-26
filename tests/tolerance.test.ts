@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeAnswerRanges } from '../src/engine/calc';
+import { computeAnswerRanges, padRange } from '../src/engine/calc';
 import { checkNumeric, gradePart, markGraph, remarkLaterParts } from '../src/engine/grading';
 import { buildInstance, instantiate } from '../src/engine/instance';
 import { getQuestion } from '../src/content/registry';
@@ -211,7 +211,8 @@ describe('graph drawing', () => {
     const res = gradePart(lift, inst, distPart, responses);
     expect(res.status).toBe('correct');
     expect(res.ecf).toBe(true);
-    expect(gradePart(lift, inst, distPart, { ...responses, b: { kind: 'numeric', value: '31' } }).status).toBe('incorrect');
+    // Every answer within 2 % is accepted, so 30.5 would pass; 32 is too far from 30.
+    expect(gradePart(lift, inst, distPart, { ...responses, b: { kind: 'numeric', value: '32' } }).status).toBe('incorrect');
     expect(gradePart(lift, inst, distPart, { ...responses, b: { kind: 'numeric', value: '22.5' } }).status).toBe('correct');
   });
 
@@ -236,15 +237,32 @@ describe('review round 2 regressions', () => {
   });
 
   it('follows through from an accepted rounded answer', () => {
-    // u = 2.0, v = 15, s = 340: a = 0.325 exactly; 0.33 is accepted, so 13/0.33 = 39 must be too.
-    const inst = buildInstance(train, { u: 2, v: 15, s: 340 });
+    // u = 5.0, v = 15, s = 800: a = 0.125 exactly; 0.13 is accepted, so 10/0.13 = 77 must be too,
+    // although 77 is more than 2 % from the exact 80 s.
+    const inst = buildInstance(train, { u: 5, v: 15, s: 800 });
     const [a, b] = inst.parts;
-    expect(gradePart(train, inst, a, { a: num('0.33') }).status).toBe('correct');
-    const res = gradePart(train, inst, b, { a: num('0.33'), b: num('39') });
+    expect(gradePart(train, inst, a, { a: num('0.13') }).status).toBe('correct');
+    expect(gradePart(train, inst, b, { b: num('77') }).status).toBe('incorrect');
+    const res = gradePart(train, inst, b, { a: num('0.13'), b: num('77') });
     expect(res.status).toBe('correct');
     expect(res.ecf).toBeFalsy();
     expect(res.message).toMatch(/rounded answer/);
-    expect(gradePart(train, inst, b, { a: num('0.33'), b: num('37') }).status).toBe('incorrect');
+    expect(gradePart(train, inst, b, { a: num('0.13'), b: num('73') }).status).toBe('incorrect');
+  });
+
+  it('accepts every answer within 2 % of the exact value', () => {
+    // A one-step answer: exact 0.4068 accepts 0.40 to 0.41 to 2 s.f., and 0.399 to 0.415 to 3 s.f.
+    const r = padRange({ exact: 0.406807, min: 0.406807, max: 0.406807 });
+    expect(r.lo).toBeCloseTo(0.406807 * 0.98, 12);
+    expect(r.hi).toBeCloseTo(0.406807 * 1.02, 12);
+    for (const typed of ['0.40', '0.41', '0.4', '0.399', '0.403', '0.410', '0.414']) expect(checkNumeric(typed, r).status, typed).toBe('correct');
+    for (const typed of ['0.39', '0.42', '0.397', '0.416']) expect(checkNumeric(typed, r).status, typed).toBe('incorrect');
+    // A wider range from rounding in the working is kept as it is.
+    const wide = padRange({ exact: 10, min: 9.5, max: 10.6 });
+    expect(wide.lo).toBeCloseTo(9.45, 12);
+    expect(wide.hi).toBeCloseTo(10.65, 12);
+    // Zero stays exact.
+    expect(padRange({ exact: 0, min: 0, max: 0 })).toEqual({ exact: 0, lo: 0, hi: 0 });
   });
 
   it('does not carry forward inadmissible inputs or break the method’s assumptions', () => {

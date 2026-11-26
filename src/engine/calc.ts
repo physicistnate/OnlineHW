@@ -202,11 +202,13 @@ export function computeAnswerRanges<P, R extends Results>(
 
 /**
  * Adds the small extra allowance (TOLERANCE.relFloor, or a question's own
- * tolerance) to both ends of a raw range.
+ * tolerance) to both ends of a raw range, and makes sure the range reaches at least
+ * TOLERANCE.relMin (2 %) either side of the exact value.
  */
 export function padRange(raw: RawRange, tol?: { rel?: number; abs?: number }): AnswerRange {
   const pad = (tol?.rel ?? TOLERANCE.relFloor) * Math.abs(raw.exact) + (tol?.abs ?? 0);
-  return { exact: raw.exact, lo: raw.min - pad, hi: raw.max + pad };
+  const floor = TOLERANCE.relMin * Math.abs(raw.exact);
+  return { exact: raw.exact, lo: Math.min(raw.min - pad, raw.exact - floor), hi: Math.max(raw.max + pad, raw.exact + floor) };
 }
 
 /**

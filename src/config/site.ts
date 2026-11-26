@@ -27,6 +27,12 @@ export const TOLERANCE = {
   minSigFigs: 2,
   /** Extra relative allowance added to both ends of the accepted range (0.005 = 0.5 %). */
   relFloor: 0.005,
+  /**
+   * Every answer within this fraction of the exact value is accepted, whatever the
+   * rounding analysis gives (0.02 = 2 %), so that rounding in a student's working never
+   * needs a teacher to check it: for an exact 0.4068, anything from 0.399 to 0.415.
+   */
+  relMin: 0.02,
   /** Safety cap on the number of rounding combinations evaluated per question. */
   maxRuns: 6000,
 };
