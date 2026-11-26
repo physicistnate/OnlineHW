@@ -35,4 +35,14 @@ export const IB = {
   Msun: 1.99e30,
   /** Mass of a proton (kg), for counting hydrogen nuclei. */
   mp: 1.673e-27,
+  /** Gravitational constant, N m² kg⁻². */
+  G: 6.67e-11,
+  /** Permittivity and permeability of free space: C² N⁻¹ m⁻², T m A⁻¹. */
+  eps0: 8.85e-12,
+  mu0: 4 * Math.PI * 1e-7,
+  /** Mass (kg) and radius (m) of the Earth. */
+  ME: 5.97e24,
+  RE: 6.37e6,
+  /** Astronomical unit, m. */
+  AU: 1.5e11,
 } as const;
