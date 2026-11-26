@@ -91,6 +91,18 @@ export function radiusInSolarRadii(T: number, L: number): number {
   return Math.sqrt(L) * (T_SUN / T) ** 2;
 }
 
+/** The dashed lines of constant radius drawn on the diagram, in units of the Sun's radius. */
+export const RADIUS_LINES = [0.01, 0.1, 1, 10, 100, 1000];
+
+/** Where a star of radius R (in R☉) lies among the dashed lines: "between the lines for 100 and 1000 solar radii". */
+export function radiusLinesAround(R: number): string {
+  const top = RADIUS_LINES[RADIUS_LINES.length - 1];
+  if (R >= top) return `beyond the line for ${top} solar radii`;
+  const below = RADIUS_LINES.filter((line) => line <= R);
+  const above = RADIUS_LINES.find((line) => line > R)!;
+  return below.length === 0 ? `below the line for ${above} solar radii` : `between the lines for ${below[below.length - 1]} and ${above} solar radii`;
+}
+
 /** Position across the plot from the hot edge (u) and down from the top (v), both 0–1. */
 export function plotUnits(T: number, logL: number): [number, number] {
   const u = (Math.log10(HR_AXES.tHot) - Math.log10(T)) / (Math.log10(HR_AXES.tHot) - Math.log10(HR_AXES.tCool));

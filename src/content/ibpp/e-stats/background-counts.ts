@@ -56,7 +56,9 @@ export default defineQuestion({
     const mc = c.carry(m, 'mean');
     const src0 = p.R - mc;
     const src = src0 / 2 ** p.k;
-    const z = c.carry(src, 'src', 3) / c.carry(sd, 'sd', 3);
+    const sdC = c.carry(sd, 'sd', 3);
+    c.assume(sdC > 0); // a standard deviation must be positive
+    const z = c.carry(src, 'src', 3) / sdC;
     const pBg = 1 - normalCdf(z, 0, 1);
     return { mean: m, sd, src0, src, z, pBg };
   },

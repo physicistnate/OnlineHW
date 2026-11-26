@@ -182,6 +182,12 @@ export interface GraphResponseSpec<C> {
   snap?: { x: number; y: number };
   /** Allowed error per coordinate. Defaults to half the snap spacing. */
   tolerance?: { x: number; y: number };
+  /**
+   * How the drawing earns marks: for each correct line segment (the default), or for
+   * each point in the right place, e.g. one mark for each end of a straight line.
+   * Match the markscheme.
+   */
+  markBy?: 'segments' | 'points';
 }
 
 export type ResponseSpec<C, R> = NumericResponseSpec<R> | McqResponseSpec<C> | TextResponseSpec | GraphResponseSpec<C>;
@@ -214,6 +220,12 @@ export interface QuestionTemplate<PS extends ParamSpecs = ParamSpecs, R extends 
   id: string;
   /** Increase when the question changes in a way that affects answers. */
   version: number;
+  /**
+   * Archived revisions only: tells apart two revisions saved under the same version
+   * number. Build 59f80b0 changed four questions without raising their versions; its
+   * revisions are archived with build 'r6', and assignments made then name the build.
+   */
+  build?: string;
   title: string;
   courses: string[];
   topic: string;
@@ -288,6 +300,7 @@ export type ResponseInstance =
       snap: { x: number; y: number };
       tolerance: { x: number; y: number };
       start: [number, number][];
+      markBy: 'segments' | 'points';
     };
 
 export interface PartInstance {

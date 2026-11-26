@@ -44,6 +44,16 @@ function samePoints(a: [number, number][], b: [number, number][]): boolean {
   return a.length === b.length && a.every(([x, y], i) => Math.abs(x - b[i][0]) < 1e-9 && Math.abs(y - b[i][1]) < 1e-9);
 }
 
+/**
+ * The exam format, said honestly: IB Paper 2 has short-answer and extended-response
+ * questions only, so a "Paper 2 style" question whose explanations are asked as
+ * multiple choice (for computer marking) says so.
+ */
+export function paperLabel(template: Pick<AnyTemplate, 'paper' | 'parts'>): string | undefined {
+  if (template.paper === 'Paper 2 style' && template.parts.some((p) => p.response.kind === 'mcq')) return 'Paper 2 style, explanations as multiple choice';
+  return template.paper;
+}
+
 /** "IB Physics SL · E.1 Structure of the atom · Paper 2 style"; in an HL assignment, shared questions say IB Physics HL. */
 export function questionMeta(template: AnyTemplate, context?: Course): string {
   const course = context ? courseOfQuestionIn(template, context) : findCourse(template.courses[0]);
@@ -52,10 +62,10 @@ export function questionMeta(template: AnyTemplate, context?: Course): string {
     // IB++: the physics topic, the mathematics topic, and the level of each.
     const mathTopic = findTopic(template.math.topic);
     const levels = `Physics ${template.level === 'HL' ? 'HL' : 'SL'}, Math ${template.math.level === 'HL' ? 'HL' : 'SL'}`;
-    return [course?.name, topic && `${topic.code} ${topic.name} + Math ${mathTopic?.code ?? ''} ${mathTopic?.name ?? ''}`.trim(), levels, template.paper].filter(Boolean).join(' · ');
+    return [course?.name, topic && `${topic.code} ${topic.name} + Math ${mathTopic?.code ?? ''} ${mathTopic?.name ?? ''}`.trim(), levels, paperLabel(template)].filter(Boolean).join(' · ');
   }
   const hlTag = template.level === 'HL' && !course?.name.includes('HL') ? 'HL' : '';
-  return [course?.name, topic && `${topic.code} ${topic.name}`, hlTag, template.paper].filter(Boolean).join(' · ');
+  return [course?.name, topic && `${topic.code} ${topic.name}`, hlTag, paperLabel(template)].filter(Boolean).join(' · ');
 }
 
 /** The grading state recorded after a result (null for unreadable input or written answers). */
@@ -396,7 +406,8 @@ function PartAnswer({ part, work, disabled, onChange, onClear, onCheck }: PartAn
           {!disabled && (
             <>
               <p className="muted small">
-                Drag the {r.start.length} points into place; they snap to the grid and are joined in order of time. Each straight section is marked separately. Keyboard: Tab to a point, then use the arrow keys.
+                Drag the {r.start.length} points into place; they snap to the grid and are joined in order of time.{' '}
+                {r.markBy === 'points' ? 'Each point in the right place earns marks.' : 'Each straight section is marked separately.'} Keyboard: Tab to a point, then use the arrow keys.
               </p>
               <div className="answer-row">
                 <button className="btn btn-primary btn-sm" onClick={onCheck}>

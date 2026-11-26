@@ -26,7 +26,8 @@ import ibpp from './ibpp';
 export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1, ...ibPhysicsA2, ...ibPhysicsA3, ...ibPhysicsE1, ...ibPhysicsE2, ...ibPhysicsE3, ...ibPhysicsE4, ...ibPhysicsE5, ...apPhysicsCMechU3, ...universityPhysics1T3, ...universityModernPhysics, ...ibpp];
 
 const byId = new Map(ALL_QUESTIONS.map((q) => [q.id, q]));
-const archived = new Map(ARCHIVED_REVISIONS.map((q) => [`${q.id}@v${q.version}`, q]));
+const revisionKey = (id: string, version: number, build?: string) => `${id}@v${version}${build ? `#${build}` : ''}`;
+const archived = new Map(ARCHIVED_REVISIONS.map((q) => [revisionKey(q.id, q.version, q.build), q]));
 
 /** The current revision of a question. */
 export function getQuestion(id: string): AnyTemplate | undefined {
@@ -40,12 +41,18 @@ export interface Resolved {
 }
 
 /** A specific revision of a question (falls back to the current revision if it was not archived). */
-export function resolveQuestion(id: string, version?: number): Resolved | undefined {
+export function resolveQuestion(id: string, version?: number, build?: string): Resolved | undefined {
   const current = byId.get(id);
-  if (version === undefined || current?.version === version) return current ? { template: current, exact: true } : undefined;
-  const old = archived.get(`${id}@v${version}`);
+  if (version === undefined || (current?.version === version && !build)) return current ? { template: current, exact: true } : undefined;
+  // A named build first (an archived revision that reused a version number), then the plain revision.
+  const old = (build ? archived.get(revisionKey(id, version, build)) : undefined) ?? archived.get(revisionKey(id, version));
   if (old) return { template: old, exact: true };
   return current ? { template: current, exact: false } : undefined;
+}
+
+/** The archived revisions of a question saved under one version number (more than one if a build reused it). */
+export function archivedRevisions(id: string, version: number): AnyTemplate[] {
+  return ARCHIVED_REVISIONS.filter((q) => q.id === id && q.version === version);
 }
 
 /** Course ids whose questions belong to a course (itself plus any it includes, e.g. HL includes SL). */

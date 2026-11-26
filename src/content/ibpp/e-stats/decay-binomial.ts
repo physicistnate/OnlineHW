@@ -25,6 +25,8 @@ export default defineQuestion({
   compute: (p, c) => {
     const pd = 1 - 0.5 ** p.k;
     const pdc = c.carry(pd, 'pd');
+    // A probability outside 0 to 1 from (a) earns no follow-through; any other wrong value does.
+    c.assume(pdc >= 0 && pdc <= 1);
     const Eleft = p.n * (1 - pdc);
     const ways = choose(p.n, p.n / 2);
     const pHalf = ways / 2 ** p.n;

@@ -41,7 +41,9 @@ export default defineQuestion({
     const varX = EX2 - EX ** 2;
     // E(D) = tE(X), with t from the student's distance in (a) (d = 5t).
     const ED = (c.carry(d5, 'd5') / 5) * EX;
-    const EK = 0.5 * (p.m as number) * (c.carry(varX, 'varX', 3) + EX ** 2);
+    const varC = c.carry(varX, 'varX', 3);
+    c.assume(varC >= 0); // a negative variance earns no follow-through
+    const EK = 0.5 * (p.m as number) * (varC + EX ** 2);
     return { t, d5, EX, EX2, varX, ED, EK };
   },
 

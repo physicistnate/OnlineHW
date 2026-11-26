@@ -86,7 +86,7 @@ The "leave out questions that need later topics" option uses the IB guide's orde
 
 ## Suggested earlier in this project
 
-- **Written (typed) answers**, such as "explain" and "describe" parts. These are left out for now: every part is marked by the computer. When they return, the teacher marks them, with optional **AI marking against the markscheme**. Estimated cost for 150 students: about $2–7 a month with Claude Haiku 5.5, or $33–130 with Sonnet 5.5.
+- **Written (typed) answers**, such as "explain" and "describe" parts. These are left out for now: every part is marked by the computer, so explanations are asked as multiple choice and such questions are labelled "Paper 2 style, explanations as multiple choice" (real IB Paper 2 has no multiple choice). Written answers would let those parts be true Paper 2 parts. When they return, the teacher marks them, with optional **AI marking against the markscheme**. Estimated cost for 150 students: about $2–7 a month with Claude Haiku 5.5, or $33–130 with Sonnet 5.5.
 - **Teacher gradebook:** by class, assignment, student and standard, with live progress, and the option to change a mark by hand (Phase 3).
 - **"Reset password" button** for teachers, once students have passwords (Phase 3).
 - **More courses:** the rest of AP Physics C: Mechanics and University Physics I (one trial unit each so far), special relativity for University Modern Physics, AP Physics 1, 2 and C: E&M, general physics, AP Precalculus, AP Calculus AB/BC and IB Maths. The maths courses need answers that are expressions (such as 2x + 3), so they need a symbolic answer checker.

@@ -95,7 +95,7 @@ export function buildInstance(
         const expected = spec.expected(ctx);
         const snap = spec.snap ?? { x: axes.x.minor ?? axes.x.major, y: axes.y.minor ?? axes.y.major };
         const tolerance = spec.tolerance ?? { x: snap.x / 2, y: snap.y / 2 };
-        response = { kind: 'graph', axes, expected, snap, tolerance, start: startPoints(axes, expected.length, snap) };
+        response = { kind: 'graph', axes, expected, snap, tolerance, start: startPoints(axes, expected.length, snap), markBy: spec.markBy ?? 'segments' };
         break;
       }
     }

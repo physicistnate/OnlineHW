@@ -214,7 +214,10 @@ Question types implemented (all marked by the computer):
                     src/engine/hr.ts, shared by the drawing, the question
                     and the tests.
   Graph drawing     Students drag points that snap to the grid (mouse, touch
-                    or keyboard arrows). Marked segment by segment.
+                    or keyboard arrows). Marked segment by segment, or point
+                    by point where the markscheme gives a mark for each point
+                    (the drone's straight acceleration line: one mark for
+                    each end).
   Written answers   Not online for now: every online part is marked by the
                     computer (the tests enforce this). Written "explain"
                     questions exist as paper-only extensions on some
@@ -530,7 +533,7 @@ yet for Topic 1, special relativity)
                                              written derivation of U)
 
 IB++ Physics/Math: 20 questions (159 marks). Each is an IB Physics problem
-(Paper 2 style, IB wording and British spelling) that needs a topic of IB
+(IB wording and British spelling) that needs a topic of IB
 Mathematics: analysis and approaches in a non-trivial way: early parts lean
 on the physics or the mathematics, later parts need both. For this trial the
 questions are physics-led and cover IB Physics Themes A and E with
@@ -655,6 +658,14 @@ British spelling (centre, colour, aluminium); AP and university questions use
 US spelling (center, color, aluminum). Marking keys are named by exam style
 (KEY_NAMES in src/config/site.ts): IB markschemes, AP scoring guidelines and
 university grading rubrics. No past-paper or textbook questions are copied.
+
+Exam-format labels: IB Paper 2 has short-answer and extended-response
+questions only, but every online part here is marked by the computer, so
+explanations are asked as multiple choice. A "Paper 2 style" question with
+multiple-choice parts is therefore labelled "Paper 2 style, explanations as
+multiple choice" (paperLabel() in src/components/QuestionView.tsx); 63 of the
+77 Paper 2 style questions are. Written explanations can still be printed as
+paper-only extensions where a question has them.
 
 
 -------------------------------------------------------------------------------
@@ -806,7 +817,10 @@ OTHER ANSWER TYPES
                     correct vertices (within half a grid square) and nothing
                     else sits between them. Points are matched to vertices in
                     any order, so one misplaced point only costs the segments
-                    it touches (e.g. 2/3 for a wrong starting point).
+                    it touches (e.g. 2/3 for a wrong starting point). A
+                    question can instead mark point by point (markBy:
+                    'points'), when its markscheme gives a mark for each
+                    point: one correct end of a straight line earns 1 of 2.
 
 SETTINGS (src/config/site.ts)
   TOLERANCE.carrySigFigs  [3, 2]   rounding levels tried for carried values
@@ -1007,7 +1021,9 @@ src/content: questions and the syllabus they are tagged with
                             physics standard and any chosen mathematics
                             standard, at the SL/HL level chosen for each.
   archive/index.ts          Earlier versions of questions that were revised after
-                            being assigned (four so far; see section 8).
+                            being assigned (see section 8). Two builds reused
+                            version 1 by mistake; build 59f80b0's revisions
+                            are kept as version 1 with build 'r6'.
   ib-physics/graph-axes.ts  niceAxis(): tidy axes (5–8 labelled lines) for
                             graphs drawn in questions.
   ib-physics/a1-kinematics/ (one file per question; index.ts sets the order)
@@ -1187,13 +1203,20 @@ src/store: saved data (browser storage now, Supabase in Phase 3)
                             check that storage is allowed.
   migrate.ts                One-time carry-over of assignments, settings, the
                             sign-in and the builder draft saved by earlier
-                            builds (cached marks are not carried over).
+                            builds (cached marks are not carried over). Also a
+                            one-time repair for build 59f80b0, which changed
+                            four questions without raising their versions: each
+                            assignment that names one of them at version 1 is
+                            told which version 1 it used, from its students'
+                            saved work (pinned numbers, kinds of part, marks)
+                            or, with nothing saved, the date it was made.
   assignments.ts            Saved assignments (question versions and settings),
                             the built-in sample assignment, due-date and
                             answer-key checks.
   progress.ts               Each student's saved responses, latest results,
                             tries and grading marks per question version, and
-                            the pinned numbers.
+                            the pinned numbers (and every student's work for a
+                            question, for repairs).
   studentData.ts            A student's own version of a question (pinned
                             numbers) and their grades for an assignment.
   session.ts                The signed-in student (class code + username).
@@ -1259,6 +1282,13 @@ tests (run with: npm test)
                             pairing (three SL, two HL), the two-subject filter
                             and its SL/HL switches, saved and linked choices,
                             and that IB++ questions stay in IB++.
+  review8.test.ts           Review 8: work saved on build 59f80b0 resolved to
+                            the revisions it was saved with (the HR answers on
+                            their parts, a completed assignment at 13/13); the
+                            valley and puck variants; point-by-point graph
+                            marking; no follow-through from an impossible
+                            probability; the binding-energy, decay-chain and HR
+                            wording; and honest exam-format labels.
   review6.test.ts           Review 6: the follow-through cases the review
                             submitted, physics wording, derivations kept for
                             paper, the HR diagram in every version, and the
@@ -1355,9 +1385,14 @@ Revising a question that has already been assigned
   Assignments made earlier keep the archived version; new assignments get the
   new one, and students' saved work is kept per version, so answers to old
   parts never appear on new ones. (Wording-only fixes that change no numbers
-  or answers can be made in place without a new version.) Archived so far:
-  version 1 of the HR diagram, isotope generator, Kelvin–Helmholtz and Compton
-  scattering questions, from before review 6.
+  or answers can be made in place without a new version.) Never change a
+  question's numbers, parts or marks without raising its version: build
+  59f80b0 did, for four questions, and needed a repair (store/migrate.ts).
+  Archived so far: version 1 of the HR diagram, isotope generator,
+  Kelvin–Helmholtz and Compton scattering questions as first published and as
+  build 59f80b0 had them (build 'r6'), and version 1 of the IB++ valley and
+  cut-string questions (before review 8 removed variants where the block
+  passed the crest or the wall crossed the orbit).
 
 
 -------------------------------------------------------------------------------

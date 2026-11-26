@@ -92,8 +92,12 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   const handles = part(4).locator('.g-handle');
   expect((await handles.count()) === 2, 'the acceleration graph has two points to drag');
   const press = async (i, key, n) => { await handles.nth(i).focus(); for (let k = 0; k < n; k++) await p.keyboard.press(key); };
+  expect((await part(4).innerText()).includes('Each point in the right place earns marks'), 'the instructions say each point earns marks');
   await press(0, 'ArrowLeft', 3);
   await press(0, 'ArrowDown', 4);
+  await part(4).locator('button', { hasText: 'Check graph' }).click();
+  const half = await part(4).locator('.feedback').innerText();
+  expect(half.includes('1 of 2 points are in the right place') && !half.includes('Correct'), `one correct end earns 1 of the 2 marks, as the markscheme says ("${half.replace(/\s+/g, ' ').trim()}")`);
   await press(1, 'ArrowRight', 3);
   await press(1, 'Shift+ArrowDown', 5);
   await press(1, 'ArrowDown', 3);
@@ -132,6 +136,42 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   expect(paper.includes('IB Mathematics formula booklet') && paper.includes('needs both physics and mathematics'), 'the paper has the IB++ instructions');
   expect(paper.includes('A drone takes off') && paper.includes('A tiny sample contains only'), 'both questions are printed');
   expect((await p.locator('.paper svg').count()) >= 1, 'the graph to draw on is printed');
+  expect(!/drag/i.test(paper), 'the printed questions do not tell students to drag points');
+  expect(paper.includes('Paper 2 style, explanations as multiple choice'), 'a question with multiple-choice parts is not labelled plain Paper 2 style');
+
+  console.log('Work saved on build 59f80b0 (four questions changed without a new version)');
+  await go('');
+  await p.evaluate(() => {
+    localStorage.clear();
+    const S = 'PHYS1:alex';
+    const done = (marks) => Object.fromEntries(marks.map(([pid, max]) => [pid, { response: { kind: 'numeric', value: '1' }, checked: { kind: 'numeric', value: '1' }, last: { status: 'correct', score: max, max, attempts: 1 }, attempts: 1 }]));
+    const mcq = (choice, max) => ({ response: { kind: 'mcq', choice }, checked: { kind: 'mcq', choice }, last: { status: 'correct', score: max, max, attempts: 1 }, attempts: 1 });
+    localStorage.setItem('rice-hw:migrated', '1');
+    localStorage.setItem('rice-hw:session', JSON.stringify({ classCode: 'PHYS1', username: 'alex' }));
+    localStorage.setItem(
+      'rice-hw:assignments',
+      JSON.stringify([
+        { id: 'hw-hr', title: 'HR from 59f80b0', courseId: 'ib-physics-hl', items: [{ id: 'ibp-e5-hr-diagram', version: 1 }], createdAt: '2026-11-25T22:15:00.000Z', settings: {} },
+        { id: 'hw-uni', title: 'Modern physics from 59f80b0', courseId: 'university-modern-physics', items: [{ id: 'ump-t5-isotope-generator', version: 1 }, { id: 'ump-t7-kelvin-helmholtz', version: 1 }], createdAt: '2026-11-25T23:40:00.000Z', settings: {} },
+      ]),
+    );
+    localStorage.setItem(`rice-hw:params:${S}::hw-hr::ibp-e5-hr-diagram@v1`, JSON.stringify({ set: 's1', order: 'o1', pair: 'p1' }));
+    localStorage.setItem(`rice-hw:work:m3:${S}::hw-hr::ibp-e5-hr-diagram@v1`, JSON.stringify({ b: mcq('o1', 1) }));
+    localStorage.setItem(`rice-hw:work:m3:${S}::hw-uni::ump-t5-isotope-generator@v1`, JSON.stringify({ ...done([['a', 2], ['b', 2], ['c', 1]]), d: mcq('o0', 1) }));
+    localStorage.setItem(`rice-hw:work:m3:${S}::hw-uni::ump-t7-kelvin-helmholtz@v1`, JSON.stringify({ ...done([['a', 2], ['b', 2], ['c', 2]]), d: mcq('o0', 1) }));
+  });
+  // Load the site afresh, as a browser that last ran build 59f80b0 would (the repair runs at start-up).
+  await p.reload();
+  await p.waitForLoadState('networkidle');
+  await go('#/student');
+  const uniCard = await p.locator('.assignment-card').filter({ hasText: 'Modern physics from 59f80b0' }).innerText();
+  expect(uniCard.includes('IB 13/13'), `the completed modern physics assignment shows 13/13 again (${uniCard.replace(/\s+/g, ' ').match(/IB \d+\/\d+/)?.[0]})`);
+  await go('#/student/a/hw-hr');
+  const hrB = part(1);
+  expect((await hrB.locator('input[type="radio"]').count()) === 4 && (await hrB.locator('.num-input').count()) === 0, 'HR (b) is the multiple-choice part the answer was given for');
+  expect(await hrB.locator('input[type="radio"]').nth(1).isChecked(), 'the saved choice is shown in (b)');
+  const repaired = await p.evaluate(() => JSON.parse(localStorage.getItem('rice-hw:assignments')).flatMap((a) => a.items.map((i) => i.build ?? '-')).join(','));
+  expect(repaired === 'r6,r6,r6', `the assignments now name build r6 (${repaired})`);
 
   console.log('Phone widths');
   const phone = await b.newPage({ viewport: { width: 375, height: 800 }, deviceScaleFactor: 1 });

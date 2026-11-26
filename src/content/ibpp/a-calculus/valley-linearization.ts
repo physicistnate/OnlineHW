@@ -2,9 +2,12 @@ import { defineQuestion } from '../../../engine/define';
 import { fmtA, fmtW } from '../../../engine/numbers';
 import { Q, tex, unitTex as u } from '../../../engine/units';
 
+/** Height of the hilltop (m): h(2b) = 4ab²e⁻². */
+const hilltop = (p: { a: number; b: number }) => 4 * p.a * p.b ** 2 * Math.exp(-2);
+
 export default defineQuestion({
   id: 'ibpp-a5-valley-linearization',
-  version: 1,
+  version: 2,
   title: 'A valley and a hill: equilibrium, energy and a Maclaurin approximation',
   courses: ['ibpp-physics-math'],
   topic: 'ibp.A.3',
@@ -22,6 +25,9 @@ export default defineQuestion({
     v0: { choices: [2, 3, 4], base: 3 },
     m: { choices: [0.1, 0.2, 0.5], base: 0.2 },
   },
+  // The block turns back below the crest (by a clear margin, even with g = 9.8), so the
+  // height in (a) is really the highest point it reaches.
+  constraint: (p) => p.v0 ** 2 / (2 * 9.8) <= 0.9 * hilltop(p),
 
   compute: (p, c) => {
     const hReach = p.v0 ** 2 / (2 * c.g);
@@ -42,7 +48,10 @@ export default defineQuestion({
       marks: 2,
       prompt: ({ d }) => `The block passes the bottom of the valley with speed ${Q(d.v0, 'm s-1')}, moving towards the hill. Calculate the greatest height it can rise to.`,
       response: { kind: 'numeric', answer: 'hReach', symbol: 'h', unit: 'm', positive: true },
-      solution: ({ d, r, g }) => [{ text: 'With no friction, mechanical energy is conserved: the kinetic energy at the bottom becomes gravitational potential energy.', math: tex`\tfrac{1}{2}mv^2 = mgh \;\Rightarrow\; h = \frac{v^2}{2g} = \frac{${d.v0}^2}{2 \times ${g}} = ${fmtA(r.hReach)}\ ${u('m')}` }],
+      solution: ({ d, r, g }) => [
+        { text: 'With no friction, mechanical energy is conserved: the kinetic energy at the bottom becomes gravitational potential energy.', math: tex`\tfrac{1}{2}mv^2 = mgh \;\Rightarrow\; h = \frac{v^2}{2g} = \frac{${d.v0}^2}{2 \times ${g}} = ${fmtA(r.hReach)}\ ${u('m')}` },
+        { text: `This is lower than the top of the hill (${fmtA(r.H)} m, part (d)), so the block stops on the slope and slides back down.` },
+      ],
       markscheme: ({ r }) => [{ mark: '$\\tfrac{1}{2}mv^2 = mgh$' }, { mark: tex`$h = ${fmtA(r.hReach)}\ ${u('m')}$` }],
     },
     {

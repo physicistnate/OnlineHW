@@ -3,10 +3,21 @@ import { fmtA, fmtW } from '../../../engine/numbers';
 import { tex, unitTex as u } from '../../../engine/units';
 
 /** Parent → daughter pairs with half-lives in the unit used throughout (d or h). */
-const PAIRS: Record<string, { parent: string; daughter: string; TP: number; TD: number; unit: 'd' | 'h'; words: string; per: string; seconds: number }> = {
-  baLa: { parent: 'Barium-140', daughter: 'lanthanum-140', TP: 12.75, TD: 1.68, unit: 'd', words: 'days', per: 'day⁻¹', seconds: 86400 },
-  pbBi: { parent: 'Lead-212', daughter: 'bismuth-212', TP: 10.6, TD: 1.01, unit: 'h', words: 'hours', per: 'h⁻¹', seconds: 3600 },
-  teI: { parent: 'Tellurium-132', daughter: 'iodine-132', TP: 76.8, TD: 2.3, unit: 'h', words: 'hours', per: 'h⁻¹', seconds: 3600 },
+const PAIRS: Record<string, { parent: string; daughter: string; then: string; TP: number; TD: number; unit: 'd' | 'h'; words: string; per: string; seconds: number }> = {
+  baLa: { parent: 'Barium-140', daughter: 'lanthanum-140', then: 'which decays to stable cerium-140', TP: 12.75, TD: 1.68, unit: 'd', words: 'days', per: 'day⁻¹', seconds: 86400 },
+  pbBi: {
+    parent: 'Lead-212',
+    daughter: 'bismuth-212',
+    // Bismuth-212 reaches lead-208 through thallium-208 (3.1 min) or polonium-212 (0.3 μs).
+    then: 'which decays to stable lead-208 through a short-lived nuclide (thallium-208 or polonium-212) that has no effect on the numbers here',
+    TP: 10.6,
+    TD: 1.01,
+    unit: 'h',
+    words: 'hours',
+    per: 'h⁻¹',
+    seconds: 3600,
+  },
+  teI: { parent: 'Tellurium-132', daughter: 'iodine-132', then: 'which decays to stable xenon-132', TP: 76.8, TD: 2.3, unit: 'h', words: 'hours', per: 'h⁻¹', seconds: 3600 },
 };
 
 export default defineQuestion({
@@ -43,7 +54,7 @@ export default defineQuestion({
 
   stem: ({ p, d }) => {
     const pr = PAIRS[p.pair];
-    return `${pr.parent} (half-life ${pr.TP} ${pr.words}) decays to ${pr.daughter} (half-life ${pr.TD} ${pr.words}), which decays to a stable nuclide. A sample contains $N_0 = ${d.N0}$ nuclei of ${pr.parent.toLowerCase()} and none of ${pr.daughter} at $t = 0$. The numbers of parent and daughter nuclei, $N_P$ and $N_D$, satisfy $$\\frac{dN_P}{dt} = -\\lambda_P N_P, \\qquad \\frac{dN_D}{dt} = \\lambda_P N_P - \\lambda_D N_D$$ where $\\lambda_P$ and $\\lambda_D$ are the decay constants, and $N_P = N_0e^{-\\lambda_P t}$. Times are in ${pr.words}.`;
+    return `${pr.parent} (half-life ${pr.TP} ${pr.words}) decays to ${pr.daughter} (half-life ${pr.TD} ${pr.words}), ${pr.then}. A sample contains $N_0 = ${d.N0}$ nuclei of ${pr.parent.toLowerCase()} and none of ${pr.daughter} at $t = 0$. The numbers of parent and daughter nuclei, $N_P$ and $N_D$, satisfy $$\\frac{dN_P}{dt} = -\\lambda_P N_P, \\qquad \\frac{dN_D}{dt} = \\lambda_P N_P - \\lambda_D N_D$$ where $\\lambda_P$ and $\\lambda_D$ are the decay constants, and $N_P = N_0e^{-\\lambda_P t}$. Times are in ${pr.words}.`;
   },
 
   parts: [

@@ -128,8 +128,9 @@ export default defineQuestion({
     {
       label: '(e)',
       marks: 2,
-      prompt: ({ d }) => `On the axes, draw the graph of the acceleration $a$ of the drone against $t$ for $0 \\le t \\le ${d.T}\\ \\mathrm{s}$. Drag the points to the ends of your line.`,
-      response: { kind: 'graph', axes: ({ p }) => axes(p), expected: ({ p }) => aEnds(p), snap: { x: 0.5, y: 1 } },
+      prompt: ({ d }) => `On the axes, draw the graph of the acceleration $a$ of the drone against $t$ for $0 \\le t \\le ${d.T}\\ \\mathrm{s}$.`,
+      // One mark for each end of the line, as the markscheme gives them.
+      response: { kind: 'graph', axes: ({ p }) => axes(p), expected: ({ p }) => aEnds(p), snap: { x: 0.5, y: 1 }, markBy: 'points' },
       solution: ({ p, d }) => [
         { text: 'The acceleration is the second derivative of the height:', math: tex`a = \frac{d^2h}{dt^2} = ${2 * Number(d.p)} - ${6 * Number(d.q)}t` },
         {

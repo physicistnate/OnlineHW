@@ -39,6 +39,8 @@ export const DEFAULT_SETTINGS: AssignmentSettings = {
 export interface AssignmentItem {
   id: string;
   version: number;
+  /** Which archived revision, when a build reused a version number (see QuestionTemplate.build). */
+  build?: string;
 }
 
 export interface Assignment {

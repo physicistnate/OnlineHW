@@ -35,7 +35,9 @@ export default defineQuestion({
     // The braking distance is subtracted from a similar distance: students keep it in full.
     const tmax = (D - brake) / p.v;
     const pStop = normalCdf(c.carry(tmax, 'tmax', 3), p.mu, p.sigma);
-    const nFail = 500 * (1 - c.carry(pStop, 'pStop', 3));
+    const pStopC = c.carry(pStop, 'pStop', 3);
+    c.assume(pStopC >= 0 && pStopC <= 1); // an impossible probability earns no follow-through
+    const nFail = 500 * (1 - pStopC);
     return { brake, sMean, pSlow, D, tmax, pStop, nFail };
   },
 

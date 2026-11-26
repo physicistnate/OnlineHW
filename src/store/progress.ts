@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { LastMark } from '../engine/gradebook';
 import type { PartResponse, PartResult } from '../engine/types';
-import { readJson, removeKey, subscribe, writeJson } from './storage';
+import { listKeys, readJson, removeKey, subscribe, writeJson } from './storage';
 
 export interface PartWork {
   /** What is in the answer box now (a draft until it is checked). */
@@ -65,6 +65,21 @@ export function loadPinnedParams(studentKey: string, assignmentKey: string, work
 /** Remembers a student's numbers so later changes to a question's ranges never change them. */
 export function savePinnedParams(studentKey: string, assignmentKey: string, workId: string, params: Record<string, number | string>): boolean {
   return writeJson(paramsKey(studentKey, assignmentKey, workId), params, false);
+}
+
+/** Every student's saved work for one question of an assignment (used to repair old data). */
+export function allWorkFor(assignmentKey: string, workId: string): QuestionWork[] {
+  return listKeys(`work:${MARKS_SCHEMA}:`)
+    .filter((k) => k.endsWith(`::${assignmentKey}::${workId}`))
+    .map((k) => readJson<QuestionWork>(k, {}));
+}
+
+/** Every student's pinned numbers for one question of an assignment (used to repair old data). */
+export function allPinnedParamsFor(assignmentKey: string, workId: string): Record<string, number | string>[] {
+  return listKeys('params:')
+    .filter((k) => k.endsWith(`::${assignmentKey}::${workId}`))
+    .map((k) => readJson<Record<string, number | string> | null>(k, null))
+    .filter((p): p is Record<string, number | string> => !!p && typeof p === 'object');
 }
 
 /** Saves changes to one or more parts at once: { partId: patch, ... }. */

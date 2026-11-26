@@ -32,7 +32,7 @@ export function studentInstance(template: AnyTemplate, studentKey: string, assig
 /** The templates of an assignment, at the revisions it was created with. */
 export function assignmentTemplates(a: Assignment): { template: AnyTemplate; exact: boolean }[] {
   return a.items.flatMap((item) => {
-    const r = resolveQuestion(item.id, item.version);
+    const r = resolveQuestion(item.id, item.version, item.build);
     return r ? [r] : [];
   });
 }

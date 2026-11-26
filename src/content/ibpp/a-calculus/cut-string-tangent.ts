@@ -28,7 +28,7 @@ const point = (p: P) => {
 
 export default defineQuestion({
   id: 'ibpp-a5-cut-string-tangent',
-  version: 1,
+  version: 2,
   title: 'Cutting the string: circular motion and the tangent to a circle',
   courses: ['ibpp-physics-math'],
   topic: 'ibp.A.2',
@@ -45,10 +45,12 @@ export default defineQuestion({
     T: { choices: [0.8, 1, 1.2, 1.5, 2], base: 1.2 },
     D: { choices: [0.5, 1, 1.5, 2], base: 1 },
   },
+  // A sensible speed, a hit point clearly away from x = 0, and a wall that lies outside
+  // the circle (at least 10 cm beyond its highest point), so the puck could go round.
   constraint: (p) => {
     const { x0, y0, r } = point(p);
     const v = (2 * Math.PI * r) / p.T;
-    return v >= 1 && v <= 10 && Math.abs(x0 - (p.D * y0) / x0) >= 0.2;
+    return v >= 1 && v <= 10 && Math.abs(x0 - (p.D * y0) / x0) >= 0.2 && y0 + p.D >= r + 0.1;
   },
 
   compute: (p, c) => {
@@ -65,7 +67,7 @@ export default defineQuestion({
 
   stem: ({ p, d }) => {
     const { x0, y0, r } = point(p);
-    return `A small puck on a frictionless horizontal table is tied by a string to a peg at the origin O. It moves anticlockwise at constant speed in a circle of radius ${Q(r, 'm')} centred on O, making one revolution every ${Q(d.T, 's')}. Positions on the table are given as coordinates $(x, y)$ in metres. When the puck is at the point P$(${x0}, ${y0})$ the string is cut. A straight wall runs along the line $y = ${Number((y0 + p.D).toFixed(6))}$.`;
+    return `A small puck on a frictionless horizontal table is tied by a string to a peg at the origin O. It moves anticlockwise at constant speed in a circle of radius ${Q(r, 'm')} centred on O, making one revolution every ${Q(d.T, 's')}. Positions on the table are given as coordinates $(x, y)$ in metres. When the puck is at the point P$(${x0}, ${y0})$ the string is cut. A straight wall, outside the circle, runs along the line $y = ${Number((y0 + p.D).toFixed(6))}$.`;
   },
 
   parts: [

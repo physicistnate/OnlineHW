@@ -11,6 +11,7 @@ import {
   GIANTS,
   HR_AXES,
   MAIN_SEQUENCE_HALF_WIDTH,
+  RADIUS_LINES,
   T_SUN,
   WHITE_DWARF_HALF_WIDTH,
   WHITE_DWARF_RADIUS,
@@ -32,7 +33,6 @@ const CLASSES: [string, number, number][] = [
   ['K', 3700, 5200],
   ['M', 2500, 3700],
 ];
-const RADII = [0.01, 0.1, 1, 10, 100, 1000];
 
 /** The SVG's own coordinate system (it scales to fit). */
 const WIDTH = 480;
@@ -103,7 +103,7 @@ export function HRDiagram({ spec, className }: { spec: HRSpec; className?: strin
   const background = useMemo(backgroundStars, []).filter((s) => marked.every((m) => Math.hypot(x(s.T) - m.px, yLog(s.logL) - m.py) > 13));
 
   // Lines of constant radius (L ∝ R²T⁴), labelled where they leave the top or left edge.
-  const radiusLines = RADII.map((R) => {
+  const radiusLines = RADIUS_LINES.map((R) => {
     const pts = sampleT(tHot, tCool, 2).map((T) => [x(T), yLog(constantRadiusLogL(R, T))] as [number, number]);
     const tTop = T_SUN * 10 ** ((logLTop - 0.35 - 2 * lg(R)) / 4);
     const labelT = tTop <= tHot * 0.92 ? tTop : tHot * 0.92;

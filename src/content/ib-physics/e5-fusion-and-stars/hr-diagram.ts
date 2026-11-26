@@ -1,5 +1,5 @@
 import { defineQuestion } from '../../../engine/define';
-import { radiusInSolarRadii } from '../../../engine/hr';
+import { radiusInSolarRadii, radiusLinesAround } from '../../../engine/hr';
 import { fmtA, fmtW } from '../../../engine/numbers';
 import { tex, unitTex as u } from '../../../engine/units';
 
@@ -159,7 +159,7 @@ export default defineQuestion({
         const list = roles.map((role, i) => `${LETTERS[i]} ${fmtA(radiusInSolarRadii(...stars[role]))}`).join(', ');
         return [
           {
-            text: `Star ${letterOf(p.order as string, largestOf(p.set as string))}. Since $L = \\sigma 4\\pi R^2T^4$, $\\dfrac{R}{R_\\odot} = \\sqrt{\\dfrac{L}{L_\\odot}} \\times \\left(\\dfrac{5800\\ \\mathrm{K}}{T}\\right)^2$. For the four stars this gives about: ${list} (in units of the Sun’s radius). On the diagram, the largest star is the one beyond the highest dashed line of constant radius.`,
+            text: `Star ${letterOf(p.order as string, largestOf(p.set as string))}. Since $L = \\sigma 4\\pi R^2T^4$, $\\dfrac{R}{R_\\odot} = \\sqrt{\\dfrac{L}{L_\\odot}} \\times \\left(\\dfrac{5800\\ \\mathrm{K}}{T}\\right)^2$. For the four stars this gives about: ${list} (in units of the Sun’s radius). On the diagram, larger radii are further towards the top right, across the dashed lines of constant radius: this star lies ${radiusLinesAround(radiusInSolarRadii(...stars[largestOf(p.set as string)]))}.`,
           },
         ];
       },

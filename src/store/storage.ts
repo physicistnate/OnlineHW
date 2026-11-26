@@ -44,6 +44,21 @@ export function hasKey(key: string): boolean {
   }
 }
 
+/** Keys (without the "rice-hw:" prefix) that start with `start`, e.g. every student's work for a question. */
+export function listKeys(start: string): string[] {
+  const out: string[] = [];
+  try {
+    const ls = window.localStorage;
+    for (let i = 0; i < ls.length; i++) {
+      const k = ls.key(i);
+      if (k && k.startsWith(`${PREFIX}:${start}`)) out.push(k.slice(PREFIX.length + 1));
+    }
+  } catch {
+    /* storage unavailable: nothing to list */
+  }
+  return out;
+}
+
 /**
  * Saves a value. Returns false if the browser refused (storage blocked or full),
  * so callers can tell the user instead of pretending it worked.

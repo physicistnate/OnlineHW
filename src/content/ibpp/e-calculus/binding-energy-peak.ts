@@ -68,12 +68,12 @@ export default defineQuestion({
     {
       label: '(b)',
       marks: 2,
-      prompt: () => 'Find the nucleon number at which the binding energy per nucleon is greatest.',
+      prompt: () => 'Treat $A$ as a continuous variable. Find the value of $A$ at which the binding energy per nucleon given by the model is greatest.',
       response: { kind: 'numeric', answer: 'Apeak', symbol: 'A', positive: true },
       solution: ({ p, r }) => [
         { math: tex`\frac{dE_b}{dA} = \frac{${p.q}}{3}A^{-4/3} - \frac{2 \times ${p.r}}{3}A^{-1/3}` },
         { text: 'Setting this to zero and multiplying by $3A^{4/3}$:', math: tex`${p.q} - 2 \times ${p.r}A = 0 \;\Rightarrow\; A = \frac{${p.q}}{2 \times ${p.r}} = ${fmtA(r.Apeak)}` },
-        { text: 'The most tightly bound nuclei are near iron and nickel (A of about 56 to 62).' },
+        { text: 'Real nucleon numbers are whole numbers, so in the model the most tightly bound nuclei are the ones with A closest to this value. In nature they are near iron and nickel (A of about 56 to 62).' },
       ],
       markscheme: ({ r }) => [{ mark: '$\\dfrac{dE_b}{dA} = 0$ with the powers differentiated correctly' }, { mark: tex`$A = ${fmtA(r.Apeak)}$` }],
     },

@@ -6,6 +6,7 @@ import { PageHeader } from '../components/Layout';
 import { StandardPicker, countByStandard } from '../components/StandardPicker';
 import { CombineTopics, CourseSelect, LaterTopicsToggle, ModeSwitch, UsesChips, courseNote, filterLater, type ChooseMode } from '../components/TopicFilters';
 import { QUESTION_TYPE_LABELS, type AnyTemplate, type QuestionType } from '../engine/types';
+import { paperLabel } from '../components/QuestionView';
 import { href, navigate } from '../router';
 
 export function marksOf(t: AnyTemplate): number {
@@ -279,7 +280,7 @@ function QuestionCard({ q, courseId }: { q: AnyTemplate; courseId: string }) {
         {q.math?.level === 'HL' && <span className="chip chip-small chip-hl">Math HL</span>}
         <div className="q-card-meta">
           <TypeChips types={q.types} />
-          <span className="muted small">{q.paper}</span>
+          <span className="muted small">{paperLabel(q)}</span>
           <UsesChips q={q} courseId={courseId} />
         </div>
         <div className="q-card-standards">
