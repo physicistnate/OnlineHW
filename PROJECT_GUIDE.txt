@@ -36,7 +36,7 @@ of IB Theme E (Topics 2–7). Course menus group them as IB, AP and
 University. HL includes every SL topic and question plus the HL-only topics
 (A.4, A.5, B.4, D.4, E.2); a question marked level 'HL' appears only in HL.
 
-Questions so far (103, 625 marks): A.1 Kinematics (12), A.2 Forces and
+Questions so far (103, 626 marks): A.1 Kinematics (12), A.2 Forces and
 momentum (15, two of them HL only), A.3 Work, energy and power (13), E.1
 Structure of the atom (7, three HL only), E.2 Quantum physics (5, an HL-only
 topic), E.3 Radioactive decay (7, three HL only), E.4 Fission (6), E.5 Fusion
@@ -164,7 +164,9 @@ Site (dark theme, works on phones):
                           Scoring guidelines, Grading rubric). Written
                           extension questions ("explain …", "derive …",
                           marked by the teacher) can be added to printed
-                          copies, with their marking key.
+                          copies, with their marking key. Each question's
+                          heading, stem, figure and first part print as one
+                          block, so a diagram is never on a page of its own.
                           "Download PDF" opens the print dialog; choose "Save
                           as PDF".
   Student view (demo)     Sign in with a class code + username (no password in
@@ -187,8 +189,13 @@ Question types implemented (all marked by the computer):
   Sankey diagrams   Drawn to scale on a counting grid (one square = a stated
                     power), with a key; read off and calculated from (A.3).
   HR diagrams       Luminosity against temperature on logarithmic axes, with
-                    the main regions shaded and lettered stars on gridlines,
-                    so their values can be read exactly (E.5).
+                    spectral classes along the top, a curved main sequence,
+                    giants, supergiants and the white-dwarf sequence over a
+                    faint population of stars, dashed lines of constant
+                    radius, and lettered stars on gridlines so their values
+                    can be read exactly (E.5). The region boundaries are in
+                    src/engine/hr.ts, shared by the drawing, the question
+                    and the tests.
   Graph drawing     Students drag points that snap to the grid (mouse, touch
                     or keyboard arrows). Marked segment by segment.
   Written answers   Not online for now: every online part is marked by the
@@ -454,9 +461,10 @@ E.5 Fusion and stars: 6 questions (32 marks)
                                              stars, why fusion stops at the iron
                                              group, lifetimes, 4 marks
    4. Reading the Hertzsprung–Russell        an HR diagram with four lettered
-      diagram                                stars: white dwarf, main sequence,
-                                             radius ratio from the readings,
-                                             largest star, 6 marks
+      diagram                                stars: peak wavelength from a
+                                             temperature read off it (Wien), which
+                                             star fuses hydrogen, radius ratio,
+                                             largest star, 7 marks
    5. A nearby star: distance from           d = 1/p in pc and m, L = 4πd²b, the
       parallax, luminosity from brightness   limits of parallax, 5 marks
    6. The temperature and size of a star     Wien’s law, radius from L = σ4πR²T⁴
@@ -1111,6 +1119,9 @@ tests (run with: npm test)
   followthrough.test.ts     For EVERY question: each "Allow ECF from (x)"
                             note is backed by the calculation, and no method
                             mixes an earlier answer with one derived from it.
+  review7.test.ts           Review 7: archived revisions for old assignments,
+                            the HR question's wording in every version, and
+                            the generator rubric's two routes to full marks.
   review6.test.ts           Review 6: the follow-through cases the review
                             submitted, physics wording, derivations kept for
                             paper, the HR diagram in every version, and the
@@ -1189,8 +1200,11 @@ Revising a question that has already been assigned
      src/content/archive/index.ts.
   2. Edit the original and increase its version.
   Assignments made earlier keep the archived version; new assignments get the
-  new one. (Wording-only fixes that change no numbers or answers can be made
-  in place without a new version.)
+  new one, and students' saved work is kept per version, so answers to old
+  parts never appear on new ones. (Wording-only fixes that change no numbers
+  or answers can be made in place without a new version.) Archived so far:
+  version 1 of the HR diagram, isotope generator, Kelvin–Helmholtz and Compton
+  scattering questions, from before review 6.
 
 
 -------------------------------------------------------------------------------

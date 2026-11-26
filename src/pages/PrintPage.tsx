@@ -178,16 +178,22 @@ function PrintQuestion({
   const total = instance.totalMarks + extensions.reduce((s, x) => s + x.marks, 0);
   // Multiple-choice questions are short: keep the stem and all options on one page.
   const keepTogether = instance.parts.every((p) => p.response.kind === 'mcq');
+  const [first, ...rest] = instance.parts;
   return (
     <section className={`paper-question${keepTogether ? ' pq-keep' : ''}`}>
-      <div className="pq-head">
-        <span className="pq-num">{number}.</span>
-        <span className="pq-meta">{questionMeta(template, context)}</span>
-        <span className="pq-total">[{marksLabel(total)}]</span>
+      {/* The heading, stem, figure and first part stay on one page, so a diagram is never
+          printed on a page of its own, away from the parts that use it. */}
+      <div className="pq-lead">
+        <div className="pq-head">
+          <span className="pq-num">{number}.</span>
+          <span className="pq-meta">{questionMeta(template, context)}</span>
+          <span className="pq-total">[{marksLabel(total)}]</span>
+        </div>
+        {instance.stem && <Tex block className="pq-stem" text={instance.stem} />}
+        {instance.figure && <Figure spec={instance.figure} className="graph-print" />}
+        {first && <PrintPart part={first} />}
       </div>
-      {instance.stem && <Tex block className="pq-stem" text={instance.stem} />}
-      {instance.figure && <Figure spec={instance.figure} className="graph-print" />}
-      {instance.parts.map((part) => (
+      {rest.map((part) => (
         <PrintPart key={part.id} part={part} />
       ))}
       {extensions.map((x, i) => (

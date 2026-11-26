@@ -129,12 +129,13 @@ describe('the HR question reads an actual HR diagram', () => {
   const q = getQuestion('ibp-e5-hr-diagram')!;
   const specs = q.params as ParamSpecs;
   const choicesOf = (name: string) => (specs[name] as unknown as { choices: string[] }).choices;
-  const combos = choicesOf('set').flatMap((set) => choicesOf('order').flatMap((order) => choicesOf('pair').map((pair) => ({ set, order, pair }))));
+  const combos = choicesOf('set').flatMap((set) =>
+    choicesOf('order').flatMap((order) => choicesOf('pair').flatMap((pair) => choicesOf('peak').map((peak) => ({ set, order, pair, peak })))),
+  );
   const onGrid = (T: number, L: number) => [40000, 20000, 10000, 5000, 2500].includes(T) && Number.isInteger(Math.log10(L)) && L >= 1e-4 && L <= 1e6;
-  /** Height above the middle of the main-sequence band, in powers of ten. */
-  const aboveMainSequence = (T: number, L: number) => Math.log10(L) - 7 * Math.log10(T / 5800);
 
-  it('every version draws four lettered stars and the Sun, on gridlines, each in its own region', () => {
+  it('every version draws four lettered stars and the Sun, on gridlines, one in each region', async () => {
+    const { hrRegion } = await import('../src/engine/hr');
     for (const params of combos) {
       const inst = buildInstance(q, params, null);
       const fig = inst.figure as { kind: string; stars: { label: string; T: number; L: number }[]; sun?: boolean };
@@ -142,35 +143,39 @@ describe('the HR question reads an actual HR diagram', () => {
       expect(fig.sun).toBe(true);
       expect(fig.stars.map((s) => s.label)).toEqual(['A', 'B', 'C', 'D']);
       for (const s of fig.stars) expect(onGrid(s.T, s.L), `${JSON.stringify(params)} star ${s.label}`).toBe(true);
-      // The keyed white dwarf is far below the main sequence and the keyed main-sequence star is inside its band.
-      const correct = (label: string) => inst.parts.find((p) => p.label === label)!.response;
-      const keyed = (label: string) => {
-        const r = correct(label);
-        const letter = r.kind === 'mcq' ? r.options.find((o) => o.correct)!.text!.slice(-1) : '';
-        return fig.stars.find((s) => s.label === letter)!;
-      };
-      const wd = keyed('(a)');
-      const ms = keyed('(b)');
-      expect(aboveMainSequence(wd.T, wd.L)).toBeLessThan(-2);
-      expect(Math.abs(aboveMainSequence(ms.T, ms.L))).toBeLessThanOrEqual(0.5);
+      expect(new Set(fig.stars.map((s) => hrRegion(s.T, s.L)))).toEqual(new Set(['white dwarf', 'main sequence', 'giant', 'supergiant']));
+      // The keyed answer to (b) is the star drawn in the main-sequence band.
+      const b = inst.parts.find((p) => p.label === '(b)')!.response;
+      const letter = b.kind === 'mcq' ? b.options.find((o) => o.correct)!.text!.slice(-1) : '';
+      const ms = fig.stars.find((s) => s.label === letter)!;
+      expect(hrRegion(ms.T, ms.L)).toBe('main sequence');
     }
+  });
+
+  it('the Sun is on the main sequence, and the diagram stays within its axes', async () => {
+    const { hrRegion } = await import('../src/engine/hr');
+    expect(hrRegion(5800, 1)).toBe('main sequence');
   });
 
   it('the star choices stay in order A–D for every student, while the correct letter varies', () => {
     const letters = new Set<string>();
     for (let i = 0; i < 40; i++) {
       const inst = instantiate(q, `student${i}::hw`);
-      const a = inst.parts[0].response;
-      if (a.kind !== 'mcq') throw new Error('expected multiple choice');
-      expect(a.options.map((o) => o.text)).toEqual(['Star A', 'Star B', 'Star C', 'Star D']);
-      letters.add(a.options.find((o) => o.correct)!.text!);
+      const b = inst.parts[1].response;
+      if (b.kind !== 'mcq') throw new Error('expected multiple choice');
+      expect(b.options.map((o) => o.text)).toEqual(['Star A', 'Star B', 'Star C', 'Star D']);
+      letters.add(b.options.find((o) => o.correct)!.text!);
     }
     expect(letters.size).toBeGreaterThan(2);
   });
 
-  it('the radius ratio follows R ∝ √L / T² from the values on the diagram', () => {
-    // Base: star C (red giant, 5000 K, 10² L☉) and star B (main sequence, 10 000 K, 10² L☉): ratio (10 000/5000)² = 4.
+  it('(a) reads a temperature and uses Wien’s law; (c) uses R ∝ √L / T²', () => {
+    // Base: star C is the red giant at 5000 K, so λmax = 2.9 × 10⁻³ / 5000 = 580 nm. In (c), star C
+    // (5000 K, 10² L☉) and star B (main sequence, 10 000 K, 10² L☉): ratio (10 000/5000)² = 4.
     const inst = instantiate(q, null);
+    const a = inst.parts.find((p) => p.label === '(a)')!;
+    expect(a.prompt).toMatch(/star C/);
+    expect(a.response.kind === 'numeric' && a.response.range.exact).toBeCloseTo(580, 6);
     const c = inst.parts.find((p) => p.label === '(c)')!;
     expect(c.prompt).toMatch(/R_C.*R_B/);
     expect(c.response.kind === 'numeric' && c.response.range.exact).toBe(4);

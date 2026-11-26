@@ -10,7 +10,7 @@ const HC = 1243;
 
 export default defineQuestion({
   id: 'ibp-e2-compton-scattering',
-  version: 1,
+  version: 2,
   title: 'Compton scattering of X-rays',
   courses: ['ib-physics-hl'],
   level: 'HL',

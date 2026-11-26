@@ -9,7 +9,7 @@ const luminosityOf = (M: number) => roundSig(M ** 3.5, 2);
 
 export default defineQuestion({
   id: 'ump-t7-kelvin-helmholtz',
-  version: 1,
+  version: 2,
   title: 'What powers a star? Gravity versus fusion',
   courses: ['university-modern-physics'],
   topic: 'ump.7',

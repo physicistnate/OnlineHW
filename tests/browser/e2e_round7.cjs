@@ -44,7 +44,9 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   const labels = (await p.locator('figure.hr .hr-star-label').allTextContents()).map((t) => t.trim());
   expect(['A', 'B', 'C', 'D', 'Sun'].every((l) => labels.includes(l)), `stars A–D and the Sun are marked (${labels.join(', ')})`);
   expect((await p.locator('figure.hr .hr-region-label').count()) === 4, 'the four regions are labelled');
-  const options = (await part(0).locator('label').allInnerTexts()).map((t) => t.replace(/\s+/g, ' ').trim());
+  expect((await p.locator('figure.hr .hr-radius').count()) === 6 && (await p.locator('figure.hr .hr-class').count()) === 7, 'lines of constant radius and the spectral classes are drawn');
+  expect((await answer(0, '580')).includes('Correct'), '(a): 580 nm from the temperature read off the diagram (5000 K)');
+  const options = (await part(1).locator('label').allInnerTexts()).map((t) => t.replace(/\s+/g, ' ').trim());
   expect(options.join('|') === 'A Star A|B Star B|C Star C|D Star D', `star choices are in order (${options.join(' | ')})`);
   expect((await p.locator('.katex-error').count()) === 0, 'no maths errors');
 
@@ -90,6 +92,11 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   await p.locator('.assignment-card', { hasText: 'HL photons' }).click();
   await p.waitForSelector('.question');
   expect((await p.locator('.q-meta').first().innerText()).includes('IB Physics HL'), 'the student sees the question labelled IB Physics HL');
+
+  console.log('Printing: the diagram stays with the first part');
+  await go('#/print?ids=ibp-e5-hr-diagram&title=HR');
+  await p.waitForSelector('.paper');
+  expect((await p.locator('.pq-lead figure.hr').count()) === 1 && (await p.locator('.pq-lead .pq-part').count()) === 1, 'the stem, diagram and part (a) print as one block');
 
   console.log('Phones');
   await p.setViewportSize({ width: 320, height: 800 });

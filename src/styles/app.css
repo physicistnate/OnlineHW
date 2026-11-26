@@ -997,7 +997,7 @@ h4.next {
 
 .hr {
   margin: 0;
-  max-width: 480px;
+  max-width: 500px;
 }
 .hr svg {
   width: 100%;
@@ -1006,10 +1006,10 @@ h4.next {
   user-select: none;
 }
 .hr-bg {
-  fill: var(--g-bg);
+  fill: #070b12;
 }
 .hr-grid {
-  stroke: var(--g-major);
+  stroke: var(--g-minor);
   stroke-width: 1;
 }
 .hr-frame {
@@ -1021,16 +1021,30 @@ h4.next {
   stroke: none;
 }
 .hr-ms {
-  fill: rgba(90, 167, 255, 0.2);
+  fill: rgba(90, 167, 255, 0.16);
 }
 .hr-giants {
-  fill: rgba(245, 120, 90, 0.2);
+  fill: rgba(255, 150, 90, 0.16);
 }
 .hr-super {
-  fill: rgba(233, 196, 106, 0.16);
+  fill: rgba(233, 196, 106, 0.12);
 }
 .hr-dwarfs {
-  fill: rgba(200, 210, 230, 0.2);
+  fill: rgba(200, 210, 235, 0.16);
+}
+.hr-radius {
+  fill: none;
+  stroke: rgba(170, 181, 200, 0.4);
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+}
+.hr-radius-label {
+  fill: rgba(170, 181, 200, 0.85);
+  font-size: 11px;
+  font-family: var(--font);
+}
+.hr-pop {
+  opacity: 0.55;
 }
 .hr-region-label {
   fill: var(--g-text);
@@ -1039,15 +1053,29 @@ h4.next {
   font-family: var(--font);
 }
 .hr-tick,
-.hr-axis-title {
+.hr-axis-title,
+.hr-class-title {
   fill: var(--g-text);
   font-size: 14px;
   font-family: var(--font);
 }
+.hr-class-title {
+  font-size: 12px;
+  font-style: italic;
+}
+.hr-class {
+  fill: var(--text-soft);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font);
+}
+.hr-class-tick {
+  stroke: var(--g-axis);
+  stroke-width: 1;
+}
 .hr-star circle {
-  fill: var(--g-line);
-  stroke: var(--bg);
-  stroke-width: 1.5;
+  stroke: #0b0f16;
+  stroke-width: 1.6;
 }
 .hr-sun circle {
   fill: none;
@@ -1063,6 +1091,9 @@ h4.next {
   font-size: 16px;
   font-weight: 700;
   font-family: var(--font);
+  paint-order: stroke;
+  stroke: #070b12;
+  stroke-width: 3px;
 }
 .hr-caption {
   font-size: 0.88rem;

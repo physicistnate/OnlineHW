@@ -14,7 +14,7 @@ const timeOf = (pair: string, k: number) => roundSig(k * PAIRS[pair].Td, 3);
 
 export default defineQuestion({
   id: 'ump-t5-isotope-generator',
-  version: 1,
+  version: 2,
   title: 'A radioisotope generator: solving the parent–daughter decay equations',
   courses: ['university-modern-physics'],
   topic: 'ump.5',
@@ -131,9 +131,14 @@ export default defineQuestion({
       marks: 3,
       lines: 8,
       markscheme: () => [
-        { mark: 'Integrating factor $e^{\\lambda_Dt}$: $\\dfrac{d}{dt}\\left(N_De^{\\lambda_Dt}\\right) = \\lambda_PN_{P0}e^{(\\lambda_D - \\lambda_P)t}$ (or another valid method, such as checking the solution by substitution)' },
+        { note: 'Either method earns full marks. Method 1, derive it:' },
+        { mark: 'Integrating factor $e^{\\lambda_Dt}$: $\\dfrac{d}{dt}\\left(N_De^{\\lambda_Dt}\\right) = \\lambda_PN_{P0}e^{(\\lambda_D - \\lambda_P)t}$' },
         { mark: 'Integrates: $N_De^{\\lambda_Dt} = \\dfrac{\\lambda_PN_{P0}}{\\lambda_D - \\lambda_P}e^{(\\lambda_D - \\lambda_P)t} + C$' },
         { mark: '$N_D(0) = 0$ gives $C = -\\dfrac{\\lambda_PN_{P0}}{\\lambda_D - \\lambda_P}$, and so the result' },
+        { note: 'Method 2, verify the given solution:' },
+        { mark: 'Differentiates: $\\dfrac{dN_D}{dt} = \\dfrac{\\lambda_PN_{P0}}{\\lambda_D - \\lambda_P}\\left(-\\lambda_Pe^{-\\lambda_Pt} + \\lambda_De^{-\\lambda_Dt}\\right)$' },
+        { mark: 'Shows that $\\dfrac{dN_D}{dt} + \\lambda_DN_D = \\lambda_PN_{P0}e^{-\\lambda_Pt} = \\lambda_PN_P$, so the equation is satisfied' },
+        { mark: 'Checks the initial condition: $N_D(0) = 0$' },
       ],
     },
   ],
