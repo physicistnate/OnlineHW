@@ -39,18 +39,24 @@ listed as Physics/Math). HL includes every SL topic and question plus the
 HL-only topics (A.4, A.5, B.4, D.4, E.2); a question marked level 'HL'
 appears only in HL.
 
-Questions so far (123, 785 marks): A.1 Kinematics (12), A.2 Forces and
-momentum (15, two of them HL only), A.3 Work, energy and power (13), E.1
+Questions so far (157, 1021 marks): A.1 Kinematics (12), A.2 Forces and
+momentum (15, two of them HL only), A.3 Work, energy and power (13), D.1
+Gravitational fields (6, two HL only), D.2 Electric and magnetic fields (6,
+two HL only), D.3 Motion in electromagnetic fields (6), D.4 Induction (5, an
+HL-only topic), E.1
 Structure of the atom (7, three HL only), E.2 Quantum physics (5, an HL-only
 topic), E.3 Radioactive decay (7, three HL only), E.4 Fission (6), E.5 Fusion
 and stars (6), AP Unit 3 (10), University Physics I Topic 3 (10),
-University Modern Physics (12) and IB++ Physics/Math (20). The IB guide has no additional higher level
+University Modern Physics (12) and IB++ Physics/Math (31). The IB guide has no additional higher level
 understandings in A.1, A.2 or A.3; the one HL difference in A.2 is collisions
 and explosions in two dimensions, which has its own HL-only standard (A.2.10)
 and question. In Theme E the HL understandings are in E.1 (nuclear radius,
 closest approach, the Bohr model), E.3 (nuclear stability, the decay
 constant) and the whole of E.2; each has HL-only standards and questions.
-HL-only standards are hidden in SL courses.
+In Theme D they are in D.1 (gravitational potential and potential energy,
+potential gradients, escape speed and orbital energy, atmospheric drag), D.2
+(electric potential and potential energy, potential gradients, work) and
+the whole of D.4. HL-only standards are hidden in SL courses.
 
 One assignment can mix questions from any courses and topics (section 3,
 "Assignment builder").
@@ -391,6 +397,90 @@ University Physics I, Topic 3 Work, energy and power: 10 questions (67 marks)
   10. A home's daily power curve and         integral of a daily cosine load,
       time-of-use prices                     peak-hour energy, cost, battery, 8 marks
 
+D.1 Gravitational fields: 6 questions (42 marks), in bank order
+   1. Gravitational field strength at the    g = GM/r² at the space station, the
+      height of the International Space      force on an astronaut, g as a
+      Station                                percentage of g at the surface, why
+                                             astronauts float, 6 marks
+   2. Satellite orbits and Kepler's third    Earth or Mars: orbit radius from the
+      law                                    period, height in km, orbital speed,
+                                             the period at twice the radius,
+                                             7 marks
+   3. The gravitational field between two    force between two stars, the
+      stars                                  resultant field halfway, the point
+                                             of zero field in AU, 7 marks
+   4. A comet's orbit and Kepler's laws      speed at aphelion (second law), why
+                                             the speed changes, the period from
+                                             the semi-major axis, where it
+                                             spends its time, 6 marks
+   5. Raising a satellite's orbit:           HL: potential in MJ kg⁻¹, total
+      potential, orbital energy and escape   energy, energy to raise the orbit,
+      speed                                  escape speed, the effect of drag,
+                                             10 marks
+   6. Field strength and work from a graph   HL: V at the surface, g from the
+      of gravitational potential             gradient of a tangent, W = mΔV,
+                                             spacing of equipotentials, 6 marks
+
+D.2 Electric and magnetic fields: 6 questions (39 marks), in bank order
+   1. Coulomb's law: the resultant force on  force of A on B, the resultant and
+      a charge between two others            its direction, where the force is
+                                             zero, 7 marks
+   2. Millikan's oil drop: a charge held     E = V/d, the drop's charge, its
+      still between parallel plates          electrons, which plate is positive,
+                                             what Millikan showed, 6 marks
+   3. The electric field between a positive  E from one charge, the resultant at
+      and a negative charge                  the midpoint, the force on an
+                                             electron, field lines, 6 marks
+   4. Sharing charge, charging by            charge shared on contact, electrons
+      induction, and magnetic field patterns moved, the fields of a solenoid and
+                                             a straight wire, 6 marks
+   5. The potential of a Van de Graaff       HL: V = kQ/r, a proton's potential
+      dome: energy and speed of charged      energy and its speed far away, work
+      particles                              on an electron, inside the dome,
+                                             8 marks
+   6. Electric field strength from a graph   HL: E = −ΔV/Δx from a V–x graph, a
+      of potential                           region of zero field, W = qΔV for an
+                                             alpha particle, 6 marks
+
+D.3 Motion in electromagnetic fields: 6 questions (40 marks), in bank order
+   1. An electron beam deflected between     E = V/d, acceleration, time between
+      parallel plates                        the plates, deflection in mm, twice
+                                             the speed, 7 marks
+   2. A proton moving in a circle in a       qvB, radius, period, why the kinetic
+      magnetic field                         energy stays the same, twice the
+                                             speed, 7 marks
+   3. A velocity selector between charged    E between the plates, v = E/B,
+      plates, then a mass spectrometer       faster ions, the radius for neon-20,
+                                             the gap to neon-22, 8 marks
+   4. Measuring e/m for the electron with a  v from eV = ½mv², the predicted
+      fine beam tube                         radius, e/m from a measured radius,
+                                             four times the voltage, 7 marks
+   5. The force on a current-carrying wire,  BIL, BIL sin θ, the direction, the
+      and a current balance                  current that holds a small mass,
+                                             6 marks
+   6. Forces between parallel currents in a  F/L = μ₀I₁I₂/2πr, the force on a
+      substation                             length, attraction and equal forces,
+                                             twice the separation, 5 marks
+
+D.4 Induction (HL only): 5 questions (33 marks), in bank order
+   1. Magnetic flux, flux linkage and the    Φ = BA cos θ, NΦ, the average emf as
+      emf of a turning coil                  the coil turns, a coil slid through
+                                             a uniform field, 6 marks
+   2. Faraday's law from a graph of a        emf from the gradient of a B–t
+      changing magnetic field                graph, no emf in a steady field, the
+                                             current as the field falls, its size
+                                             and direction, 6 marks
+   3. A rod moving on rails: induced emf,    BvL, the current, the force BIL to
+      current, force and power               keep it moving, P = Fv = I²R, Lenz's
+                                             law and energy, 7 marks
+   4. A magnet falling through a coil:       Lenz's law, the average emf, the
+      Lenz's law, emf and charge             charge NΔΦ/R, the emf–time graph, a
+                                             higher drop, 7 marks
+   5. The alternating emf of a simple        ω from rev/min, ε₀ = NBAω, the emf
+      generator                              at an angle, where the emf is
+                                             largest, turning twice as fast,
+                                             7 marks
+
 E.1 Structure of the atom: 7 questions (39 marks), in bank order
    1. The Geiger–Marsden experiment and      conclusions from the scattering,
       nuclear notation                       nucleons and neutrons from notation,
@@ -532,13 +622,15 @@ yet for Topic 1, special relativity)
                                              lifetime, 7 marks (and a 3-mark
                                              written derivation of U)
 
-IB++ Physics/Math: 20 questions (159 marks). Each is an IB Physics problem
+IB++ Physics/Math: 31 questions (241 marks). Each is an IB Physics problem
 (IB wording and British spelling) that needs a topic of IB
 Mathematics: analysis and approaches in a non-trivial way: early parts lean
 on the physics or the mathematics, later parts need both. For this trial the
-questions are physics-led and cover IB Physics Themes A and E with
+questions are physics-led and cover IB Physics Themes A, D and E with
 Mathematics Topics 4 (statistics and probability) and 5 (calculus): five
-questions for each of the four pairings, three SL and two HL. A question
+questions for each pairing (three SL, two HL), and six for Theme D with
+Topic 5 (three SL, three HL). The Theme D statistics questions use summary
+statistics and probability distributions rather than regression lines. A question
 counts as HL if its physics or its mathematics is HL; the two are labelled
 separately ("Physics HL", "Math HL"), and teachers choose SL or HL for each
 subject independently.
@@ -606,14 +698,66 @@ subject independently.
   20. Compton scattering: how the scattered  Physics HL: Δλ, E′(θ), dE′/dθ by the
       energy changes with angle              chain rule, a linear estimate, why
                                              radians, 7 marks
+  Theme D with Topic 4
+  21. Is charge quantized? The statistics    n for each drop, the mean and σ of
+      of Millikan's oil drops                q/n, Σq/Σn, why the quantum is not
+                                             e/2, 6 marks
+  22. A velocity selector and normally       v = E/B, the fraction that passes,
+      distributed speeds                     the best setting, E for the fastest
+                                             10% (inverse normal), 7 marks
+  23. Measuring the Earth's magnetic field   mean and median with a faulty
+      with phones                            reading, which is robust, mean and σ
+                                             without it, F = BIL sin θ, 7 marks
+  24. Isotope peaks in a mass spectrometer:  Math HL: B(n, p) for chlorine or
+      binomial counts and a linear           bromine isotopes, E(M), σ_M from
+      transformation                         Var(aX + b), r = mv/qB, E(D),
+                                             8 marks
+  25. Where is the electron? A probability   Physics and Math HL: the mode by the
+      density and the expected potential     product rule, P(R < r) and E(R) by
+      energy                                 integration, E(U) = −kZe²E(1/R),
+                                             E(1/R) ≠ 1/E(R), 9 marks
+  Theme D with Topic 5
+  26. Small changes to an orbit: Kepler's    T, dT/dr = 3T/2r, ΔT and Δv by the
+      third law and the tangent line         tangent line, catching up by
+                                             dropping lower, 8 marks
+  27. Tidal stretching near a black hole     g, dg/dr = −2GM/r³, the difference
+                                             between head and feet, over- or
+                                             underestimate (concavity), the
+                                             closest survivable distance, 8 marks
+  28. An electron beam between deflecting    k in y = kx², the deflection and
+      plates: the parabola and its tangent   gradient at the exit, the spot on a
+                                             screen, the tangent crosses at L/2,
+                                             7 marks
+  29. A screened charge in a plasma: the     Physics HL: E = −dV/dr by the
+      field from E = −dV/dr                  product rule for V = (kQ/r)e^(−r/λ)
+                                             (spherical symmetry), E at a point,
+                                             W = qΔV, why the field is weaker,
+                                             where it halves, 8 marks
+  30. Poisson's equation and the second      Physics HL: E = −dV/dr = ker/R³ in
+      derivative test in Thomson's model of  Thomson's atom, V″ < 0 so V has a
+      the atom                               maximum at the centre, ρ from
+                                             (1/r²) d/dr(r² dV/dr) = −ρ/ε₀ (V″
+                                             alone gives a third of it), a stable
+                                             electron, 7 marks
+  31. A rod braked by induction: a           Physics and Math HL: F = −B²L²v/R,
+      differential equation for a circuit    v = v₀e^(−t/τ) by separating the
+                                             variables, τ, the half-speed time,
+                                             the limiting distance, the energy,
+                                             7 marks
+Capacitance is not in the 2025 IB Physics guide, so the circuit with a
+differential equation is an induction circuit (a rod on rails) rather than
+an RC circuit. Poisson's equation is used in its spherically symmetric form,
+(1/r²) d/dr(r² dV/dr) = −ρ/ε₀: d²V/dr² alone is not enough (question 30
+shows that it gives only a third of the charge density), and the minus sign
+makes a positive charge density give a maximum of potential.
 Questions that need a second mathematics topic list its standard too (the
 lifetime question names 4.14 and 5.16, integration by parts), so choosing
 that standard finds them. IB Mathematics standards (Topics 4 and 5, SL and
 AHL) paraphrase the IB guide's content headings; the numbering 4.1, 4.2, ...
 is ours, as for physics. Topics 1–3 are listed with no standards yet.
 
-Theme E standards paraphrase the understandings in the IB guide (first
-assessment 2025); the numbering E.1.1, E.1.2, ... is ours. The IB's own site
+Theme D and Theme E standards paraphrase the understandings in the IB guide
+(first assessment 2025); the numbering D.1.1, E.1.1, ... is ours. The IB's own site
 could not be reached from the environment they were written in, so their
 wording and the SL/HL split were checked against published summaries of the
 guide, not the guide itself. Please compare them with your copy of the guide
@@ -625,8 +769,8 @@ Constants: IB Theme E questions use the values in the IB data booklet, plus
 the Sun's luminosity, radius and mass (src/content/ib-physics/constants.ts).
 University Modern Physics questions use 4 s.f. values as US textbooks give
 them (src/content/university-modern-physics/constants.ts). Each question
-states the values it needs, and the 0.5% allowance covers students who use
-more precise ones.
+states the values it needs, and the 2% minimum allowance covers students who
+use more precise ones.
 
 Real-world figures used (check them about once a year and update the
 questions' text and constants if they change):
@@ -701,10 +845,15 @@ The system then re-runs the whole calculation many times:
   calculator and rounding quirks that a single path cannot capture. Rounding
   is done the way a person does it (halves round up), not the way binary
   floating point does.
+  Finally, the range always reaches at least 2% either side of the exact
+  answer (TOLERANCE.relMin), whatever the analysis gives. Students round in
+  their working in more ways than any analysis tries, and a teacher should
+  never have to check an answer by hand for a rounding slip: an exact 0.4068
+  accepts anything from 0.399 to 0.415 (0.40 and 0.41 to 2 s.f.).
 
 For a one-step answer, nothing is carried, so the range is just the exact
-answer ± 0.5%. For multi-step answers the range widens by exactly as much as
-rounding mid-calculation can change the result. Across every allowed set of
+answer ± 2%. For multi-step answers the range is wider whenever rounding
+mid-calculation can change the result by more than that. Across every allowed set of
 numbers in the current questions, the widest range is about −9%: the
 projectile's maximum height when v_y ≈ 11.5 is rounded to 11 and then squared.
 
@@ -794,18 +943,21 @@ and products (14 + 33.33 = 47.3) add up.
 WORKED EXAMPLES (base versions)
 
   Train (a): a = (20² − 4.0²)/(2 × 400) = 0.480 m s⁻²
-    One step, nothing carried: accepted range 0.4776 to 0.4824.
-    0.48, 0.480, 0.478 and 4.8e-1 are accepted. 0.47 and 0.483 are rejected,
-    and so is 0.5 (read as 0.50).
+    One step, nothing carried: accepted range 0.4704 to 0.4896 (± 2%).
+    0.48, 0.480, 0.478, 0.471, 0.489, 0.47, 0.49 and 4.8e-1 are accepted.
+    0.469, 0.491 and 0.46 are rejected, and so is 0.5 (read as 0.50).
 
   Projectile (b): maximum height h = v_y² / (2g), with v_y = 18 sin 40° = 11.57
     Carried value v_y: 11.5702 (full), 11.6 (3 s.f.), 12 (2 s.f.); g = 9.8 or 9.81.
     Results run from 6.823 (full precision, g = 9.81) to 7.347 (v_y = 12,
-    g = 9.8). With the 0.5% allowance, the accepted range is 6.789 to 7.381.
-      Accepted: 6.83, 6.830, 6.82, 6.8, 7.3, 7 (read as 7.0), 7.4
-      Rejected: 6.78, 6.7, 7.5
-    Rounding 11.57 to 12 and then squaring is what widens this range. See
-    section 10 for the stricter setting, which gives 6.789 to 6.899 here.
+    g = 9.8). With the 0.5% allowance the top end is 7.381; the 2% minimum
+    sets the bottom end at 6.693 (exact 6.830 − 2%). Accepted range: 6.693 to
+    7.381.
+      Accepted: 6.83, 6.830, 6.82, 6.8, 6.7, 6.70, 7.3, 7 (read as 7.0), 7.4
+      Rejected: 6.68, 6.6, 7.39, 7.5
+    Rounding 11.57 to 12 and then squaring is what widens this range above
+    2%. See section 10 for the stricter setting, which gives 6.693 to 6.967
+    here.
 
   ECF: a student who answers 0.5 for train (a) and then 32 s for (b), since
   (20 − 4.0)/0.5 = 32, gets (a) wrong and (b) correct by ECF.
@@ -826,6 +978,7 @@ SETTINGS (src/config/site.ts)
   TOLERANCE.carrySigFigs  [3, 2]   rounding levels tried for carried values
   TOLERANCE.minSigFigs    2        answers are read to at least this many s.f.
   TOLERANCE.relFloor      0.005    extra allowance (0.5%) on each end
+  TOLERANCE.relMin        0.02     every answer within 2% of exact is accepted
   CONSTANTS.IB.g          primary 9.8, also accepts 9.81
   A single answer can be widened in its template with tolerance: { rel, abs }.
 
@@ -1083,8 +1236,19 @@ src/content: questions and the syllabus they are tagged with
     diagram drawn to scale), home-energy (appliance table), data-centre (AI
     data centre vs cities), hydroelectric, power-station, energy-density. See
     the list in section 3.
-  ib-physics/constants.ts   Data-booklet constants for Theme E (c, e, h, mₑ, u,
-                            k, σ, Wien, R₀, pc, ly, the Sun).
+  ib-physics/d1-gravitational-fields/ … d4-induction/ (one file per question;
+                            index.ts sets the order; HL-only questions have
+                            courses ['ib-physics-hl'] and level 'HL')
+    D.1: field-at-altitude, satellite-orbits, binary-neutral-point,
+         comet-kepler, orbit-energy (HL), potential-graph (HL).
+    D.2: coulomb-line, millikan-drop, field-two-charges, charging-and-fields,
+         van-de-graaff (HL), potential-profile (HL).
+    D.3: electron-deflection, proton-circle, velocity-selector,
+         fine-beam-tube, wire-force, parallel-wires.
+    D.4: flux-coil, faraday-graph, moving-rod, lenz-magnet, generator.
+  ib-physics/constants.ts   Data-booklet constants for Themes D and E (c, e, h,
+                            mₑ, u, k, ε₀, μ₀, G, the Earth, σ, Wien, R₀, pc, ly,
+                            AU, the Sun).
   ib-physics/e1-structure-of-the-atom/ … e5-fusion-and-stars/ (one file per
                             question; index.ts sets the order; HL-only questions
                             have courses ['ib-physics-hl'] and level 'HL')
@@ -1122,7 +1286,7 @@ src/content: questions and the syllabus they are tagged with
   ibpp/ (style IB: courses ['ibpp-physics-math']; topic and standards are the
                             physics side, math: { topic, standards, level }
                             the mathematics side; index.ts sets the order)
-    helpers.ts              GDC-style statistics: mean, population standard
+    helpers.ts              GDC-style statistics: mean, median, population standard
                             deviation, regression line and r, normal and
                             binomial probabilities, and data and distribution
                             tables for question text.
@@ -1132,6 +1296,12 @@ src/content: questions and the syllabus they are tagged with
     a-calculus/             Theme A with Topic 5: riemann-work,
                             cut-string-tangent, drone-height,
                             air-resistance-limits, valley-linearization.
+    d-stats/                Theme D with Topic 4: millikan-statistics,
+                            selector-normal, phone-magnetometer,
+                            isotope-peaks, hydrogen-pdf.
+    d-calculus/             Theme D with Topic 5: kepler-linear,
+                            tidal-gradient, deflection-tangent, debye-field,
+                            poisson-sphere, rod-ode.
     e-stats/                Theme E with Topic 4: decay-binomial,
                             background-counts, balmer-regression,
                             photoelectric-regression, lifetime-distribution.
@@ -1140,7 +1310,12 @@ src/content: questions and the syllabus they are tagged with
                             decay-chain-ode, compton-angle.
 
 src/components: reusable pieces of the interface
-  Tex.tsx                   Renders text with KaTeX maths (cached).
+  Tex.tsx                   Renders text with KaTeX maths (cached). Display
+                            maths and worked-solution lines are cut at
+                            =, ≈, ⇒ and <, and at top-level +, −, × and
+                            commas (splitAtRelations), into pieces that wrap
+                            onto new lines on a narrow screen instead of
+                            running out of their box.
   Figure.tsx                A question's figure: a graph, a Sankey diagram or
                             an HR diagram.
   Sankey.tsx                Sankey diagrams drawn to scale on a counting grid,
@@ -1252,7 +1427,15 @@ tests (run with: npm test)
                             methods that agree, no rounding noise around zero,
                             displayed arithmetic that adds up, and each worked
                             solution's own displayed answer accepted.
-  tolerance.test.ts         The acceptance rule, typed units, malformed input,
+  latex-text.test.ts        For EVERY question and archived revision (base and
+                            12 students): no control characters or bare
+                            command words where a backslash was lost (\times
+                            printed as "imes"), and every piece of wrapped
+                            display maths typesets.
+  source-escapes.test.ts    No lone backslash in an ordinary string in the
+                            source (write \\ or use tex`…` / String.raw).
+  tolerance.test.ts         The acceptance rule (including the 2% minimum),
+                            typed units, malformed input,
                             rounding ranges, constants, alternative methods,
                             ECF (including re-marking and negative values) and
                             segment-by-segment graph marking.
@@ -1263,8 +1446,8 @@ tests (run with: npm test)
                             assignment settings, failed saves, damaged data,
                             due dates, answer keys, pinned numbers and grades.
   topics.test.ts            Later topics and combined topics: which topics a
-                            question uses, the filter, that every A.1–A.3, E.1–
-                            E.5 (SL and HL), AP Unit 3, University Topic 3 and
+                            question uses, the filter, that every A.1–A.3, D.1–
+                            D.4, E.1–E.5 (SL and HL), AP Unit 3, University Topic 3 and
                             Modern Physics standard has a question without
                             later topics, and that each course's questions stay
                             in that course.
@@ -1278,8 +1461,12 @@ tests (run with: npm test)
                             the HR question's wording in every version, and
                             the generator rubric's two routes to full marks.
   ibpp.test.ts              IB++: the mathematics each question names, its
-                            Physics and Math SL/HL labels, five questions per
-                            pairing (three SL, two HL), the two-subject filter
+                            Physics and Math SL/HL labels, the balance of each
+                            pairing (three SL, two or three HL), the Theme D
+                            problems that were asked for (E = −dV/dr,
+                            Poisson's equation with the second derivative
+                            test, a circuit differential equation) and no
+                            regression in Theme D statistics, the two-subject filter
                             and its SL/HL switches, saved and linked choices,
                             and that IB++ questions stay in IB++.
   review8.test.ts           Review 8: work saved on build 59f80b0 resolved to
@@ -1317,7 +1504,11 @@ tests (run with: npm test)
                             the IB++ course: the two standards boxes (choices
                             kept across topics, removing one, SL/HL, links),
                             the builder, a drawn acceleration graph,
-                            follow-through, printing and phone widths. Run the
+                            follow-through, printing and phone widths;
+                            e2e_round9.cjs Theme D and the IB++ Theme D
+                            problems in the bank, the 2% minimum in the
+                            markscheme panel and when checking answers, and
+                            maths that stays inside its box. Run the
                             browser checks from a scratch folder: some of them
                             save screenshots and PDFs in the current folder.
 
@@ -1415,15 +1606,19 @@ Content (each batch on its own branch and pull request)
       all), with real contexts such as medical tracers, reactors and stars.
   [x] University Modern Physics: 12 calculus-based questions for the same
       ideas (integrals, differentials, a differential equation).
-  [x] IB++ Physics/Math (trial): 20 physics-led questions that need IB
-      Mathematics, five for each pairing of Themes A and E with Topics 4 and
-      5 (three SL, two HL), with a two-subject standards chooser.
+  [x] Theme D Fields: 23 questions covering every SL and HL standard of
+      D.1–D.4 (D.4 is HL only), including a velocity selector before a mass
+      spectrometer, graphs of potential and of a changing field, and a
+      generator.
+  [x] IB++ Physics/Math (trial): 31 physics-led questions that need IB
+      Mathematics, for Themes A, D and E with Topics 4 and 5 (three SL and
+      two or three HL for each pairing), with a two-subject standards chooser.
   [ ] IB++ next, if the trial works: math-led questions for the same
       pairings (the mathematics in front, the physics as the context); more
-      pairings (Themes B–D, Topics 1–3); and enough questions at each level
+      pairings (Themes B and C, Topics 1–3); and enough questions at each level
       that every combination of Physics SL/HL and Math SL/HL has several.
-  [ ] Check the Theme E standards against your copy of the IB guide (see
-      the note in section 3).
+  [ ] Check the Theme D and E standards against your copy of the IB guide
+      (see the note in section 3).
   [x] Trial units for other courses: AP Physics C: Mechanics Unit 3 and
       University Physics I Topic 3 (10 questions each, with integrals for
       variable forces, the dot product, friction on ramps, elastic potential
@@ -1433,17 +1628,17 @@ Content (each batch on its own branch and pull request)
   [ ] More questions for standards with only one or two, so retakes have
       choice later, and more questions that combine topics.
   [ ] The remaining SL topics, about 10 questions each: B.1 Thermal energy
-      transfers next, then B.2, B.3, B.5, C.1–C.5, D.1–D.3.
+      transfers next, then B.2, B.3, B.5, C.1–C.5.
   [ ] Once a year: check the real-world figures listed in section 3 (EIA,
       IEA, Epoch AI) and update the questions that quote them.
-  [ ] HL-only topics (A.4, A.5, B.4, D.4) and the HL additions inside shared
-      topics (for example B.3, C.1, D.1, D.2), each with its HL standards
+  [ ] HL-only topics (A.4, A.5, B.4) and the HL additions inside shared
+      topics (for example B.3, C.1), each with its HL standards
       marked 'HL' in the catalog.
   [ ] University Modern Physics Topic 1, special relativity.
   Each batch: write, npm test, review in the browser, then merge.
   [ ] Physical constants beyond g (c, e, h, G, k, N_A, ...) in site.ts. (Theme
-      E and Modern Physics questions state their constants, and the 0.5%
-      allowance covers other common values; site.ts would let each style
+      E and Modern Physics questions state their constants, and the 2%
+      minimum allowance covers other common values; site.ts would let each style
       accept a list of values, as it does for g.)
   [ ] More graph tools as later topics need them: data plotting with a line of
       best fit and gradient, sketching curves (e.g. SHM).
@@ -1518,7 +1713,10 @@ written answers with optional AI marking, and more).
     accepted for an exact 6.83 m; the widest case in the current bank is about
     −9%). For a stricter "keep at least 3 s.f. in working" policy, set
     TOLERANCE.carrySigFigs to [3] in src/config/site.ts; the same example then
-    accepts 6.789 to 6.899 m (6.8 and 6.9 accepted, 7.0 and above rejected).
+    accepts 6.693 to 6.967 m (6.7 to 7.0 accepted, 7.1 and above rejected).
+    The 2% minimum (TOLERANCE.relMin) was asked for so that teachers do not
+    spend time finding rounding slips; lowering it makes marking stricter for
+    every question.
   - Grades: the 7-point penalty per extra try applies to the class grade; the
     IB grade is the marks of the latest answers with no penalty. Tries are
     counted per part (not per question). The lowest score applies to attempted

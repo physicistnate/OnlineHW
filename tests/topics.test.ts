@@ -75,6 +75,22 @@ describe('questions that use ideas from other topics', () => {
     expect(questionsForTopic('ibp.E.2', SL)).toEqual([]);
   });
 
+  it('has a question for every Theme D standard, in SL and in HL, without later topics', () => {
+    for (const course of [IB_PHYSICS_SL, IB_PHYSICS_HL]) {
+      const themeD = allTopics(course).filter((t) => t.id.startsWith('ibp.D.'));
+      // SL leaves out the HL-only topic D.4.
+      expect(themeD.map((t) => t.code)).toEqual(course === IB_PHYSICS_SL ? ['D.1', 'D.2', 'D.3'] : ['D.1', 'D.2', 'D.3', 'D.4']);
+      for (const topic of themeD) {
+        const { visible } = filterLater(questionsForTopic(topic.id, course.id), course.id, false);
+        expect(visible.length, `${course.id} ${topic.code}`).toBeGreaterThanOrEqual(4);
+        for (const s of topic.standards) {
+          expect(visible.some((q) => q.standards.includes(s.id)), `${course.id} ${s.code} has no question that avoids later topics`).toBe(true);
+        }
+      }
+    }
+    expect(questionsForTopic('ibp.D.4', SL)).toEqual([]);
+  });
+
   it('has a question for every standard of the University Modern Physics topics that have questions', () => {
     const course = UNIVERSITY_MODERN_PHYSICS;
     const withStandards = allTopics(course).filter((t) => t.standards.length > 0);

@@ -33,7 +33,7 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
   const ibpp = groups.find((g) => g.label === 'IB++');
   expect(!!ibpp && ibpp.options.join('|') === 'Physics/Math', `an IB++ section lists Physics/Math (${JSON.stringify(ibpp)})`);
   const home = await (async () => { await go(''); return p.locator('main').innerText(); })();
-  expect(home.includes('IB++ Physics/Math (trial): 20 IB Physics problems'), 'the home page lists the IB++ course and its 20 questions');
+  expect(home.includes('IB++ Physics/Math (trial): 31 IB Physics problems'), 'the home page lists the IB++ course and its 31 questions');
 
   console.log('Two standards boxes, chosen standards kept across topics');
   await go('#/bank?course=ibpp-physics-math');

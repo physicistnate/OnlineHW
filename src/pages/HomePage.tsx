@@ -10,7 +10,7 @@ const FEATURES = [
   },
   {
     title: 'Answers checked the way a teacher would',
-    body: `Each calculation is re-run with every intermediate value kept exact, rounded to 3 s.f. or rounded to 2 s.f. Any answer in that range is accepted, and significant figures are never penalized.`,
+    body: `Each calculation is re-run with every intermediate value kept exact, rounded to 3 s.f. or rounded to 2 s.f. Any answer in that range, or within 2% of the exact answer, is accepted, and significant figures are never penalized.`,
   },
   {
     title: 'Worked solutions and marking keys',
@@ -32,8 +32,18 @@ export function HomePage() {
   const ib = (topicId: string) => questionsForTopic(topicId, IB_PHYSICS_HL.id);
   const withQuestions = topics.filter((t) => questionsForTopic(t.id, IB_PHYSICS_SL.id).length > 0);
   const hlOnlyToCome = allTopics(IB_PHYSICS_HL).filter((t) => t.hlOnly && ib(t.id).length === 0).length;
+  const themeD = allTopics(IB_PHYSICS_HL).filter((t) => t.id.startsWith('ibp.D.'));
   const themeE = allTopics(IB_PHYSICS_HL).filter((t) => t.id.startsWith('ibp.E.'));
   const hlCount = (topicId: string) => ib(topicId).filter((q) => q.level === 'HL').length;
+  /** "D.1 Gravitational fields: 6 questions (2 HL only); …" for a theme's topics. */
+  const themeCounts = (theme: typeof themeE) =>
+    theme
+      .map((t) => {
+        const n = ib(t.id).length;
+        const hl = hlCount(t.id);
+        return `${t.code} ${t.name}: ${n} questions${t.hlOnly ? ' (HL only)' : hl ? ` (${hl} HL only)` : ''}`;
+      })
+      .join('; ');
   const marks = ALL_QUESTIONS.reduce((sum, q) => sum + q.parts.reduce((s, p) => s + p.marks, 0), 0);
   const ibpp = questionsForCourse(IBPP_PHYSICS_MATH.id);
 
@@ -95,15 +105,10 @@ export function HomePage() {
                 Calculation, graph reading and drawing, and multiple choice, all marked by the computer
               </li>
               <li>
-                IB Physics · Theme E Nuclear and quantum physics:{' '}
-                {themeE
-                  .map((t) => {
-                    const n = ib(t.id).length;
-                    const hl = hlCount(t.id);
-                    return `${t.code} ${t.name}: ${n} questions${t.hlOnly ? ' (HL only)' : hl ? ` (${hl} HL only)` : ''}`;
-                  })
-                  .join('; ')}
-                , including graph questions (half-life, photoelectric effect)
+                IB Physics · Theme D Fields: {themeCounts(themeD)}, including a velocity selector and graphs of potential and of a changing field
+              </li>
+              <li>
+                IB Physics · Theme E Nuclear and quantum physics: {themeCounts(themeE)}, including graph questions (half-life, photoelectric effect)
               </li>
               <li>
                 Trial units: {AP_PHYSICS_C_MECH.name} Unit 3 Work, Energy, and Power ({questionsForCourse(AP_PHYSICS_C_MECH.id).length} questions) and{' '}
@@ -114,7 +119,7 @@ export function HomePage() {
                 waves, decay, fission and fusion, stars), with integrals, differentials and differential equations
               </li>
               <li>
-                {IBPP_PHYSICS_MATH.name} (trial): {ibpp.length} IB Physics problems that need IB Mathematics on purpose, for Themes A and E with Topics 4
+                {IBPP_PHYSICS_MATH.name} (trial): {ibpp.length} IB Physics problems that need IB Mathematics on purpose, for Themes A, D and E with Topics 4
                 (statistics and probability) and 5 (calculus); {ibpp.filter((q) => q.level !== 'HL' && q.math?.level !== 'HL').length} use only SL physics and
                 SL mathematics. Choose physics and mathematics standards side by side, with SL or HL for each subject
               </li>
@@ -130,7 +135,7 @@ export function HomePage() {
           <div>
             <h4 className="next">Coming next</h4>
             <ul>
-              <li>B.1 Thermal energy transfers (the next SL topic), the HL-only topics A.4 and A.5, then themes B, C and D; more AP and university units if the trial units work well</li>
+              <li>B.1 Thermal energy transfers (the next SL topic), the HL-only topics A.4 and A.5, then themes B and C; more AP and university units if the trial units work well</li>
               <li>Supabase database: real teacher and student accounts, classes, saved work across devices, server-side marking and deadlines</li>
               <li>Teacher gradebook by class, assignment, student and standard</li>
               <li>Hosting on a host school networks allow (Cloudflare Pages or Netlify)</li>

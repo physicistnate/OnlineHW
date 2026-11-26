@@ -5,6 +5,13 @@
 
 export const mean = (xs: number[]) => xs.reduce((s, x) => s + x, 0) / xs.length;
 
+/** The median: the middle value, or the mean of the two middle values. */
+export function median(xs: number[]): number {
+  const s = [...xs].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
 /** Standard deviation of data treated as a whole population (σx on a GDC). */
 export function sdPopulation(xs: number[]): number {
   const m = mean(xs);

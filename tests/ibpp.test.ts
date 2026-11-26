@@ -1,7 +1,7 @@
 /**
  * IB++ Physics/Math: IB Physics problems that need IB Mathematics on purpose. Checks the
- * mathematics each question names, the balance of the bank (five questions for each
- * pairing of a physics theme with a mathematics topic, three SL and two HL), the
+ * mathematics each question names, the balance of the bank (for each pairing of a
+ * physics theme with a mathematics topic, three SL questions and two or three HL), the
  * two-subject filter with its SL/HL switches, and that IB++ questions stay in IB++.
  */
 import { describe, expect, it } from 'vitest';
@@ -51,16 +51,35 @@ describe('IB++ questions', () => {
     }
   });
 
-  it('has five questions for each pairing tested so far, three SL and two HL', () => {
-    for (const th of ['A', 'E']) {
-      for (const mt of ['ibm.4', 'ibm.5']) {
-        const set = IBPP.filter((q) => theme(q) === th && q.math!.topic === mt);
-        expect(set.length, `Theme ${th} with ${mt}`).toBe(5);
-        expect(set.filter((q) => !isHL(q)).length, `Theme ${th} with ${mt}: SL questions`).toBe(3);
-        expect(set.filter(isHL).length, `Theme ${th} with ${mt}: HL questions`).toBe(2);
-      }
+  it('has a balanced set for each pairing: three SL questions and two or three HL', () => {
+    const pairings: [string, string, number, number][] = [
+      ['A', 'ibm.4', 3, 2],
+      ['A', 'ibm.5', 3, 2],
+      ['D', 'ibm.4', 3, 2],
+      ['D', 'ibm.5', 3, 3],
+      ['E', 'ibm.4', 3, 2],
+      ['E', 'ibm.5', 3, 2],
+    ];
+    for (const [th, mt, sl, hl] of pairings) {
+      const set = IBPP.filter((q) => theme(q) === th && q.math!.topic === mt);
+      expect(set.filter((q) => !isHL(q)).length, `Theme ${th} with ${mt}: SL questions`).toBe(sl);
+      expect(set.filter(isHL).length, `Theme ${th} with ${mt}: HL questions`).toBe(hl);
     }
-    expect(IBPP).toHaveLength(20);
+    expect(IBPP).toHaveLength(31);
+  });
+
+  it('has the Theme D problems that were asked for, and Theme D statistics without regression lines', () => {
+    const byId = (id: string) => IBPP.find((q) => q.id === id)!;
+    // E = −dV/dr with spherical symmetry.
+    expect(byId('ibpp-d5-debye-field').standards).toContain('ibp.D.2.8');
+    // Poisson's equation with spherical symmetry, the second derivative and the second derivative test.
+    expect(byId('ibpp-d5-poisson-sphere').math!.standards).toEqual(expect.arrayContaining(['ibm.5.7', 'ibm.5.8']));
+    // A differential equation for a circuit.
+    expect(byId('ibpp-d5-rod-ode').math!.standards).toContain('ibm.5.18');
+    for (const q of IBPP.filter((x) => theme(x) === 'D' && x.math!.topic === 'ibm.4')) {
+      expect(q.math!.standards, q.id).not.toContain('ibm.4.4');
+      expect(q.math!.standards, q.id).not.toContain('ibm.4.10');
+    }
   });
 
   it('has ids that say which pairing they belong to', () => {
@@ -121,14 +140,14 @@ describe('the two-subject filter', () => {
 
   it('hides HL questions in a subject set to SL, independently for each subject', () => {
     const all = dualQuestionsAtLevels(ID, 'HL', 'HL');
-    expect(all).toHaveLength(20);
+    expect(all).toHaveLength(31);
     const physicsSL = dualQuestionsAtLevels(ID, 'SL', 'HL');
     const mathSL = dualQuestionsAtLevels(ID, 'HL', 'SL');
     const bothSL = dualQuestionsAtLevels(ID, 'SL', 'SL');
     expect(physicsSL.every((q) => q.level !== 'HL')).toBe(true);
     expect(mathSL.every((q) => q.math?.level !== 'HL')).toBe(true);
     expect(bothSL.every((q) => !isHL(q))).toBe(true);
-    expect(bothSL).toHaveLength(12);
+    expect(bothSL).toHaveLength(18);
     // Physics HL with mathematics SL keeps, for example, the photoelectric regression.
     expect(mathSL.map((q) => q.id)).toContain('ibpp-e4-photoelectric-regression');
     expect(physicsSL.map((q) => q.id)).not.toContain('ibpp-e4-photoelectric-regression');
