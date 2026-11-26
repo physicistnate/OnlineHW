@@ -17,6 +17,7 @@ import ibPhysicsB1 from './ib-physics/b1-thermal-energy-transfers';
 import ibPhysicsB2 from './ib-physics/b2-greenhouse-effect';
 import ibPhysicsB3 from './ib-physics/b3-gas-laws';
 import ibPhysicsB4 from './ib-physics/b4-thermodynamics';
+import ibPhysicsB5 from './ib-physics/b5-current-and-circuits';
 import ibPhysicsD1 from './ib-physics/d1-gravitational-fields';
 import ibPhysicsD2 from './ib-physics/d2-electric-magnetic-fields';
 import ibPhysicsD3 from './ib-physics/d3-motion-in-em-fields';
@@ -31,7 +32,7 @@ import universityPhysics1T3 from './university-physics-1/t3-work-energy-power';
 import universityModernPhysics from './university-modern-physics';
 import ibpp from './ibpp';
 
-export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1, ...ibPhysicsA2, ...ibPhysicsA3, ...ibPhysicsB1, ...ibPhysicsB2, ...ibPhysicsB3, ...ibPhysicsB4, ...ibPhysicsD1, ...ibPhysicsD2, ...ibPhysicsD3, ...ibPhysicsD4, ...ibPhysicsE1, ...ibPhysicsE2, ...ibPhysicsE3, ...ibPhysicsE4, ...ibPhysicsE5, ...apPhysicsCMechU3, ...universityPhysics1T3, ...universityModernPhysics, ...ibpp];
+export const ALL_QUESTIONS: AnyTemplate[] = [...ibPhysicsA1, ...ibPhysicsA2, ...ibPhysicsA3, ...ibPhysicsB1, ...ibPhysicsB2, ...ibPhysicsB3, ...ibPhysicsB4, ...ibPhysicsB5, ...ibPhysicsD1, ...ibPhysicsD2, ...ibPhysicsD3, ...ibPhysicsD4, ...ibPhysicsE1, ...ibPhysicsE2, ...ibPhysicsE3, ...ibPhysicsE4, ...ibPhysicsE5, ...apPhysicsCMechU3, ...universityPhysics1T3, ...universityModernPhysics, ...ibpp];
 
 const byId = new Map(ALL_QUESTIONS.map((q) => [q.id, q]));
 const revisionKey = (id: string, version: number, build?: string) => `${id}@v${version}${build ? `#${build}` : ''}`;
