@@ -74,14 +74,6 @@ export function allWorkFor(assignmentKey: string, workId: string): QuestionWork[
     .map((k) => readJson<QuestionWork>(k, {}));
 }
 
-/** Every student's pinned numbers for one question of an assignment (used to repair old data). */
-export function allPinnedParamsFor(assignmentKey: string, workId: string): Record<string, number | string>[] {
-  return listKeys('params:')
-    .filter((k) => k.endsWith(`::${assignmentKey}::${workId}`))
-    .map((k) => readJson<Record<string, number | string> | null>(k, null))
-    .filter((p): p is Record<string, number | string> => !!p && typeof p === 'object');
-}
-
 /** Saves changes to one or more parts at once: { partId: patch, ... }. */
 export type WorkUpdater = (patches: Record<string, Partial<PartWork>>) => void;
 

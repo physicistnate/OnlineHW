@@ -57,8 +57,8 @@ export default defineQuestion({
   },
 
   stem: ({ p }) =>
-    `In a version of Millikan’s oil-drop experiment, a student measures the charges $q$ on eight oil drops. Each drop carries a whole number $n$ of excess electrons.\n${dataTable(
-      ['\\text{Drop}', 'q\\ /\\ 10^{-19}\\ \\mathrm{C}'],
+    `In a version of Millikan’s oil-drop experiment, a student measures the charges on eight oil drops. Each drop carries a whole number $n$ of excess electrons, so its charge is negative; the table gives the magnitudes $|q|$.\n${dataTable(
+      ['\\text{Drop}', '|q|\\ /\\ 10^{-19}\\ \\mathrm{C}'],
       SETS[p.set].map((q, i) => [DROPS[i], q.toFixed(2)]),
     )}`,
 
@@ -66,7 +66,7 @@ export default defineQuestion({
     {
       label: '(a)',
       marks: 1,
-      prompt: ({ p }) => `Taking $e \\approx 1.60 \\times 10^{-19}$ C as a first estimate, find the number of excess electrons on drop ${DROPS[SETS[p.set].indexOf(Math.max(...SETS[p.set]))]}, the drop with the largest charge.`,
+      prompt: ({ p }) => `Taking $e \\approx 1.60 \\times 10^{-19}$ C as a first estimate, find the number of excess electrons on drop ${DROPS[SETS[p.set].indexOf(Math.max(...SETS[p.set]))]}, the drop with the largest magnitude of charge.`,
       response: { kind: 'numeric', answer: 'nMax', symbol: 'n', positive: true },
       solution: ({ r }) => [{ math: tex`\frac{${r.qMax.toFixed(2)}}{1.60} = ${fmtW(r.qMax / 1.6)} \approx ${r.nMax}` }, { text: 'The number of electrons must be a whole number.' }],
       markscheme: ({ r }) => [{ mark: tex`$n = ${r.nMax}$` }],
@@ -74,15 +74,15 @@ export default defineQuestion({
     {
       label: '(b)',
       marks: 2,
-      prompt: () => 'For each drop, divide its charge by its number of excess electrons to give an estimate of $e$. Find the mean of the eight estimates. (Use your calculator’s lists and keep full precision.)',
+      prompt: () => 'For each drop, divide the magnitude of its charge by its number of excess electrons to give an estimate of $e$. Find the mean of the eight estimates. (Use your calculator’s lists and keep full precision.)',
       response: { kind: 'numeric', answer: 'm', symbol: '\\bar{e}', unit: 'C', positive: true },
       solution: ({ p, r }) => {
         const qs = SETS[p.set];
         const n = electrons(qs);
         const rows = qs.map((q, i) => `${DROPS[i]} & ${q.toFixed(2)} & ${n[i]} & ${fmtW(q / n[i])}`).join(' \\\\ ');
         return [
-          { text: 'The numbers of electrons, and the estimates $q/n$ in units of $10^{-19}$ C:', math: `\\begin{array}{c|c|c|c} \\text{Drop} & q & n & q/n \\\\ \\hline ${rows} \\end{array}` },
-          { math: tex`\bar{e} = \frac{1}{8}\sum \frac{q}{n} = ${fmtA(r.m)}\ \mathrm{C}` },
+          { text: 'The numbers of electrons, and the estimates $|q|/n$ in units of $10^{-19}$ C:', math: `\\begin{array}{c|c|c|c} \\text{Drop} & |q| & n & |q|/n \\\\ \\hline ${rows} \\end{array}` },
+          { math: tex`\bar{e} = \frac{1}{8}\sum \frac{|q|}{n} = ${fmtA(r.m)}\ \mathrm{C}` },
         ];
       },
       markscheme: ({ r }) => [{ mark: 'Whole numbers $n$ for every drop' }, { mark: tex`$\bar{e} = ${fmtA(r.m)}\ \mathrm{C}$` }],
@@ -98,11 +98,11 @@ export default defineQuestion({
     {
       label: '(d)',
       marks: 1,
-      prompt: () => 'Another estimate of $e$ is the total charge on all the drops divided by the total number of excess electrons. Find this estimate.',
+      prompt: () => 'Another estimate of $e$ is the magnitude of the total charge on all the drops divided by the total number of excess electrons. Find this estimate.',
       response: { kind: 'numeric', answer: 'total', symbol: 'e', unit: 'C', positive: true },
       solution: ({ r }) => [
-        { math: tex`e = \frac{\sum q}{\sum n} = \frac{${r.sumQ.toFixed(2)} \times 10^{-19}}{${r.sumN}} = ${fmtA(r.total)}\ \mathrm{C}` },
-        { text: 'This gives more weight to the drops with more electrons, whose estimates $q/n$ share the error in $q$ among more electrons.' },
+        { math: tex`e = \frac{\sum |q|}{\sum n} = \frac{${r.sumQ.toFixed(2)} \times 10^{-19}}{${r.sumN}} = ${fmtA(r.total)}\ \mathrm{C}` },
+        { text: 'This gives more weight to the drops with more electrons, whose estimates $|q|/n$ share the error in $|q|$ among more electrons.' },
       ],
       markscheme: ({ r }) => [{ mark: tex`$${fmtA(r.total)}\ \mathrm{C}$` }],
     },
@@ -113,14 +113,14 @@ export default defineQuestion({
       response: {
         kind: 'mcq',
         options: () => [
-          { text: 'With a quantum of $0.80 \\times 10^{-19}$ C, some drops would be expected to carry an odd number of quanta, but every charge is close to an even number of them.', correct: true },
+          { text: 'If drops pick up charge at random, a quantum of $0.80 \\times 10^{-19}$ C should show up as an odd number of quanta on some drops, but every charge is close to an even number of them.', correct: true },
           { text: 'The mean in (b) is close to $1.60 \\times 10^{-19}$ C, so the quantum must be $1.60 \\times 10^{-19}$ C.' },
           { text: 'The standard deviation in (c) is small, so the quantum must be $1.60 \\times 10^{-19}$ C.' },
           { text: 'A charge as small as $0.80 \\times 10^{-19}$ C would be too small to measure.' },
         ],
       },
       solution: () => [
-        { text: 'Any set of charges that are whole numbers of $e$ are also whole numbers of $e/2$, so the mean and the spread cannot decide. What decides is that no drop ever shows an odd multiple of $e/2$: if the quantum really were $e/2$, about half of the drops would. Millikan measured many drops and never found one.' },
+        { text: 'Charges that are whole numbers of $e$ are also whole numbers of $e/2$, so the mean and the spread cannot decide. What counts is that no drop shows an odd multiple of $e/2$. If the quantum were $e/2$ and drops picked up charge at random, odd multiples would be expected among enough drops; Millikan measured many drops and never found one. The argument rests on that assumption about how drops pick up charge: the data alone cannot say how often odd multiples would appear.' },
       ],
       markscheme: () => [{ note: 'No odd multiples of 0.80 × 10⁻¹⁹ C among the charges.' }],
     },

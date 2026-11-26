@@ -18,7 +18,7 @@ const vPeri = (p: P) => {
 export default defineQuestion({
   id: 'ibp-d1-comet-kepler',
   version: 1,
-  title: 'A comet’s orbit and Kepler’s laws',
+  title: 'A comet’s orbit and Kepler’s laws (extension: an elliptical orbit)',
   courses: ['ib-physics-sl'],
   topic: 'ibp.D.1',
   standards: ['ibp.D.1.1', 'ibp.D.1.5'],
@@ -41,7 +41,7 @@ export default defineQuestion({
   },
 
   stem: ({ p, d }) =>
-    `A comet moves in an elliptical orbit around the Sun. Its closest distance from the Sun (perihelion) is ${Q(d.rp, 'AU')} and its greatest distance (aphelion) is ${Q(d.ra, 'AU')}. At perihelion its speed is ${Q(vPeri(p).toPrecision(3), 'km s-1')}. The Earth’s orbit is a circle of radius 1 AU with a period of 1 year.`,
+    `This question goes beyond the IB guide, which uses Kepler’s laws in calculations only for circular orbits. A comet moves in an elliptical orbit around the Sun. Its closest distance from the Sun (perihelion) is ${Q(d.rp, 'AU')} and its greatest distance (aphelion) is ${Q(d.ra, 'AU')}. At perihelion its speed is ${Q(vPeri(p).toPrecision(3), 'km s-1')}. The Earth’s orbit is a circle of radius 1 AU with a period of 1 year.`,
 
   parts: [
     {
@@ -97,7 +97,9 @@ export default defineQuestion({
           { text: 'Halfway between perihelion and aphelion.' },
         ],
       },
-      solution: () => [{ text: 'Equal areas are swept in equal times, and the area near aphelion is swept slowly (large $r$, small $v$). So most of the period is spent far from the Sun: comets are visible near the Sun for only a short part of each orbit.' }],
+      solution: () => [
+        { text: 'The line from the Sun to the comet sweeps out area at a constant rate (equal areas in equal times). Far from the Sun, $r$ is large, so each degree of the orbit sweeps out a large area and takes a long time; the comet also moves slowly there. So most of the period is spent far from the Sun: comets are visible near the Sun for only a short part of each orbit.' },
+      ],
       markscheme: () => [{ note: 'Near aphelion (slow, far away).' }],
     },
   ],

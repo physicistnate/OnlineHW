@@ -27,12 +27,13 @@ export default defineQuestion({
     w: { choices: [5, 10], base: 5 },
   },
 
-  compute: (p) => {
+  compute: (p, c) => {
     const v = (p.E * 1e4) / p.B;
     const mu = p.mu * 1e5;
     const sigma = p.sigma * 1e4;
     const w = p.w * 1e3;
-    const frac = normalCdf(v + w, mu, sigma) - normalCdf(v - w, mu, sigma);
+    const vc = c.carry(v, 'v', 3);
+    const frac = normalCdf(vc + w, mu, sigma) - normalCdf(vc - w, mu, sigma);
     const v90 = mu + Z90 * sigma;
     const E90 = v90 * p.B;
     return { v, frac, v90, E90 };
@@ -62,7 +63,7 @@ export default defineQuestion({
           { text: `The ions that pass have speeds between $${fmtA(lo)}$ and $${fmtA(hi)}\\ \\mathrm{m\\,s^{-1}}$. With the normal distribution on a calculator (mean $${d.mu} \\times 10^{5}$, standard deviation $${d.sigma} \\times 10^{4}$):`, math: tex`P(${fmtA(lo)} < V < ${fmtA(hi)}) = ${fmtA(r.frac)}` },
         ];
       },
-      markscheme: ({ r }) => [{ mark: 'Both limits: selected speed ± the half-width' }, { mark: tex`$${fmtA(r.frac)}$` }],
+      markscheme: ({ r }) => [{ mark: 'Both limits: selected speed ± the half-width' }, { mark: tex`$${fmtA(r.frac)}$` }, { note: 'Allow ECF from (a).' }],
     },
     {
       label: '(c)',
@@ -94,7 +95,7 @@ export default defineQuestion({
     {
       label: '(e)',
       marks: 1,
-      prompt: () => 'An ion faster than the selected speed enters the fields. What happens to it?',
+      prompt: () => 'An ion faster than the selected speed enters the fields. Which way is it pushed as it enters?',
       response: {
         kind: 'mcq',
         options: () => [
@@ -104,7 +105,9 @@ export default defineQuestion({
           { text: 'It is slowed down to the selected speed, then goes straight through.' },
         ],
       },
-      solution: () => [{ text: 'The electric force $qE$ is the same at every speed, but the magnetic force $qvB$ grows with the speed. For a faster ion the magnetic force wins, so it is pushed aside and misses the slit.' }],
+      solution: ({ d }) => [
+        { text: `The electric force $qE$ is the same at every speed, but the magnetic force $qvB$ grows with the speed. For a faster ion the magnetic force is the larger, so the ion is pushed in the direction of the magnetic force. An ion only a little faster (by less than $${d.w} \\times 10^{3}\\ \\mathrm{m\\,s^{-1}}$ here) is pushed so little that it still reaches the slit: that is why the selector lets through a band of speeds, not a single speed.` },
+      ],
       markscheme: () => [{ note: 'Towards the magnetic force: qvB > qE.' }],
     },
   ],

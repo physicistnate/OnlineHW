@@ -42,7 +42,9 @@ export default defineQuestion({
     const rc = c.carry(r, 'r', 3);
     const h = (rc - pl.R) / 1e3;
     const v = (2 * Math.PI * rc) / Ts;
-    return { Ts, r, h, v };
+    // The markscheme also allows v = √(GM/r): it follows on from the student's radius too.
+    const v__gm = Math.sqrt((IB.G * pl.M) / rc);
+    return { Ts, r, h, v, v__gm };
   },
 
   stem: ({ p, d }) => {
@@ -79,8 +81,11 @@ export default defineQuestion({
       marks: 2,
       prompt: () => 'Calculate the orbital speed of the satellite.',
       response: { kind: 'numeric', answer: 'v', symbol: 'v', unit: 'm s-1', positive: true },
-      solution: ({ r }) => [{ math: tex`v = \frac{2\pi r}{T} = \frac{2\pi \times ${fmtW(r.r)}}{${fmtW(r.Ts)}} = ${fmtA(r.v)}\ ${u('m s-1')}` }],
-      markscheme: ({ r }) => [{ mark: '$v = 2\\pi r/T$ (or $v = \\sqrt{GM/r}$)' }, { mark: tex`$v = ${fmtA(r.v)}\ ${u('m s-1')}$` }, { note: 'Allow ECF from (a).' }],
+      solution: ({ r }) => [
+        { math: tex`v = \frac{2\pi r}{T} = \frac{2\pi \times ${fmtW(r.r)}}{${fmtW(r.Ts)}} = ${fmtA(r.v)}\ ${u('m s-1')}` },
+        { text: 'Or, from $\\dfrac{GMm}{r^2} = \\dfrac{mv^2}{r}$, $v = \\sqrt{GM/r}$, which gives the same speed.' },
+      ],
+      markscheme: ({ r }) => [{ mark: '$v = 2\\pi r/T$ (or $v = \\sqrt{GM/r}$)' }, { mark: tex`$v = ${fmtA(r.v)}\ ${u('m s-1')}$` }, { note: 'Allow ECF from (a), by either method.' }],
     },
     {
       label: '(d)',

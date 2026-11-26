@@ -71,14 +71,24 @@ export default defineQuestion({
       response: {
         kind: 'mcq',
         options: () => [
-          { text: 'They start on the positive charge and end on the negative charge, never cross, and are closest together near the charges.', correct: true },
-          { text: 'They start on the negative charge and end on the positive charge.' },
+          { text: 'They point away from the positive charge and towards the negative charge, never cross, and are closest together near the charges, where the field is strongest.', correct: true },
+          { text: 'They point away from the negative charge and towards the positive charge.' },
           { text: 'They form closed loops around each charge.' },
           { text: 'They are evenly spaced everywhere, because the field is uniform.' },
         ],
       },
-      solution: () => [{ text: 'Field lines show the direction of the force on a small positive test charge: away from positive charges and towards negative ones. Their spacing shows the strength of the field, which is greatest near the charges. Two lines cannot cross, because the field has only one direction at each point.' }],
-      markscheme: () => [{ note: 'From + to −; never cross; density shows field strength.' }],
+      solution: ({ p }) => [
+        { text: 'Field lines show the direction of the force on a small positive test charge: away from positive charges and towards negative ones. Their spacing shows the strength of the field, which is greatest near the charges. Two lines cannot cross, because the field has only one direction at each point.' },
+        {
+          text:
+            p.Q1 > p.Q2
+              ? 'The number of lines on each charge is proportional to its size. Here the positive charge is the larger, so only some of its lines end on the negative charge: the rest go off to infinity.'
+              : p.Q1 < p.Q2
+                ? 'The number of lines on each charge is proportional to its size. Here the negative charge is the larger, so it also receives lines that come in from infinity, besides those from the positive charge.'
+                : 'The number of lines on each charge is proportional to its size. Here the charges are equal in size, so every line that leaves the positive charge ends on the negative charge.',
+        },
+      ],
+      markscheme: () => [{ note: 'Away from + and towards −; never cross; spacing shows field strength.' }],
     },
   ],
 });

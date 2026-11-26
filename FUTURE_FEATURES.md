@@ -72,7 +72,7 @@ Still needed:
 Started for mathematics: the IB++ Physics/Math course (round 8) tags each question with the IB Mathematics topic and standards it needs, and the bank and builder have a second standards box for them (see item 7).
 
 ### 7. IB++: problems that need two IB subjects on purpose
-IB++ Physics/Math is a trial: IB Physics problems that need IB Mathematics: analysis and approaches in a non-trivial way, physics-led for now. It has 31 questions for Themes A, D and E with Topics 4 (statistics and probability) and 5 (calculus): three SL and two HL in each pairing, and three SL and three HL for Theme D with calculus (including E = −dV/dr, Poisson's equation with the second derivative test, and a circuit's differential equation). Teachers choose physics and mathematics standards side by side, with SL or HL for each subject.
+IB++ Physics/Math is a trial: IB Physics problems that need IB Mathematics: analysis and approaches in a non-trivial way, physics-led for now. It has 32 questions for Themes A, D and E with Topics 4 (statistics and probability) and 5 (calculus): three SL and two HL in each pairing, and three SL and four HL for Theme D with calculus (including E = −dV/dr, Poisson's equation with the second derivative test, and differential equations for an induction circuit and an RC circuit). Teachers choose physics and mathematics standards side by side, with SL or HL for each subject.
 
 Next, if the review goes well:
 - **Math-led questions:** a switch between physics-led and math-led questions for the same pairings, where the mathematics is in front and the physics is the context.
@@ -95,7 +95,7 @@ The "leave out questions that need later topics" option uses the IB guide's orde
 - **More graph tools:** plotting data with a line of best fit and its gradient, and sketching curves (for example simple harmonic motion).
 - **More physical constants** beyond g (c, e, h, G, k, N_A, …), with each style's accepted values.
 - **Stricter or looser rounding as an assignment setting**, such as "keep at least 3 s.f. in working", or a different minimum allowance than 2% (today these are site-wide settings).
-- **An RC circuit question for IB++**, if capacitance comes back into the IB guide or for a course that teaches it (the 2025 guide has no capacitors, so the circuit differential equation uses induction for now).
+- **Capacitors in AP Physics C: Electricity and Magnetism**, covered fully there. They are not in the 2025 IB guide, so in IB material they stay a small part: one IB++ problem uses an RC circuit for its differential equation.
 - **"Show that" questions** with method marks.
 - **Accessibility review** (screen readers, keyboard-only use, contrast) and a **light theme**.
 - **A custom domain**, which school web filters are less likely to block.

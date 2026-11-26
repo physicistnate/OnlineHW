@@ -82,12 +82,12 @@ export default defineQuestion({
     {
       label: '(c)',
       marks: 2,
-      prompt: ({ d, p }) => `A small bead carrying a charge of ${Q(d.q, 'nC')} is moved slowly from ${Q(2 * p.r1, 'mm')} to ${Q(d.r1, 'mm')} from the centre of the sphere. Calculate the work done on the bead.`,
+      prompt: ({ d, p }) => `A small bead carrying a charge of ${Q(d.q, 'nC')} is moved slowly from ${Q(2 * p.r1, 'mm')} to ${Q(d.r1, 'mm')} from the centre of the sphere. Calculate the work done by the external force that moves the bead.`,
       response: { kind: 'numeric', answer: 'W', symbol: 'W', unit: 'J', positive: true },
       solution: ({ d, p, r }) => [
         { math: tex`V(${d.r1}\ \mathrm{mm}) = \frac{${fmtW(r.kQ)}}{${d.r1} \times 10^{-3}} \times e^{-${r.x}} = ${fmtW(r.V1)}\ ${u('V')}` },
         { math: tex`V(${2 * p.r1}\ \mathrm{mm}) = \frac{${fmtW(r.kQ)}}{${2 * p.r1} \times 10^{-3}} \times e^{-${2 * r.x}} = ${fmtW(r.V2)}\ ${u('V')}` },
-        { text: 'The work done is the charge times the change of potential:', math: tex`W = q\,\Delta V = ${d.q} \times 10^{-9} \times (${fmtW(r.V1)} - ${fmtW(r.V2)}) = ${fmtA(r.W)}\ ${u('J')}` },
+        { text: 'The field pushes the positive bead outwards, so the external force does positive work, equal to the bead’s gain in electric potential energy:', math: tex`W = q\,\Delta V = ${d.q} \times 10^{-9} \times (${fmtW(r.V1)} - ${fmtW(r.V2)}) = ${fmtA(r.W)}\ ${u('J')}` },
       ],
       markscheme: ({ r }) => [{ mark: 'Both potentials from $V(r)$' }, { mark: tex`$W = ${fmtA(r.W)}\ ${u('J')}$` }],
     },

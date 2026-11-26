@@ -5,5 +5,6 @@ import deflectionTangent from './deflection-tangent';
 import debyeField from './debye-field';
 import poissonSphere from './poisson-sphere';
 import rodOde from './rod-ode';
+import rcPlates from './rc-plates';
 
-export default [keplerLinear, tidalGradient, deflectionTangent, debyeField, poissonSphere, rodOde];
+export default [keplerLinear, tidalGradient, deflectionTangent, debyeField, poissonSphere, rodOde, rcPlates];

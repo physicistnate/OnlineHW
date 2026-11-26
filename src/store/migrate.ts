@@ -11,7 +11,7 @@ import { archivedRevisions } from '../content/registry';
 import { partId } from '../engine/instance';
 import type { AnyTemplate } from '../engine/types';
 import { DEFAULT_SETTINGS, SAMPLE_ID, itemsFor, type Assignment, type AssignmentItem } from './assignments';
-import { allPinnedParamsFor, allWorkFor } from './progress';
+import { allWorkFor } from './progress';
 import { hasKey, readJson, readLegacyJson, writeJson } from './storage';
 
 interface LegacyAssignment {
@@ -61,16 +61,17 @@ export const REUSED_VERSIONS = [
 ];
 
 /**
- * How badly saved data fits a revision: pinned numbers with other parameter names,
- * and saved parts it does not have, of another kind (multiple choice or numeric) or
- * marked out of a different number of marks.
+ * How badly students' saved answers fit a revision: saved parts it does not have, of
+ * another kind (multiple choice or numeric) or marked out of a different number of marks.
+ *
+ * Pinned numbers are not counted: they only show which revision a student last opened.
+ * Whenever a build opens an assignment as a revision with other parameter names, it
+ * replaces the numbers (build e6066f1 did this to version-1 assignments made on
+ * 59f80b0, and 59f80b0 to older ones), and the student is given back their original
+ * numbers when the right revision is restored, because they come from the same seed.
  */
 function misfits(t: AnyTemplate, assignmentId: string, workId: string): number {
   let n = 0;
-  const keys = Object.keys(t.params);
-  for (const pinned of allPinnedParamsFor(assignmentId, workId)) {
-    if (Object.keys(pinned).length !== keys.length || !keys.every((k) => k in pinned)) n++;
-  }
   for (const work of allWorkFor(assignmentId, workId)) {
     for (const [pid, saved] of Object.entries(work)) {
       const part = t.parts.find((p) => partId(p.label) === pid);
@@ -88,9 +89,10 @@ function misfits(t: AnyTemplate, assignmentId: string, workId: string): number {
 }
 
 /**
- * The build an assignment's question came from: the revision its students' saved work
- * fits better, or, with nothing saved to go on, the build that was the latest when the
- * assignment was made. Undefined means the plain archived revision.
+ * The build an assignment's question came from: the revision its students' saved
+ * answers fit better (so that no one's work is lost), or, when answers do not decide
+ * it, the build that was the latest when the assignment was made. Undefined means the
+ * plain archived revision.
  */
 export function inferBuild(a: Pick<Assignment, 'id' | 'createdAt'>, item: AssignmentItem, spec: (typeof REUSED_VERSIONS)[number]): string | undefined {
   const revisions = archivedRevisions(item.id, item.version);
@@ -107,7 +109,10 @@ export function inferBuild(a: Pick<Assignment, 'id' | 'createdAt'>, item: Assign
 
 /** Tells assignments made with a build that reused a version number which revision they used. */
 export function repairReusedVersions(): void {
-  const done = 'repaired-builds:r6';
+  // Second pass ("r6-v2"): the first pass also counted pinned numbers, so an unanswered
+  // assignment that a later build had re-pinned kept the wrong revision. Items it gave a
+  // build keep it.
+  const done = 'repaired-builds:r6-v2';
   if (hasKey(done)) return;
   const list = readJson<unknown>('assignments', []);
   if (Array.isArray(list)) {

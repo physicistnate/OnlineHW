@@ -14,7 +14,7 @@ const THEME_D = {
   'ibp-d3': ['electron-deflection', 'proton-circle', 'velocity-selector', 'fine-beam-tube', 'wire-force', 'parallel-wires'],
   'ibp-d4': ['flux-coil', 'faraday-graph', 'moving-rod', 'lenz-magnet', 'generator'],
   'ibpp-d4': ['millikan-statistics', 'selector-normal', 'phone-magnetometer', 'isotope-peaks', 'hydrogen-pdf'],
-  'ibpp-d5': ['kepler-linear', 'tidal-gradient', 'deflection-tangent', 'debye-field', 'poisson-sphere', 'rod-ode'],
+  'ibpp-d5': ['kepler-linear', 'tidal-gradient', 'deflection-tangent', 'debye-field', 'poisson-sphere', 'rod-ode', 'rc-plates'],
 };
 const IDS = Object.entries(THEME_D).flatMap(([prefix, names]) => names.map((n) => `${prefix}-${n}`));
 
@@ -56,7 +56,7 @@ const IDS = Object.entries(THEME_D).flatMap(([prefix, names]) => names.map((n) =
   const status = await p.locator('.status-card').innerText();
   expect(status.includes('IB Physics · Theme D Fields: D.1 Gravitational fields: 6 questions (2 HL only)'), 'status lists Theme D, starting with D.1');
   expect(status.includes('D.4 Induction: 5 questions (HL only)'), 'status lists D.4 as HL only');
-  expect(status.includes('IB++ Physics/Math (trial): 31 IB Physics problems') && status.includes('for Themes A, D and E'), 'status lists the 31 IB++ problems for Themes A, D and E');
+  expect(status.includes('IB++ Physics/Math (trial): 32 IB Physics problems') && status.includes('for Themes A, D and E'), 'status lists the 32 IB++ problems for Themes A, D and E');
   expect((await p.locator('.feature-grid').innerText()).includes('within 2% of the exact answer'), 'the marking feature mentions the 2% allowance');
 
   console.log('Theme D in the bank: SL without D.4 and HL-only questions, HL with them');
@@ -146,6 +146,20 @@ const IDS = Object.entries(THEME_D).flatMap(([prefix, names]) => names.map((n) =
   await phone.goto(`${BASE}#/q/ibpp-d5-poisson-sphere?sol=1`);
   await phone.waitForLoadState('networkidle');
   await phone.screenshot({ path: 'tests/browser/shots/round9-poisson-phone.png', fullPage: false });
+
+  console.log('Review 9: follow-through by either method, from a wrong selected speed, and the comet labelled an extension');
+  for (const v of ['2909', '6310']) {
+    await go('#/q/ibp-d1-satellite-orbits');
+    await answer(0, '1.0e7');
+    expect((await answer(2, v)).includes('error carried forward'), `orbital speed ${v} m/s follows on from a radius of 1.0 × 10⁷ m (2πr/T and √(GM/r))`);
+  }
+  await go('#/q/ibpp-d4-selector-normal');
+  await answer(0, '2.0e5');
+  expect((await answer(1, '0.0334')).includes('error carried forward'), 'selector (b) follows on from a wrong selected speed in (a)');
+  await go('#/q/ibp-d1-comet-kepler');
+  expect((await p.locator('.question').innerText()).includes('goes beyond the IB guide'), 'the comet question says it is an extension');
+  await go('#/q/ibpp-d5-rc-plates?sol=1&ms=1');
+  expect((await p.locator('.question').innerText()).includes('Capacitors are not in the IB Physics guide'), 'the RC problem says capacitors are not in the IB guide');
 
   console.log('Printing');
   await go('#/print?ids=ibp-d3-velocity-selector,ibp-d4-faraday-graph,ibpp-d5-poisson-sphere&title=Fields&sol=1&ms=1');

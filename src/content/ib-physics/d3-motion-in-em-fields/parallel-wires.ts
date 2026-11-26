@@ -56,10 +56,10 @@ export default defineQuestion({
       response: {
         kind: 'mcq',
         options: () => [
-          { text: 'They attract, and the forces on the two bars are equal in size even though the currents are different.', correct: true },
-          { text: 'They attract, and the bar with the larger current feels the larger force.' },
-          { text: 'They repel, and the forces on the two bars are equal in size.' },
-          { text: 'They repel, and the bar with the smaller current feels the larger force.' },
+          { text: 'They attract, and the forces on the two bars are always equal in size, whatever the two currents are.', correct: true },
+          { text: 'They attract, but the forces on the two bars are equal in size only when the two currents are equal.' },
+          { text: 'They repel, and the forces on the two bars are always equal in size, whatever the two currents are.' },
+          { text: 'They repel, but the forces on the two bars are equal in size only when the two currents are equal.' },
         ],
       },
       solution: () => [{ text: 'Currents in the same direction attract. Each bar sits in the field of the other, and the two forces are a Newton’s third law pair: equal and opposite, whatever the currents.' }],

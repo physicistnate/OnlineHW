@@ -56,7 +56,7 @@ describe('IB++ questions', () => {
       ['A', 'ibm.4', 3, 2],
       ['A', 'ibm.5', 3, 2],
       ['D', 'ibm.4', 3, 2],
-      ['D', 'ibm.5', 3, 3],
+      ['D', 'ibm.5', 3, 4],
       ['E', 'ibm.4', 3, 2],
       ['E', 'ibm.5', 3, 2],
     ];
@@ -65,7 +65,7 @@ describe('IB++ questions', () => {
       expect(set.filter((q) => !isHL(q)).length, `Theme ${th} with ${mt}: SL questions`).toBe(sl);
       expect(set.filter(isHL).length, `Theme ${th} with ${mt}: HL questions`).toBe(hl);
     }
-    expect(IBPP).toHaveLength(31);
+    expect(IBPP).toHaveLength(32);
   });
 
   it('has the Theme D problems that were asked for, and Theme D statistics without regression lines', () => {
@@ -74,8 +74,13 @@ describe('IB++ questions', () => {
     expect(byId('ibpp-d5-debye-field').standards).toContain('ibp.D.2.8');
     // Poisson's equation with spherical symmetry, the second derivative and the second derivative test.
     expect(byId('ibpp-d5-poisson-sphere').math!.standards).toEqual(expect.arrayContaining(['ibm.5.7', 'ibm.5.8']));
-    // A differential equation for a circuit.
+    // Differential equations for circuits: an induction circuit, and an RC circuit (capacitors are not in the
+    // IB guide, but they are fine where the differential equation is the point).
     expect(byId('ibpp-d5-rod-ode').math!.standards).toContain('ibm.5.18');
+    expect(byId('ibpp-d5-rc-plates').math!.standards).toContain('ibm.5.18');
+    // Capacitors stay a small part of the bank: only this IB++ problem mentions them.
+    const capacitorQs = ALL_QUESTIONS.filter((q) => /capacitor/i.test(JSON.stringify(instantiate(q, null)))).map((q) => q.id);
+    expect(capacitorQs).toEqual(['ibpp-d5-rc-plates']);
     for (const q of IBPP.filter((x) => theme(x) === 'D' && x.math!.topic === 'ibm.4')) {
       expect(q.math!.standards, q.id).not.toContain('ibm.4.4');
       expect(q.math!.standards, q.id).not.toContain('ibm.4.10');
@@ -140,7 +145,7 @@ describe('the two-subject filter', () => {
 
   it('hides HL questions in a subject set to SL, independently for each subject', () => {
     const all = dualQuestionsAtLevels(ID, 'HL', 'HL');
-    expect(all).toHaveLength(31);
+    expect(all).toHaveLength(32);
     const physicsSL = dualQuestionsAtLevels(ID, 'SL', 'HL');
     const mathSL = dualQuestionsAtLevels(ID, 'HL', 'SL');
     const bothSL = dualQuestionsAtLevels(ID, 'SL', 'SL');
