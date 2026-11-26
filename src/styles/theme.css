@@ -192,7 +192,8 @@ input[type='radio'] {
 }
 /* The narrowest phones (320–360 px): tables and long equations in question text a little smaller, so they fit. */
 @media (max-width: 360px) {
-  .q-stem .katex-display {
+  .q-stem .katex-display,
+  .q-stem .eq-flow {
     font-size: 0.86em;
   }
 }

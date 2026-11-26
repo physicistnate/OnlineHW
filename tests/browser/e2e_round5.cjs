@@ -91,7 +91,7 @@ const UP_T3 = ['dot-product-3d', 'exponential-force', 'nonlinear-spring', 'pumpi
   const yLabels = await p.locator('.question svg text').evaluateAll((els) => els.map((e) => e.textContent ?? ''));
   expect(yLabels.some((t) => t.trim().startsWith('−') || t.trim().startsWith('-')), 'its force axis goes below zero');
   await go('#/q/ibp-a3-home-energy');
-  expect((await p.locator('.q-stem .katex-display').count()) === 1, 'the appliance table is shown');
+  expect((await p.locator('.q-stem .eq-flow').count()) === 1, 'the appliance table is shown'); // display maths renders as a wrapping .eq-flow
   // KaTeX writes the spaces in \text{} as no-break spaces.
   expect((await p.locator('.q-stem').innerText()).replace(/\u00a0/g, ' ').includes('EV charger'), 'the table lists the car charger');
 
@@ -124,7 +124,7 @@ const UP_T3 = ['dot-product-3d', 'exponential-force', 'nonlinear-spring', 'pumpi
     expect(over <= 0, `${h.split('?')[0]}${h.includes('q/') ? ' ' + h.split('/')[2].split('?')[0] : ''}: no sideways scrolling at 375 px (${over}px)`);
   }
   await go('#/q/ibp-a3-home-energy');
-  const table = await p.locator('.q-stem .katex-display').evaluate((el) => el.scrollWidth - el.clientWidth);
+  const table = await p.locator('.q-stem .eq-flow').evaluate((el) => el.scrollWidth - el.clientWidth);
   expect(table <= 0, `the appliance table fits a phone without scrolling sideways (${table}px)`);
 
   await b.close();

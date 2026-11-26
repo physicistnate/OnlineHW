@@ -128,7 +128,7 @@ const expect = (cond, msg) => { console.log(cond ? '  ✓' : '  ✗ FAIL:', msg)
     expect(over <= 0, `${h}: no sideways scrolling at 320 px (${over}px)`);
   }
   await go('#/q/ibp-a3-home-energy');
-  expect((await p.locator('.q-stem .katex-display').evaluate((el) => el.scrollWidth - el.clientWidth)) <= 0, 'the appliance table fits at 320 px');
+  expect((await p.locator('.q-stem .eq-flow').evaluate((el) => el.scrollWidth - el.clientWidth)) <= 0, 'the appliance table fits at 320 px');
 
   await b.close();
   console.log(problems.length ? `\n${problems.length} PROBLEM(S):\n- ${problems.join('\n- ')}` : '\nAll round-6 browser checks passed.');
