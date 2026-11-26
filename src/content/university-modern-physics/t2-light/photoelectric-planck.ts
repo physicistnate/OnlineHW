@@ -60,9 +60,9 @@ export default defineQuestion({
           text: 'Write the photoelectric equation for each measurement, with $f = c/\\lambda$, and subtract: the work function cancels.',
           math: tex`eV_1 - eV_2 = hc\left(\frac{1}{\lambda_1} - \frac{1}{\lambda_2}\right) \quad\Rightarrow\quad h = \frac{e(V_1 - V_2)\,\lambda_1\lambda_2}{c(\lambda_2 - \lambda_1)}`,
         },
-        {
-          math: tex`h = \frac{1.602 \times 10^{-19} \times (${r.V1.toFixed(2)} - ${r.V2.toFixed(2)}) \times ${d.l1} \times 10^{-9} \times ${d.l2} \times 10^{-9}}{2.998 \times 10^{8} \times (${d.l2} - ${d.l1}) \times 10^{-9}} = ${fmtA(r.h)}\ ${u('J s')}`,
-        },
+        { math: tex`e(V_1 - V_2) = 1.602 \times 10^{-19} \times (${r.V1.toFixed(2)} - ${r.V2.toFixed(2)}) = ${fmtW(UMP.e * (r.V1 - r.V2))}\ ${u('J')}` },
+        { math: tex`\frac{\lambda_1\lambda_2}{\lambda_2 - \lambda_1} = \frac{${d.l1} \times 10^{-9} \times ${d.l2} \times 10^{-9}}{(${d.l2} - ${d.l1}) \times 10^{-9}} = ${fmtW((Number(d.l1) * Number(d.l2) * 1e-9) / (Number(d.l2) - Number(d.l1)))}\ ${u('m')}` },
+        { math: tex`h = \frac{${fmtW(UMP.e * (r.V1 - r.V2))} \times ${fmtW((Number(d.l1) * Number(d.l2) * 1e-9) / (Number(d.l2) - Number(d.l1)))}}{2.998 \times 10^{8}} = ${fmtA(r.h)}\ ${u('J s')}` },
         { text: 'Millikan’s data gave $h$ within about 1% of the value from blackbody radiation, convincing even skeptics that Einstein’s equation was right.' },
       ],
       markscheme: ({ r }) => [{ mark: 'Writes $eV_s = hf - \\phi$ for both wavelengths and eliminates $\\phi$' }, { mark: 'Uses $f = c/\\lambda$ with wavelengths in meters' }, { mark: tex`$h = ${fmtA(r.h)}\ ${u('J s')}$` }],

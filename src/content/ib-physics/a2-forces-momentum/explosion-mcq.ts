@@ -57,7 +57,7 @@ export default defineQuestion({
           math: tex`v_2 = \frac{p}{m_2} = \frac{${fmtW(r.mom)}}{${fmtW(r.m2)}} = ${fmtW(r.v2)}\ ${u('m s-1')}`,
         },
         {
-          text: 'Its kinetic energy is $\tfrac{1}{2}m_2 v_2^{\,2}$, which is the same as $p^2/2m_2$. Using the momentum avoids rounding the speed.',
+          text: 'Its kinetic energy is $\\tfrac{1}{2}m_2 v_2^{\\,2}$, which is the same as $p^2/2m_2$. Using the momentum avoids rounding the speed.',
           math: tex`E_k = \frac{p^2}{2m_2} = \frac{${fmtW(r.mom)}^2}{2 \times ${fmtW(r.m2)}} = ${fmt(r.KE2)}\ ${u('J')}`,
         },
         {

@@ -70,8 +70,8 @@ export default defineQuestion({
       solution: ({ p, r }) => {
         const probs = PROBS[p.dist as string];
         return [
-          { math: tex`E(X) = ${SPEEDS.map((v, i) => `${v} \times ${probs[i]}`).join(' + ')} = ${fmtW(r.EX)}` },
-          { math: tex`E(X^2) = ${SPEEDS.map((v, i) => `${v}^2 \times ${probs[i]}`).join(' + ')} = ${fmtW(r.EX2)}` },
+          { math: tex`E(X) = ${SPEEDS.map((v, i) => tex`${v} \times ${probs[i]}`).join(' + ')} = ${fmtW(r.EX)}` },
+          { math: tex`E(X^2) = ${SPEEDS.map((v, i) => tex`${v}^2 \times ${probs[i]}`).join(' + ')} = ${fmtW(r.EX2)}` },
           { math: tex`[E(X)]^2 = ${fmtW(r.EX)}^2 = ${fmtW(r.EX ** 2)}` },
           { math: tex`\mathrm{Var}(X) = E(X^2) - [E(X)]^2 = ${fmtW(r.EX2)} - ${fmtW(r.EX ** 2)} = ${fmtA(r.varX)}\ ${u('m2 s-2')}` },
         ];

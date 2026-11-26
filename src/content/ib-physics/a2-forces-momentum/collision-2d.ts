@@ -149,8 +149,9 @@ export default defineQuestion({
       solution: ({ d, r }) => [
         {
           text: 'Compare the total kinetic energy before and after the collision.',
-          math: tex`\begin{aligned} E_{k,\text{before}} &= \tfrac{1}{2} \times ${d.mA} \times ${d.uA}^2 = ${fmtW(r.KEb)}\ ${u('J')} \\ E_{k,\text{after}} &= \tfrac{1}{2} \times ${d.mA} \times ${d.vA}^2 + \tfrac{1}{2} \times ${d.mB} \times ${fmtW(r.vB)}^2 = ${fmtW(r.KEa)}\ ${u('J')} \end{aligned}`,
+          math: tex`E_{k,\text{before}} = \tfrac{1}{2} \times ${d.mA} \times ${d.uA}^2 = ${fmtW(r.KEb)}\ ${u('J')}`,
         },
+        { math: tex`E_{k,\text{after}} = \tfrac{1}{2} \times ${d.mA} \times ${d.vA}^2 + \tfrac{1}{2} \times ${d.mB} \times ${fmtW(r.vB)}^2 = ${fmtW(r.KEa)}\ ${u('J')}` },
         {
           text: 'The kinetic energy decreases, so the collision is inelastic. Momentum is conserved in every collision of an isolated system, elastic or not, so it cannot decide the question.',
         },

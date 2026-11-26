@@ -41,7 +41,8 @@ export default defineQuestion({
     const P8 = power(8, p.r, p.eff as number);
     const EV = SPEEDS.reduce((s, v, i) => s + v * probs[i], 0);
     const PEV = power(c.carry(EV, 'EV'), p.r, p.eff as number);
-    const EP = SPEEDS.reduce((s, v, i) => s + power(v, p.r, p.eff as number) * probs[i], 0);
+    // Each power is written down (4 s.f.) and then weighted, as the worked solution shows.
+    const EP = SPEEDS.reduce((s, v, i) => s + c.carry(power(v, p.r, p.eff as number), undefined, 3) * probs[i], 0);
     return { P8, EV, PEV, EP };
   },
 
@@ -69,7 +70,7 @@ export default defineQuestion({
       response: { kind: 'numeric', answer: 'EV', symbol: 'E(V)', unit: 'm s-1', positive: true },
       solution: ({ p, r }) => {
         const probs = PROBS[p.wind as string];
-        return [{ math: tex`E(V) = \sum vP(V = v) = ${SPEEDS.map((v, i) => `${v} \times ${probs[i]}`).join(' + ')} = ${fmtA(r.EV)}\ ${u('m s-1')}` }];
+        return [{ math: tex`E(V) = \sum vP(V = v) = ${SPEEDS.map((v, i) => tex`${v} \times ${probs[i]}`).join(' + ')} = ${fmtA(r.EV)}\ ${u('m s-1')}` }];
       },
       markscheme: ({ r }) => [{ mark: '$\\sum vP(V = v)$' }, { mark: tex`$E(V) = ${fmtA(r.EV)}\ ${u('m s-1')}$` }],
     },
@@ -91,7 +92,7 @@ export default defineQuestion({
         const powers = SPEEDS.map((v) => power(v, p.r, Number(d.eff)));
         return [
           { text: `Find the power at each wind speed (MW): ${SPEEDS.map((v, i) => `${v} m s⁻¹: ${fmtW(powers[i])}`).join('; ')}. Then weight each by its probability.` },
-          { math: tex`E(P) = \sum P(v)\,P(V = v) = ${powers.map((w, i) => `${fmtW(w)} \times ${probs[i]}`).join(' + ')} = ${fmtA(r.EP)}\ ${u('MW')}` },
+          { math: tex`E(P) = \sum P(v)\,P(V = v) = ${powers.map((w, i) => tex`${fmtW(w)} \times ${probs[i]}`).join(' + ')} = ${fmtA(r.EP)}\ ${u('MW')}` },
         ];
       },
       markscheme: ({ r }) => [{ mark: 'Power at each speed weighted by its probability' }, { mark: tex`$E(P) = ${fmtA(r.EP)}\ ${u('MW')}$` }],

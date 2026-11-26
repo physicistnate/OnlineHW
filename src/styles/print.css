@@ -365,6 +365,9 @@
   overflow: visible;
   margin: 0.2em 0;
 }
+.paper .eq-flow.is-centered {
+  margin: 0.3em 0;
+}
 .paper .step-text {
   color: #1f2937;
 }
