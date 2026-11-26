@@ -77,9 +77,9 @@ export function parseNumber(raw: string): ParseResult {
       return { ok: false, error: 'Finish the power of ten, for example 3.0e8 or 3.0e-8.' };
     }
     if (/^[xX*]/.test(rest)) return { ok: false, error: 'Write powers of ten as 3.0x10^8 or 3.0e8.' };
-    // A unit: starts with a letter (or µ ° Ω %), then letters, exponents, "/", "^",
+    // A unit: starts with a letter (or µ ° ℃ Ω %), then letters, exponents, "/", "^",
     // "-", and separators "·", "*", "." between unit symbols.
-    if (!/^[a-zA-Zµμ°%Ω][a-zA-Zµμ°%Ω0-9^\-/.()·⋅∙*⁰¹²³⁴⁵⁶⁷⁸⁹⁻]*$/.test(rest)) return { ok: false, error: NOT_A_NUMBER };
+    if (!/^[a-zA-Zµμ°℃%Ω][a-zA-Zµμ°℃%Ω0-9^\-/.()·⋅∙*⁰¹²³⁴⁵⁶⁷⁸⁹⁻]*$/.test(rest)) return { ok: false, error: NOT_A_NUMBER };
   }
 
   const exponent = expE ?? expRound ?? expCurly ?? expBare ?? '0';
