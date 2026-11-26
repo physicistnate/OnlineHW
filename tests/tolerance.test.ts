@@ -37,6 +37,9 @@ describe('accepting typed answers (cell rule)', () => {
     ['3.2 kW h', 'kW h'],
     ['3.2 kWh', 'kW h'],
     ['64 %', '%'],
+    ['13.8 °C', '°C'],
+    ['13.8 C', '°C'],
+    ['13.8 ℃', '°C'],
   ])('recognises %j as the unit %j', (s, unit) => {
     const value = Number.parseFloat(s);
     expect(checkNumeric(s, range(value, value, value), { unit }).status).toBe('correct');

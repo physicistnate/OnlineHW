@@ -10,6 +10,7 @@ export function unitTex(unit: string): string {
   const u = unit.trim();
   if (u === '') return '';
   if (u === 'deg' || u === '°') return '^{\\circ}';
+  if (u === '°C') return '{}^{\\circ}\\mathrm{C}';
   if (u === '%') return '\\%'; // "%" starts a comment in LaTeX
   const parts = u.split(/\s+/).map((tok) => {
     const m = tok.match(/^([A-Za-zΩµμ]+)(-?\d+)?$/);
@@ -59,6 +60,7 @@ function normalizeTypedUnit(text: string): string {
 export function unitMatches(typed: string, expected: string): boolean {
   const t = normalizeTypedUnit(typed);
   if (expected === 'deg') return ['°', 'deg', 'degree', 'degrees'].includes(t);
+  if (expected === '°C') return ['°C', '℃', 'C', 'degC', 'oC'].includes(t);
   const tokens = parseUnit(expected);
   const pow = (sym: string, e: number) => (e === 1 ? sym : `${sym}${e}`);
   const forms = new Set<string>([tokens.map((x) => pow(x.sym, x.exp)).join('')]);

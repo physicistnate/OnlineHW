@@ -1,7 +1,7 @@
 /**
- * Constants as the IB Physics data booklet (first assessment 2025) gives them, for
- * Theme E questions. Students may use more precise values: the answer ranges include
- * a 0.5 % allowance, which covers the difference (for example h = 6.626 × 10⁻³⁴ J s).
+ * Constants as the IB Physics data booklet (first assessment 2025) gives them. Students
+ * may use more precise values: every answer is accepted within at least 2 % of the exact
+ * value, which covers the difference (for example h = 6.626 × 10⁻³⁴ J s).
  */
 export const IB = {
   /** Speed of light, m s⁻¹. */
@@ -45,4 +45,12 @@ export const IB = {
   RE: 6.37e6,
   /** Astronomical unit, m. */
   AU: 1.5e11,
+  /** Molar gas constant (J K⁻¹ mol⁻¹), Boltzmann constant (J K⁻¹) and Avogadro constant (mol⁻¹). */
+  R: 8.31,
+  kB: 1.38e-23,
+  NA: 6.02e23,
+  /** Solar constant, W m⁻². */
+  S: 1.36e3,
+  /** 0 °C in kelvin, as IB questions use it. */
+  zeroC: 273,
 } as const;
