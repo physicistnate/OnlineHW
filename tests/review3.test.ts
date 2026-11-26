@@ -141,7 +141,7 @@ describe('courses and revisions', () => {
     expect(codes(IB_PHYSICS_SL)).not.toContain('A.2.10');
     expect(codes(IB_PHYSICS_HL)).toContain('A.2.10');
     expect(findTopic('ibp.A.2')!.standards.find((s) => s.code === 'A.2.10')?.hl).toBe(true);
-    const hlOnly = ALL_QUESTIONS.filter((q) => q.level === 'HL').map((q) => q.id);
+    const hlOnly = ALL_QUESTIONS.filter((q) => q.level === 'HL' && q.courses.some((c) => c.startsWith('ib-physics'))).map((q) => q.id);
     expect(hlOnly).toContain('ibp-a2-collision-2d');
     for (const id of hlOnly) {
       expect(questionsForCourse(IB_PHYSICS_SL.id).some((q) => q.id === id)).toBe(false);

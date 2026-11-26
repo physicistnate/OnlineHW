@@ -5,8 +5,18 @@
  * two columns, where a click removes it.
  */
 import type { Course, Subject, Topic } from '../content/catalog';
-import { findStandard } from '../content/catalog';
+import { findStandard, topicOf } from '../content/catalog';
 import { dualQuestionsAtLevels, type DualChoice } from '../content/registry';
+
+/** Higher level only: an HL standard, or any standard of an HL-only topic (such as E.2). */
+export function isHLStandard(id: string): boolean {
+  return !!findStandard(id)?.hl || !!topicOf(id)?.hlOnly;
+}
+
+/** The topics a subject box offers at a level (HL-only topics only at HL). */
+function offeredTopics(subject: Subject | undefined, level: 'SL' | 'HL'): Topic[] {
+  return (subject?.themes.flatMap((t) => t.topics) ?? []).filter((t) => level === 'HL' || !t.hlOnly);
+}
 
 interface Props {
   course: Course;
@@ -26,21 +36,29 @@ export function defaultDualChoice(course: Course): DualChoice {
   return { physicsTopic: firstTopic('physics'), mathTopic: firstTopic('math'), physics: [], math: [], physicsLevel: 'HL', mathLevel: 'HL' };
 }
 
-/** Repairs a saved or linked choice: unknown topics and standards are dropped. */
+/**
+ * Repairs a saved or linked choice: unknown topics and standards are dropped, and so are
+ * HL standards and topics in a subject set to SL.
+ */
 export function cleanDualChoice(course: Course, saved: Partial<DualChoice> | null | undefined): DualChoice {
   const base = defaultDualChoice(course);
   if (!saved) return base;
-  const topicsOf = (key: 'physics' | 'math') => course.subjects?.find((s) => s.key === key)?.themes.flatMap((t) => t.topics) ?? [];
-  const okTopic = (key: 'physics' | 'math', id: unknown) => typeof id === 'string' && topicsOf(key).some((t) => t.id === id);
+  const physicsLevel = saved.physicsLevel === 'SL' ? 'SL' : 'HL';
+  const mathLevel = saved.mathLevel === 'SL' ? 'SL' : 'HL';
+  const levelOf = { physics: physicsLevel, math: mathLevel } as const;
+  const topicsOf = (key: 'physics' | 'math') => offeredTopics(course.subjects?.find((s) => s.key === key), levelOf[key]);
+  const topicFor = (key: 'physics' | 'math', id: unknown) => (typeof id === 'string' && topicsOf(key).some((t) => t.id === id) ? id : (topicsOf(key).find((t) => t.id === base[TOPIC_KEY[key]]) ?? topicsOf(key)[0])?.id ?? '');
   const okStandards = (key: 'physics' | 'math', ids: unknown) =>
-    Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string' && topicsOf(key).some((t) => t.standards.some((s) => s.id === id))) : [];
+    Array.isArray(ids)
+      ? ids.filter((id): id is string => typeof id === 'string' && topicsOf(key).some((t) => t.standards.some((s) => s.id === id)) && (levelOf[key] === 'HL' || !isHLStandard(id)))
+      : [];
   return {
-    physicsTopic: okTopic('physics', saved.physicsTopic) ? (saved.physicsTopic as string) : base.physicsTopic,
-    mathTopic: okTopic('math', saved.mathTopic) ? (saved.mathTopic as string) : base.mathTopic,
+    physicsTopic: topicFor('physics', saved.physicsTopic),
+    mathTopic: topicFor('math', saved.mathTopic),
     physics: okStandards('physics', saved.physics),
     math: okStandards('math', saved.math),
-    physicsLevel: saved.physicsLevel === 'SL' ? 'SL' : 'HL',
-    mathLevel: saved.mathLevel === 'SL' ? 'SL' : 'HL',
+    physicsLevel,
+    mathLevel,
   };
 }
 
@@ -117,16 +135,18 @@ function SubjectBox({
 }) {
   const key = subject.key;
   const level = choice[LEVEL_KEY[key]];
-  const topics = subject.themes.flatMap((t) => t.topics);
+  const topics = offeredTopics(subject, level);
   const topic = topics.find((t) => t.id === choice[TOPIC_KEY[key]]) ?? topics[0];
-  const visible = topic.standards.filter((s) => level === 'HL' || !s.hl);
+  const visible = topic.standards.filter((s) => level === 'HL' || !isHLStandard(s.id));
   const chosen = choice[key];
   const inTopic = (t: Topic) => pool.filter((q) => (key === 'physics' ? q.topic === t.id : q.math?.topic === t.id)).length;
   const toggle = (id: string) => onChange({ ...choice, [key]: chosen.includes(id) ? chosen.filter((x) => x !== id) : [...chosen, id] });
   const setLevel = (l: 'SL' | 'HL') => {
-    // At SL, HL-only standards are hidden, so they are no longer chosen either.
-    const keep = l === 'HL' ? chosen : chosen.filter((id) => !findStandard(id)?.hl);
-    onChange({ ...choice, [LEVEL_KEY[key]]: l, [key]: keep });
+    // At SL, HL-only standards and topics are hidden, so they are no longer chosen either.
+    const keep = l === 'HL' ? chosen : chosen.filter((id) => !isHLStandard(id));
+    const shown = offeredTopics(subject, l);
+    const topicId = shown.some((t) => t.id === topic.id) ? topic.id : shown[0]?.id;
+    onChange({ ...choice, [LEVEL_KEY[key]]: l, [key]: keep, [TOPIC_KEY[key]]: topicId });
   };
   const allIds = visible.map((s) => s.id);
 
@@ -146,7 +166,7 @@ function SubjectBox({
         {subject.themes.map((theme) => (
           <optgroup key={theme.code} label={key === 'physics' ? `${theme.code} · ${theme.name}` : theme.name}>
             {theme.topics
-              .filter((t) => level === 'HL' || !t.hlOnly)
+              .filter((t) => topics.includes(t))
               .map((t) => {
                 const n = inTopic(t);
                 return (

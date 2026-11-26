@@ -1,5 +1,5 @@
 import { ASSIGNMENT_DEFAULTS, SITE } from '../config/site';
-import { AP_PHYSICS_C_MECH, COURSES, IB_PHYSICS_HL, IB_PHYSICS_SL, UNIVERSITY_MODERN_PHYSICS, UNIVERSITY_PHYSICS_1, allTopics } from '../content/catalog';
+import { AP_PHYSICS_C_MECH, COURSES, IBPP_PHYSICS_MATH, IB_PHYSICS_HL, IB_PHYSICS_SL, UNIVERSITY_MODERN_PHYSICS, UNIVERSITY_PHYSICS_1, allTopics } from '../content/catalog';
 import { ALL_QUESTIONS, questionsForCourse, questionsForTopic } from '../content/registry';
 import { Logo } from '../components/Layout';
 
@@ -33,6 +33,7 @@ export function HomePage() {
   const themeE = allTopics(IB_PHYSICS_HL).filter((t) => t.id.startsWith('ibp.E.'));
   const hlCount = (topicId: string) => questionsForTopic(topicId).filter((q) => q.level === 'HL').length;
   const marks = ALL_QUESTIONS.reduce((sum, q) => sum + q.parts.reduce((s, p) => s + p.marks, 0), 0);
+  const ibpp = questionsForCourse(IBPP_PHYSICS_MATH.id);
 
   return (
     <div className="container home">
@@ -64,7 +65,7 @@ export function HomePage() {
             <div className="stat-num">{COURSES.length} courses</div>
             <div className="stat-label">
               IB Physics SL &amp; HL ({withQuestions.length} of {topics.length} SL topics started · {hlOnlyToCome} HL-only topics to come), AP Physics C: Mechanics,
-              University Physics I and University Modern Physics
+              University Physics I, University Modern Physics and IB++ Physics/Math
             </div>
           </div>
         </div>
@@ -109,6 +110,11 @@ export function HomePage() {
               <li>
                 {UNIVERSITY_MODERN_PHYSICS.name}: {questionsForCourse(UNIVERSITY_MODERN_PHYSICS.id).length} questions on the Theme E ideas (light, atoms, matter
                 waves, decay, fission and fusion, stars), with integrals, differentials and differential equations
+              </li>
+              <li>
+                {IBPP_PHYSICS_MATH.name} (trial): {ibpp.length} IB Physics problems that need IB Mathematics on purpose, for Themes A and E with Topics 4
+                (statistics and probability) and 5 (calculus); {ibpp.filter((q) => q.level !== 'HL' && q.math?.level !== 'HL').length} use only SL physics and
+                SL mathematics. Choose physics and mathematics standards side by side, with SL or HL for each subject
               </li>
               <li>Question preview with any student’s numbers, worked solutions and markschemes</li>
               <li>
