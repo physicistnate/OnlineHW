@@ -39,6 +39,14 @@ function renderMath(math: string | undefined, where: string) {
 
 function checkInstance(inst: QuestionInstance, where: string) {
   renderAll(inst.stem, `${where} stem`);
+  // Written extensions for printed copies: valid text, marks, lines and marking points.
+  for (const x of inst.extensions) {
+    renderAll(x.prompt, `${where} extension prompt`);
+    expect(x.marks, `${where}: extension needs marks`).toBeGreaterThan(0);
+    expect(x.lines, `${where}: extension needs writing lines`).toBeGreaterThan(0);
+    expect(x.markscheme.filter((l) => 'mark' in l).length, `${where}: extension needs marking points`).toBeGreaterThanOrEqual(x.marks);
+    for (const line of x.markscheme) renderAll('mark' in line ? line.mark : line.note, `${where} extension markscheme`);
+  }
   const ids = new Set<string>();
   for (const part of inst.parts) {
     const at = `${where} ${part.label || 'main'}`;
@@ -117,6 +125,7 @@ describe.each(ALL_QUESTIONS.map((t) => [t.id, t] as const))('%s', (_id, t) => {
       expect(findTopic(t.topic)?.standards.some((x) => x.id === s), `standard ${s} is not in topic ${t.topic}`).toBe(true);
     }
     if (findTopic(t.topic)?.hlOnly) expect(t.level, 'questions in an HL-only topic must be level HL').toBe('HL');
+    if (t.standards.some((s) => findStandard(s)?.hl)) expect(t.level, 'questions on an HL-only standard must be level HL').toBe('HL');
     for (const part of t.parts) expect(part.response.kind, `${part.label}: written answers are not used yet`).not.toBe('text');
     for (const [name, spec] of Object.entries(t.params as ParamSpecs)) {
       if (isChoice(spec)) {

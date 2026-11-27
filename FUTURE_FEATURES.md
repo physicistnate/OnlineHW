@@ -36,13 +36,13 @@ Make assignments that mix IB, AP (each AP Physics course: 1, 2, C Mechanics, C E
 
 Already in place:
 - Courses and standards live in one catalog, and a question can belong to several courses.
-- Each question has an exam style (IB, AP or General), which already sets the accepted values of g (AP also accepts g = 10).
-- The builder works course by course, and HL already includes SL.
+- Each question has an exam style (IB, AP or General), which sets the accepted values of g (AP also accepts g = 10) and the name of its marking key (markscheme, scoring guidelines, grading rubric).
+- One assignment can mix courses: ticked questions from any course and topic collect in "Your assignment". Each question is labelled with its course, printed papers give instructions that suit every course on them, and each key keeps its own name. HL includes SL.
 
 Still needed:
 - The AP course frameworks (units and topics for each AP Physics course), TEKS (Physics, §112.39), and college/university topic lists in the catalog.
 - A crosswalk between frameworks (which AP topics or TEKS match each IB standard), so the menus can show IB standards while listing AP-style questions.
-- Builder controls: a main course (sets the menus), extra courses (their questions go at the end), and a question-style filter (IB-style only, AP-style only, or both).
+- Builder controls: a main course (sets the menus and sorts its questions first), and a question-style filter (IB-style only, AP-style only, or both).
 
 ### 4. Per-standard results chart
 Track how well each student does on each standard, shown as a bar chart (standard on the x-axis, percent correct on the y-axis). Students can then study specific areas if they choose.
@@ -54,15 +54,48 @@ Still needed:
 - The chart for each student, and the class average plus individual students for the teacher (with the Phase 3 gradebook).
 - A colour-blind-safe chart that is readable on phones, with the numbers shown on or under the bars.
 
+### 5. Applications to other IB subjects
+Choose an application area from another IB subject and get physics problems set in that context. Examples:
+- **Biology:** forces in muscles and joints, blood flow, the terminal speed of falling seeds.
+- **Chemistry:** gas laws, energy in reactions.
+- **Sports, exercise and health science:** impulse in a kick or a landing, projectile angles in sport, power output.
+- **Environmental systems and societies:** energy resources and efficiency.
+- **Design technology:** forces in structures, materials and springs.
+- **Geography:** river flow, earthquakes.
+- **Mathematics:** modelling with graphs.
+
+Still needed:
+- An "application" tag on each question (one or more IB subjects), alongside its topic and standards.
+- A builder filter for it, which can be combined with topics, like the combined-topics mode.
+- New questions written for each context.
+
+Started for mathematics: the IB++ Physics/Math course (round 8) tags each question with the IB Mathematics topic and standards it needs, and the bank and builder have a second standards box for them (see item 7).
+
+### 7. IB++: problems that need two IB subjects on purpose
+IB++ Physics/Math is a trial: IB Physics problems that need IB Mathematics: analysis and approaches in a non-trivial way, physics-led for now. It has 32 questions for Themes A, D and E with Topics 4 (statistics and probability) and 5 (calculus): three SL and two HL in each pairing, and three SL and four HL for Theme D with calculus (including E = −dV/dr, Poisson's equation with the second derivative test, and differential equations for an induction circuit and an RC circuit). Teachers choose physics and mathematics standards side by side, with SL or HL for each subject.
+
+Next, if the review goes well:
+- **Math-led questions:** a switch between physics-led and math-led questions for the same pairings, where the mathematics is in front and the physics is the context.
+- **More pairings:** Themes B and C with Topics 4 and 5, and Topics 1–3 (number and algebra, functions, geometry and trigonometry) with every theme.
+- **Every level combination:** enough questions that each of Physics SL/HL × Math SL/HL has several questions per pairing (an SL-only teacher currently sees three per pairing).
+- **Interactive figures:** slope fields (for example, for the energy of a ball among hills of different heights) and first- and second-derivative tests on graphs students drag.
+- **Other subject pairs:** for example Chemistry/Math or Physics/Chemistry, using the same two-box chooser.
+
+### 6. Your own teaching order
+The "leave out questions that need later topics" option uses the IB guide's order (A.1, A.2, A.3, …, E.5). Because the IB lets schools teach topics in any order, a teacher could set their own order for each class, and "later topics" would follow it.
+
 ## Suggested earlier in this project
 
-- **Written (typed) answers**, such as "explain" and "describe" parts. These are left out for now: every part is marked by the computer. When they return, the teacher marks them, with optional **AI marking against the markscheme**. Estimated cost for 150 students: about $2–7 a month with Claude Haiku 5.5, or $33–130 with Sonnet 5.5.
+- **Written (typed) answers**, such as "explain" and "describe" parts. These are left out for now: every part is marked by the computer, so explanations are asked as multiple choice and such questions are labelled "Paper 2 style, explanations as multiple choice" (real IB Paper 2 has no multiple choice). Written answers would let those parts be true Paper 2 parts. When they return, the teacher marks them, with optional **AI marking against the markscheme**. Estimated cost for 150 students: about $2–7 a month with Claude Haiku 5.5, or $33–130 with Sonnet 5.5.
 - **Teacher gradebook:** by class, assignment, student and standard, with live progress, and the option to change a mark by hand (Phase 3).
 - **"Reset password" button** for teachers, once students have passwords (Phase 3).
-- **More courses:** AP Physics 1, 2 and C, general physics, AP Precalculus, AP Calculus AB/BC and IB Maths. The maths courses need answers that are expressions (such as 2x + 3), so they need a symbolic answer checker.
+- **More courses:** the rest of AP Physics C: Mechanics and University Physics I (one trial unit each so far), special relativity for University Modern Physics, AP Physics 1, 2 and C: E&M, general physics, AP Precalculus, AP Calculus AB/BC and IB Maths. The maths courses need answers that are expressions (such as 2x + 3), so they need a symbolic answer checker.
+- **AP-style point allocations** on printed scoring guidelines (the keys already use each style's name: markscheme, scoring guidelines, grading rubric).
+- **Real-world data that stays current:** a yearly reminder (or a small data file) for the figures some questions quote, such as US home electricity use (EIA) and data-centre power (IEA, Epoch AI).
 - **More graph tools:** plotting data with a line of best fit and its gradient, and sketching curves (for example simple harmonic motion).
 - **More physical constants** beyond g (c, e, h, G, k, N_A, …), with each style's accepted values.
-- **Stricter rounding as an assignment setting**, such as "keep at least 3 s.f. in working" (today this is one site-wide setting).
+- **Stricter or looser rounding as an assignment setting**, such as "keep at least 3 s.f. in working", or a different minimum allowance than 2% (today these are site-wide settings).
+- **Capacitors in AP Physics C: Electricity and Magnetism**, covered fully there. They are not in the 2025 IB guide, so in IB material they stay a small part: one IB++ problem uses an RC circuit for its differential equation.
 - **"Show that" questions** with method marks.
 - **Accessibility review** (screen readers, keyboard-only use, contrast) and a **light theme**.
 - **A custom domain**, which school web filters are less likely to block.

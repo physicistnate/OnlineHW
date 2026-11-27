@@ -27,6 +27,12 @@ export const TOLERANCE = {
   minSigFigs: 2,
   /** Extra relative allowance added to both ends of the accepted range (0.005 = 0.5 %). */
   relFloor: 0.005,
+  /**
+   * Every answer within this fraction of the exact value is accepted, whatever the
+   * rounding analysis gives (0.02 = 2 %), so that rounding in a student's working never
+   * needs a teacher to check it: for an exact 0.4068, anything from 0.399 to 0.415.
+   */
+  relMin: 0.02,
   /** Safety cap on the number of rounding combinations evaluated per question. */
   maxRuns: 6000,
 };
@@ -44,6 +50,26 @@ export const ASSIGNMENT_DEFAULTS = {
 };
 
 export type Style = 'IB' | 'AP' | 'General';
+
+/** What each exam style calls its marking key: in previews, printed keys and students' answer keys. */
+export const KEY_NAMES: Record<Style, string> = {
+  IB: 'Markscheme',
+  AP: 'Scoring guidelines',
+  General: 'Grading rubric',
+};
+
+/** The key's name when every question has the same style; null for a mix of styles. */
+export function sharedKeyName(styles: Style[]): string | null {
+  const set = new Set(styles);
+  return set.size === 1 ? KEY_NAMES[[...set][0]] : null;
+}
+
+/** For sentences: "markscheme", "scoring guidelines", or for a mix "markscheme and scoring guidelines". */
+export function keyNamesPhrase(styles: Style[]): string {
+  const names = [...new Set(styles)].map((s) => KEY_NAMES[s].toLowerCase());
+  if (names.length === 0) return 'answer key';
+  return names.length <= 2 ? names.join(' and ') : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+}
 export type ConstantName = 'g';
 
 export interface ConstantPolicy {

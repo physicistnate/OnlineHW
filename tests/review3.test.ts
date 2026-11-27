@@ -3,7 +3,7 @@
  * question revisions, zero answers and scientific notation.
  */
 import { describe, expect, it } from 'vitest';
-import { COURSES, IB_PHYSICS_HL, IB_PHYSICS_SL, allTopics, courseOrDefault, findTopic } from '../src/content/catalog';
+import { COURSES, IB_PHYSICS_HL, IB_PHYSICS_SL, allTopics, courseOrDefault, courseTopic, findTopic } from '../src/content/catalog';
 import { ALL_QUESTIONS, getQuestion, questionsForCourse, questionsForTopic, resolveQuestion } from '../src/content/registry';
 import { defineQuestion } from '../src/engine/define';
 import { attemptLimit, combineSummaries, partClassPercent, summarizeGrades, type GradingPolicy } from '../src/engine/gradebook';
@@ -133,7 +133,26 @@ describe('courses and revisions', () => {
     expect(questionsForTopic('ibp.A.1', IB_PHYSICS_HL.id).length).toBe(questionsForTopic('ibp.A.1', IB_PHYSICS_SL.id).length);
     expect(courseOrDefault(null).id).toBe(IB_PHYSICS_SL.id);
     expect(courseOrDefault('no-such-course').id).toBe(IB_PHYSICS_SL.id);
-    expect(COURSES.map((c) => c.id)).toEqual(['ib-physics-sl', 'ib-physics-hl']);
+    expect(COURSES.map((c) => c.id)).toEqual(['ib-physics-sl', 'ib-physics-hl', 'ap-physics-c-mech', 'university-physics-1', 'university-modern-physics', 'ibpp-physics-math']);
+  });
+
+  it('shows HL-only standards and questions in HL only (A.2: collisions in two dimensions)', () => {
+    const codes = (course: typeof IB_PHYSICS_SL) => courseTopic(course, 'ibp.A.2')!.standards.map((s) => s.code);
+    expect(codes(IB_PHYSICS_SL)).not.toContain('A.2.10');
+    expect(codes(IB_PHYSICS_HL)).toContain('A.2.10');
+    expect(findTopic('ibp.A.2')!.standards.find((s) => s.code === 'A.2.10')?.hl).toBe(true);
+    const hlOnly = ALL_QUESTIONS.filter((q) => q.level === 'HL' && q.courses.some((c) => c.startsWith('ib-physics'))).map((q) => q.id);
+    expect(hlOnly).toContain('ibp-a2-collision-2d');
+    for (const id of hlOnly) {
+      expect(questionsForCourse(IB_PHYSICS_SL.id).some((q) => q.id === id)).toBe(false);
+      expect(questionsForCourse(IB_PHYSICS_HL.id).some((q) => q.id === id)).toBe(true);
+    }
+    // Every SL standard in A.1 and A.2 has at least one question.
+    for (const topicId of ['ibp.A.1', 'ibp.A.2']) {
+      for (const s of courseTopic(IB_PHYSICS_HL, topicId)!.standards) {
+        expect(questionsForTopic(topicId, IB_PHYSICS_HL.id).some((q) => q.standards.includes(s.id)), `${s.code} has no question`).toBe(true);
+      }
+    }
   });
 
   it('resolves the version an assignment was made with, and says when it cannot', () => {
@@ -255,7 +274,7 @@ describe('scientific notation', () => {
     const inst = buildInstance(sciQuestion, { d: 3.84e8, lambda: 500 });
     const f = inst.parts[1].response;
     if (f.kind !== 'numeric') throw new Error('expected a numeric part');
-    expect(fmtA(inst.results.f)).toBe('6\\times 10^{14}');
+    expect(fmtA(inst.results.f)).toBe('6.0\\times 10^{14}'); // 2 s.f. at least in scientific notation
     for (const typed of [...typedForms('6.0\\times 10^{14}'), ...typedForms('6.00\\times 10^{14}'), '600000000000000', '6e14 Hz']) {
       expect(checkNumeric(typed, rangesOf(f), { unit: 'Hz', positive: true }).status, typed).toBe('correct');
     }

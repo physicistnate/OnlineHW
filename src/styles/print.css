@@ -137,6 +137,89 @@
   max-width: 470px;
   margin: 8px auto 12px;
 }
+.sankey.graph-print {
+  max-width: 400px;
+}
+.paper .sk-input {
+  fill: #e5e7eb;
+}
+.paper .sk-useful {
+  fill: #9ca3af;
+}
+.paper .sk-waste {
+  fill: #d1d5db;
+}
+.paper .sk-key {
+  font-size: 10pt;
+  color: inherit;
+}
+.hr.graph-print {
+  max-width: 270px;
+  margin: 4px auto 8px;
+}
+.paper .hr-bg {
+  fill: #fff;
+}
+.paper .hr-grid {
+  stroke: #d8dce2;
+}
+.paper .hr-frame {
+  stroke: #333;
+}
+.paper .hr-ms {
+  fill: #dfe6ef;
+}
+.paper .hr-giants {
+  fill: #efe1db;
+}
+.paper .hr-super {
+  fill: #f2ecdb;
+}
+.paper .hr-dwarfs {
+  fill: #e8eaee;
+}
+.paper .hr-radius {
+  stroke: #9aa1ab;
+}
+.paper .hr-radius-label {
+  fill: #6b7280;
+}
+.paper .hr-pop {
+  fill: #b8bec7 !important;
+  opacity: 1;
+}
+.paper .hr-region-label,
+.paper .hr-tick,
+.paper .hr-axis-title,
+.paper .hr-class-title,
+.paper .hr-class {
+  fill: #333;
+}
+.paper .hr-class-tick {
+  stroke: #333;
+}
+.paper .hr-star circle {
+  fill: #111 !important;
+  stroke: #fff;
+}
+.paper .hr-sun circle {
+  stroke: #111;
+}
+.paper .hr-sun .hr-sun-dot {
+  fill: #111;
+}
+.paper .hr-star-label {
+  fill: #111;
+  stroke: #fff;
+}
+.paper .hr-caption {
+  font-size: 8.5pt;
+  line-height: 1.3;
+  color: inherit;
+}
+.pq-lead {
+  break-inside: avoid;
+}
 .pq-part {
   margin: 10px 0 14px 18px;
   break-inside: avoid;
@@ -282,6 +365,9 @@
   overflow: visible;
   margin: 0.2em 0;
 }
+.paper .eq-flow.is-centered {
+  margin: 0.3em 0;
+}
 .paper .step-text {
   color: #1f2937;
 }
@@ -360,4 +446,14 @@
   .step-math {
     overflow: visible !important;
   }
+}
+
+/* Written extension questions (paper only) */
+.pq-extension .pq-label {
+  font-style: italic;
+  white-space: nowrap;
+}
+.key-style {
+  font-weight: normal;
+  color: #4b5563;
 }

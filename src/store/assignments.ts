@@ -39,6 +39,8 @@ export const DEFAULT_SETTINGS: AssignmentSettings = {
 export interface AssignmentItem {
   id: string;
   version: number;
+  /** Which archived revision, when a build reused a version number (see QuestionTemplate.build). */
+  build?: string;
 }
 
 export interface Assignment {
@@ -101,6 +103,26 @@ export function createAssignment(title: string, courseId: string, questionIds: s
     settings,
   };
   return writeJson('assignments', [...saved(), a]) ? a : null;
+}
+
+/**
+ * Replaces a saved assignment's title, questions and settings. Questions it already had
+ * keep the version they were assigned with; new ones are pinned to the current version.
+ * Returns false if the assignment cannot be changed (the sample) or storage failed.
+ */
+export function updateAssignment(id: string, title: string, courseId: string, questionIds: string[], settings: AssignmentSettings): boolean {
+  const list = saved();
+  const existing = list.find((a) => a.id === id);
+  if (!existing) return false;
+  const pinned = new Map(existing.items.map((it) => [it.id, it]));
+  const items = questionIds.flatMap((qid) => {
+    const kept = pinned.get(qid);
+    return kept ? [kept] : itemsFor([qid]);
+  });
+  return writeJson(
+    'assignments',
+    list.map((a) => (a.id === id ? { ...a, title: title.trim() || a.title, courseId, items, settings } : a)),
+  );
 }
 
 /** Changes an assignment's settings. Returns false if the browser refused to store them. */

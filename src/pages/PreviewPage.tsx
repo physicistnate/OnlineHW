@@ -11,6 +11,7 @@ import { href } from '../router';
 import { useAssignments } from '../store/assignments';
 import { useQuestionWork, workIdFor } from '../store/progress';
 import { studentKey } from '../store/session';
+import { KEY_NAMES } from '../config/site';
 
 const NAMES = ['alex', 'sam', 'jordan', 'priya', 'mateo', 'aisha', 'liam', 'mei', 'noah', 'zara', 'kofi', 'elena'];
 
@@ -110,7 +111,7 @@ export function PreviewPage({ id, query }: { id: string; query: URLSearchParams 
           </label>
           <label className="switch">
             <input type="checkbox" checked={showMarkscheme} onChange={(e) => setShowMarkscheme(e.target.checked)} />
-            <span>Markscheme</span>
+            <span>{KEY_NAMES[template.style]}</span>
           </label>
           <button className="btn btn-sm btn-ghost" onClick={reset}>
             Reset answers

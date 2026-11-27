@@ -6,10 +6,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { LastMark } from '../engine/gradebook';
 import type { PartResponse, PartResult } from '../engine/types';
-import { readJson, removeKey, subscribe, writeJson } from './storage';
+import { listKeys, readJson, removeKey, subscribe, writeJson } from './storage';
 
 export interface PartWork {
+  /** What is in the answer box now (a draft until it is checked). */
   response?: PartResponse;
+  /**
+   * The answer as it was when last checked (unreadable input aside). Error carried
+   * forward in later parts uses this, never an unchecked draft.
+   */
+  checked?: PartResponse;
   /** Result of the most recent check, for feedback (cleared when the response is edited). */
   result?: PartResult;
   /** Marking state after the latest check or re-marking, for grades (kept when the response is edited). */
@@ -59,6 +65,13 @@ export function loadPinnedParams(studentKey: string, assignmentKey: string, work
 /** Remembers a student's numbers so later changes to a question's ranges never change them. */
 export function savePinnedParams(studentKey: string, assignmentKey: string, workId: string, params: Record<string, number | string>): boolean {
   return writeJson(paramsKey(studentKey, assignmentKey, workId), params, false);
+}
+
+/** Every student's saved work for one question of an assignment (used to repair old data). */
+export function allWorkFor(assignmentKey: string, workId: string): QuestionWork[] {
+  return listKeys(`work:${MARKS_SCHEMA}:`)
+    .filter((k) => k.endsWith(`::${assignmentKey}::${workId}`))
+    .map((k) => readJson<QuestionWork>(k, {}));
 }
 
 /** Saves changes to one or more parts at once: { partId: patch, ... }. */

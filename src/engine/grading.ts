@@ -198,7 +198,8 @@ function followThrough(
       const used = candidates.filter((_, i) => {
         if (!(mask & (1 << i))) return false;
         const without = methodsFor(mask & ~(1 << i));
-        return !without || !without[m] || Math.abs(without[m].exact - exact) > 1e-9 * Math.max(1, Math.abs(exact));
+        // Relative, so that tiny answers (6.6 × 10⁻²⁴ kg m s⁻¹) are compared properly too.
+        return !without || !without[m] || Math.abs(without[m].exact - exact) > 1e-9 * Math.max(Math.abs(exact), Math.abs(without[m].exact));
       });
       const wrong = used.filter((c) => c.wrong).map((c) => c.label);
       const rounded = used.filter((c) => !c.wrong).map((c) => c.label);
@@ -276,15 +277,20 @@ export function gradePart(
 
     case 'graph': {
       if (response.kind !== 'graph') break;
-      const { segmentOk } = markGraph(response.points, spec.expected, spec.tolerance);
-      const correct = segmentOk.filter(Boolean).length;
-      const score = Math.floor((max * correct) / segmentOk.length + 1e-9);
-      if (correct === segmentOk.length) return { status: 'correct', score: max, max };
+      const { segmentOk, pointOk } = markGraph(response.points, spec.expected, spec.tolerance);
+      // Marks for each point in the right place, or (the default) for each correct line segment.
+      const byPoints = spec.markBy === 'points';
+      const correct = (byPoints ? pointOk : segmentOk).filter(Boolean).length;
+      const out = byPoints ? spec.expected.length : segmentOk.length;
+      const score = Math.floor((max * correct) / out + 1e-9);
+      if (correct === out) return { status: 'correct', score: max, max };
       return {
         status: score > 0 ? 'partial' : 'incorrect',
         score,
         max,
-        message: `${correct} of ${segmentOk.length} line segments are correct (a segment is correct when both of its ends are in the right place).`,
+        message: byPoints
+          ? `${correct} of ${out} points are in the right place.`
+          : `${correct} of ${out} line segments are correct (a segment is correct when both of its ends are in the right place).`,
       };
     }
   }

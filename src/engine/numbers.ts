@@ -22,13 +22,17 @@ const SUPERSCRIPT: Record<string, string> = {
   '⁻': '-', '⁺': '+',
 };
 
+/**
+ * Significant figures in a typed number. sfMin leaves out trailing zeros, after the
+ * decimal point as well as in whole numbers: typing 2.0000000000 for an answer of 2.0
+ * (or 2.0 padded with zeros for any answer that rounds to it) must never make the
+ * answer stricter than typing 2.0. Significant figures are not penalized.
+ */
 function sigFigs(mantissa: string): { sfMin: number; sfMax: number } {
-  const hasPoint = mantissa.includes('.');
   const digits = mantissa.replace('.', '').replace(/^0+/, '');
   if (digits === '') return { sfMin: 1, sfMax: 1 }; // the value zero
-  if (hasPoint) return { sfMin: digits.length, sfMax: digits.length };
   const withoutTrailingZeros = digits.replace(/0+$/, '');
-  return { sfMin: withoutTrailingZeros.length, sfMax: digits.length };
+  return { sfMin: Math.max(1, withoutTrailingZeros.length), sfMax: digits.length };
 }
 
 const NOT_A_NUMBER = 'That doesn\'t look like a number. Try a form such as 13.8 or 3.0e8.';
@@ -73,9 +77,9 @@ export function parseNumber(raw: string): ParseResult {
       return { ok: false, error: 'Finish the power of ten, for example 3.0e8 or 3.0e-8.' };
     }
     if (/^[xX*]/.test(rest)) return { ok: false, error: 'Write powers of ten as 3.0x10^8 or 3.0e8.' };
-    // A unit: starts with a letter (or µ ° Ω %), then letters, exponents, "/", "^",
+    // A unit: starts with a letter (or µ ° ℃ Ω %), then letters, exponents, "/", "^",
     // "-", and separators "·", "*", "." between unit symbols.
-    if (!/^[a-zA-Zµμ°%Ω][a-zA-Zµμ°%Ω0-9^\-/.()·⋅∙*⁰¹²³⁴⁵⁶⁷⁸⁹⁻]*$/.test(rest)) return { ok: false, error: NOT_A_NUMBER };
+    if (!/^[a-zA-Zµμ°℃%Ω][a-zA-Zµμ°℃%Ω0-9^\-/.()·⋅∙*⁰¹²³⁴⁵⁶⁷⁸⁹⁻]*$/.test(rest)) return { ok: false, error: NOT_A_NUMBER };
   }
 
   const exponent = expE ?? expRound ?? expCurly ?? expBare ?? '0';
@@ -106,18 +110,23 @@ export function exponentOf(x: number): number {
 
 /**
  * Number -> LaTeX with `sf` significant figures. Uses scientific notation outside
- * 0.001 to 99 999, e.g. fmt(0.48) = "0.480", fmt(3e8) = "3.00\times 10^{8}".
+ * 0.01 to 99 999, as IB papers do: fmt(0.48) = "0.480", fmt(0.0026) = "2.60\times 10^{-3}",
+ * fmt(3e8) = "3.00\times 10^{8}".
  */
 export function fmt(x: number, sf = 3): string {
   if (!Number.isFinite(x)) return '\\text{undefined}';
   if (x === 0) return '0';
   const r = roundSig(x, sf);
   const e = exponentOf(r);
-  if (e >= 5 || e <= -4) {
+  if (usesScientific(e)) {
     const mant = r / 10 ** e;
     return `${mant.toFixed(sf - 1)}\\times 10^{${e}}`;
   }
   return r.toFixed(Math.max(0, sf - 1 - e));
+}
+
+function usesScientific(exponent: number): boolean {
+  return exponent >= 5 || exponent <= -3;
 }
 
 /** Same as fmt() but as plain text (used outside maths, e.g. SVG labels). */
@@ -144,12 +153,27 @@ export function exactSigFigs(x: number, maxSf = 4): number | null {
  * answers, so the displayed arithmetic reproduces the displayed result.
  */
 export function fmtW(x: number): string {
-  return fmt(x, exactSigFigs(x) ?? 4);
+  return fmt(x, minSciSf(x, exactSigFigs(x) ?? 4));
+}
+
+/** In scientific notation an exact value still gets 2 s.f.: 1.0 × 10¹⁶, not 1 × 10¹⁶. */
+function minSciSf(x: number, sf: number): number {
+  return x !== 0 && Number.isFinite(x) && usesScientific(exponentOf(roundSig(x, sf))) ? Math.max(2, sf) : sf;
 }
 
 /** A final answer: exact values as they are (0.48, 22.5, 104.5), otherwise 3 s.f. */
 export function fmtA(x: number): string {
-  return fmt(x, exactSigFigs(x) ?? 3);
+  return fmt(x, minSciSf(x, exactSigFigs(x) ?? 3));
+}
+
+/**
+ * The end of a displayed calculation: the working value, then the final answer when it
+ * is rounded differently ("1009 \approx 1010"), or just the answer ("678").
+ */
+export function fmtWA(x: number): string {
+  const w = fmtW(x);
+  const a = fmtA(x);
+  return w === a ? a : `${w} \\approx ${a}`;
 }
 
 /** The value a carried quantity has when it is displayed with fmtW(). */
@@ -183,3 +207,5 @@ export function snapZero(value: number, ...terms: number[]): number {
 export const sinD = (deg: number) => Math.sin((deg * Math.PI) / 180);
 export const cosD = (deg: number) => Math.cos((deg * Math.PI) / 180);
 export const tanD = (deg: number) => Math.tan((deg * Math.PI) / 180);
+/** Inverse tangent in degrees. */
+export const atanD = (x: number) => (Math.atan(x) * 180) / Math.PI;

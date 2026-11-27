@@ -14,8 +14,9 @@
  * with the device's clock. Phase 3 moves checking to the server (server time).
  */
 import { memo, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { ASSIGNMENT_DEFAULTS } from '../config/site';
+import { ASSIGNMENT_DEFAULTS, keyNamesPhrase } from '../config/site';
 import { PageHeader } from '../components/Layout';
+import { findCourse } from '../content/catalog';
 import { Modal } from '../components/Modal';
 import { QuestionView } from '../components/QuestionView';
 import { formatCountdown, formatDue, timeLeftLabel, useNow } from '../components/time';
@@ -286,11 +287,13 @@ interface StudentQuestionProps {
   closed: boolean;
   closesAt: number | null;
   showKey: boolean;
+  /** The assignment's course, for the question's label. */
+  courseId: string;
 }
 
 /** One question with the student's pinned numbers (memoised: saving another question does not re-render it). */
 const StudentQuestion = memo(function StudentQuestion(props: StudentQuestionProps) {
-  const { template, number, sKey, assignmentId, maxAttempts, lowestScore, penaltyPerTry, closed, closesAt, showKey } = props;
+  const { template, number, sKey, assignmentId, maxAttempts, lowestScore, penaltyPerTry, closed, closesAt, showKey, courseId } = props;
   const instance = useMemo(() => studentInstance(template, sKey, assignmentId), [template, sKey, assignmentId]);
   const policy = useMemo(() => ({ maxAttempts, lowestScore, penaltyPerTry }), [maxAttempts, lowestScore, penaltyPerTry]);
   const { work, update, saveFailed } = useQuestionWork(sKey, assignmentId, workIdFor(template));
@@ -308,6 +311,7 @@ const StudentQuestion = memo(function StudentQuestion(props: StudentQuestionProp
       closed={closed}
       closesAt={closesAt}
       saveFailed={saveFailed}
+      context={findCourse(courseId)}
     />
   );
 });
@@ -375,7 +379,11 @@ export function StudentAssignment({ id }: { id: string }) {
           This assignment closed{s.dueAt ? ` on ${formatDue(s.dueAt)}` : ''}. You can look over your answers, but they can no longer be checked or changed.
         </div>
       )}
-      {showKey && <div className="banner banner-info">The answer key is open: the worked solutions and markscheme under each question use your numbers.</div>}
+      {showKey && (
+        <div className="banner banner-info">
+          The answer key is open: the worked solutions and {keyNamesPhrase(resolved.map((r) => r.template.style))} under each question use your numbers.
+        </div>
+      )}
       {!showKey && s.solutions === 'after-due' && s.dueAt && !closed && (
         <div className="banner banner-info">The answer key, with your numbers, opens here after the due date.</div>
       )}
@@ -397,6 +405,7 @@ export function StudentAssignment({ id }: { id: string }) {
           closed={closed}
           closesAt={dueMs(assignment)}
           showKey={showKey}
+          courseId={assignment.courseId}
         />
       ))}
     </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeAnswerRanges } from '../src/engine/calc';
+import { computeAnswerRanges, padRange } from '../src/engine/calc';
 import { checkNumeric, gradePart, markGraph, remarkLaterParts } from '../src/engine/grading';
 import { buildInstance, instantiate } from '../src/engine/instance';
 import { getQuestion } from '../src/content/registry';
@@ -28,6 +28,18 @@ describe('accepting typed answers (cell rule)', () => {
     ['0.48 m/s2', 'm s-2'],
     ['0.48 m·s⁻²', 'm s-2'],
     ['0.48 m*s^-2', 'm s-2'],
+    // Expected units written with a slash (AP and university questions): both forms match.
+    ['4 m/s', 'm/s'],
+    ['4 m s-1', 'm/s'],
+    ['4 m s⁻¹', 'm/s'],
+    ['250 N/m', 'N/m'],
+    ['250 N m-1', 'N/m'],
+    ['3.2 kW h', 'kW h'],
+    ['3.2 kWh', 'kW h'],
+    ['64 %', '%'],
+    ['13.8 °C', '°C'],
+    ['13.8 C', '°C'],
+    ['13.8 ℃', '°C'],
   ])('recognises %j as the unit %j', (s, unit) => {
     const value = Number.parseFloat(s);
     expect(checkNumeric(s, range(value, value, value), { unit }).status).toBe('correct');
@@ -37,6 +49,8 @@ describe('accepting typed answers (cell rule)', () => {
     ['13.8 km', 'm'],
     ['13.8 ms', 's'],
     ['13.8 m', undefined],
+    ['13.8 m/s', 'm/s^2'],
+    ['13.8 s/m', 'm/s'],
   ])('rejects a wrong or unexpected unit %j (expected %j) as unreadable, not wrong', (s, unit) => {
     expect(checkNumeric(s, r, { unit }).status).toBe('invalid');
   });
@@ -52,6 +66,23 @@ describe('accepting typed answers (cell rule)', () => {
 
   it.each(['13.5', '13.6', '13.95', '10', '15'])('rejects %s', (s) => {
     expect(checkNumeric(s, r).status).toBe('incorrect');
+  });
+
+  it('accepts a right answer padded with zeros (2.0000000000 for 2.0)', () => {
+    const r = range(2, 1.99, 2.01);
+    for (const typed of ['2', '2.0', '2.00', '2.0000000000', '2.00000000000000000000', '02.0', '+2.0', '2.', '2.0000e0', '2.000000 m']) {
+      expect(checkNumeric(typed, r, { unit: 'm' }).status, typed).toBe('correct');
+    }
+    // An answer that rounds to 2.0 (exact 2.04, written to 2 s.f.) may be padded with zeros too.
+    const r2 = range(2.04, 2.03, 2.05);
+    expect(checkNumeric('2.0', r2).status).toBe('correct');
+    expect(checkNumeric('2.000000', r2).status).toBe('correct');
+    // Zeros do not rescue a wrong answer.
+    expect(checkNumeric('2.2000000', r2).status).toBe('incorrect');
+    expect(checkNumeric('0.000000', range(0, 0, 0)).status).toBe('correct');
+    // Large and small answers written out in full, with or without trailing zeros.
+    expect(checkNumeric('300000000.0000', range(3e8, 2.99e8, 3.01e8)).status).toBe('correct');
+    expect(checkNumeric('0.00000000200000', range(2e-9, 1.99e-9, 2.01e-9)).status).toBe('correct');
   });
 
   it('reads 1-s.f. answers as at least 2 s.f.', () => {
@@ -183,7 +214,8 @@ describe('graph drawing', () => {
     const res = gradePart(lift, inst, distPart, responses);
     expect(res.status).toBe('correct');
     expect(res.ecf).toBe(true);
-    expect(gradePart(lift, inst, distPart, { ...responses, b: { kind: 'numeric', value: '31' } }).status).toBe('incorrect');
+    // Every answer within 2 % is accepted, so 30.5 would pass; 32 is too far from 30.
+    expect(gradePart(lift, inst, distPart, { ...responses, b: { kind: 'numeric', value: '32' } }).status).toBe('incorrect');
     expect(gradePart(lift, inst, distPart, { ...responses, b: { kind: 'numeric', value: '22.5' } }).status).toBe('correct');
   });
 
@@ -208,15 +240,32 @@ describe('review round 2 regressions', () => {
   });
 
   it('follows through from an accepted rounded answer', () => {
-    // u = 2.0, v = 15, s = 340: a = 0.325 exactly; 0.33 is accepted, so 13/0.33 = 39 must be too.
-    const inst = buildInstance(train, { u: 2, v: 15, s: 340 });
+    // u = 5.0, v = 15, s = 800: a = 0.125 exactly; 0.13 is accepted, so 10/0.13 = 77 must be too,
+    // although 77 is more than 2 % from the exact 80 s.
+    const inst = buildInstance(train, { u: 5, v: 15, s: 800 });
     const [a, b] = inst.parts;
-    expect(gradePart(train, inst, a, { a: num('0.33') }).status).toBe('correct');
-    const res = gradePart(train, inst, b, { a: num('0.33'), b: num('39') });
+    expect(gradePart(train, inst, a, { a: num('0.13') }).status).toBe('correct');
+    expect(gradePart(train, inst, b, { b: num('77') }).status).toBe('incorrect');
+    const res = gradePart(train, inst, b, { a: num('0.13'), b: num('77') });
     expect(res.status).toBe('correct');
     expect(res.ecf).toBeFalsy();
     expect(res.message).toMatch(/rounded answer/);
-    expect(gradePart(train, inst, b, { a: num('0.33'), b: num('37') }).status).toBe('incorrect');
+    expect(gradePart(train, inst, b, { a: num('0.13'), b: num('73') }).status).toBe('incorrect');
+  });
+
+  it('accepts every answer within 2 % of the exact value', () => {
+    // A one-step answer: exact 0.4068 accepts 0.40 to 0.41 to 2 s.f., and 0.399 to 0.415 to 3 s.f.
+    const r = padRange({ exact: 0.406807, min: 0.406807, max: 0.406807 });
+    expect(r.lo).toBeCloseTo(0.406807 * 0.98, 12);
+    expect(r.hi).toBeCloseTo(0.406807 * 1.02, 12);
+    for (const typed of ['0.40', '0.41', '0.4', '0.399', '0.403', '0.410', '0.414']) expect(checkNumeric(typed, r).status, typed).toBe('correct');
+    for (const typed of ['0.39', '0.42', '0.397', '0.416']) expect(checkNumeric(typed, r).status, typed).toBe('incorrect');
+    // A wider range from rounding in the working is kept as it is.
+    const wide = padRange({ exact: 10, min: 9.5, max: 10.6 });
+    expect(wide.lo).toBeCloseTo(9.45, 12);
+    expect(wide.hi).toBeCloseTo(10.65, 12);
+    // Zero stays exact.
+    expect(padRange({ exact: 0, min: 0, max: 0 })).toEqual({ exact: 0, lo: 0, hi: 0 });
   });
 
   it('does not carry forward inadmissible inputs or break the method’s assumptions', () => {

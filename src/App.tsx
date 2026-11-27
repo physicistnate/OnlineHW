@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { SITE } from './config/site';
+import { dualFromQuery } from './components/DualStandardPicker';
 import { Footer, Header } from './components/Layout';
 import { BankPage } from './pages/BankPage';
 import { BuilderPage } from './pages/BuilderPage';
@@ -27,6 +28,10 @@ export function App() {
           courseId={route.query.get('course')}
           topicId={route.query.get('topic') ?? undefined}
           standards={(route.query.get('std') ?? '').split(',').filter(Boolean)}
+          includeLater={route.query.get('later') === '1'}
+          mode={route.query.get('mode') === 'combine' ? 'combine' : 'topic'}
+          combine={(route.query.get('topics') ?? '').split(',').filter(Boolean)}
+          dual={dualFromQuery(route.query)}
         />
       );
       title = 'Question bank';

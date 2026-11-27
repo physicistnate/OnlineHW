@@ -17,26 +17,42 @@ import type { ParamSpecs } from '../src/engine/params';
 import { EXHAUSTIVE_LIMIT, SAMPLE_SIZE, combosToCheck, everyCombo, gridSize, sampleCombos, typedForms } from './helpers';
 
 /**
- * Finds displayed arithmetic such as "14 + 33.33 = 47.3" or "2 \times 100.6 = 201.2"
- * (sums and products of plain numbers) and checks that the left side really gives
- * the right side at the precision shown. Covers text as well as maths, including
- * the explanations of written-answer parts.
+ * Finds displayed arithmetic such as "14 + 33.33 = 47.3", "2 \times 100.6 = 201.2",
+ * "\tfrac{1}{2} \times 5.4 \times 0.8333^2 = 1.87" or "9.8 + 1.5 = 11.3" (sums and
+ * products of plain numbers, squares and numeric fractions) and checks that the left
+ * side really gives the right side at the precision shown. Covers text as well as
+ * maths. Expressions inside other fractions or roots are skipped.
  */
 const NUM = String.raw`\d+(?:\.\d+)?`;
-const CHAIN = new RegExp(String.raw`(?<![\w.^{}\\-])(${NUM}(?:\s*(?:\+|\\times)\s*${NUM})+)\s*=\s*(${NUM})(?![\d.^]|\s*\\times)`, 'g');
+const SQ = String.raw`(?:\^2|\^\{(?:\\,)?2\})`;
+const FRAC = String.raw`\\[td]?frac\{${NUM}\}\{${NUM}\}`;
+const FACTOR = String.raw`(?:${FRAC}|${NUM}(?:${SQ})?)`;
+const TERM = String.raw`${FACTOR}(?:\s*\\times\s*${FACTOR})*`;
+const CHAIN = new RegExp(String.raw`(?<![\w.^{}\\-])(${TERM}(?:\s*\+\s*${TERM})*)\s*=\s*(${NUM})(?![\d.^]|\s*\\times)`, 'g');
+
+function factorValue(f: string): number {
+  const frac = f.match(/^\\[td]?frac\{([\d.]+)\}\{([\d.]+)\}$/);
+  if (frac) return Number(frac[1]) / Number(frac[2]);
+  const square = f.match(/^([\d.]+)(?:\^2|\^\{(?:\\,)?2\})$/);
+  if (square) return Number(square[1]) ** 2;
+  return Number(f);
+}
 
 export function arithmeticErrors(text: string | undefined): string[] {
   if (!text) return [];
   const errors: string[] = [];
   for (const m of text.matchAll(CHAIN)) {
+    if (!/\\times|\+|\^|frac/.test(m[1])) continue; // a lone number, not a calculation
     const lhs = m[1]
       .split('+')
-      .map((term) => term.split('\\times').reduce((prod, x) => prod * Number(x.trim()), 1))
+      .map((term) => term.split('\\times').reduce((prod, f) => prod * factorValue(f.trim()), 1))
       .reduce((a, b) => a + b, 0);
-    const decimals = m[2].split('.')[1]?.length ?? 0;
-    if (Math.abs(lhs - Number(m[2])) > 0.5 * 10 ** -decimals + 1e-9 * Math.max(1, Math.abs(lhs))) {
-      errors.push(`"${m[0]}" (the left side is ${lhs})`);
-    }
+    const rhs = m[2];
+    const decimals = rhs.split('.')[1]?.length ?? 0;
+    // A whole number ending in zeros may be rounded to its last non-zero digit (4500 for 4503).
+    const trailingZeros = decimals === 0 ? (rhs.match(/0+$/)?.[0].length ?? 0) : 0;
+    const tol = 0.5 * 10 ** (trailingZeros - decimals) + 1e-9 * Math.max(1, Math.abs(lhs));
+    if (Math.abs(lhs - Number(rhs)) > tol) errors.push(`"${m[0]}" (the left side is ${lhs})`);
   }
   return errors;
 }
@@ -46,7 +62,17 @@ describe('displayed-arithmetic checker', () => {
     expect(arithmeticErrors('less than double ($2 \\times 100.6 = 201.3$ m)')).toHaveLength(1); // 2 × 100.6 = 201.2
     expect(arithmeticErrors('s = s_1 + s_2 = 14 + 33.33 = 47.3\\ \\mathrm{m}')).toEqual([]);
     expect(arithmeticErrors('v = u + at = 0 + 1.0 \\times 3.0 = 3.0')).toEqual([]);
-    expect(arithmeticErrors('t = \\frac{2 \\times 400}{4.0 + 20} = 33.3')).toEqual([]); // fractions are skipped
+    expect(arithmeticErrors('t = \\frac{2 \\times 400}{4.0 + 20} = 33.3')).toEqual([]); // fractions with working inside are skipped
+  });
+
+  it('checks squares and numeric fractions too', () => {
+    // The explosion slip from review 4: ½ × 5.4 × 0.8333² is 1.875, which shows as 1.87, not 1.88.
+    expect(arithmeticErrors('E_k = \\tfrac{1}{2} \\times 5.4 \\times 0.8333^2 = 1.88\\ \\mathrm{J}')).toHaveLength(1);
+    expect(arithmeticErrors('E_k = \\tfrac{1}{2} \\times 5.4 \\times 0.8333^2 = 1.87\\ \\mathrm{J}')).toEqual([]);
+    expect(arithmeticErrors('E_k = \\tfrac{1}{2} \\times 2 \\times 0.6^{2} = 0.36')).toEqual([]);
+    expect(arithmeticErrors('a = \\frac{15^2}{60} = 3.75')).toEqual([]); // inside a fraction: skipped
+    expect(arithmeticErrors('v = \\sqrt{12.0^2 + 29.69^2} = 32.0')).toEqual([]); // inside a root: skipped
+    expect(arithmeticErrors('F = 1550 \\times 6.667 = 10300')).toEqual([]); // a whole number rounded to 3 s.f.
   });
 
   it('finds equalities to check in the real questions', () => {
@@ -139,5 +165,5 @@ describe.each(ALL_QUESTIONS.map((t) => [t.id, t] as const))('%s', (_id, t) => {
       }
     }
     expect(checked, 'no combination of given data satisfies the constraint').toBeGreaterThan(0);
-  });
+  }, 60_000); // up to 20,000 combinations, each with its full rounding analysis
 });

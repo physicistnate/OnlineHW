@@ -190,6 +190,13 @@ input[type='radio'] {
   overflow-y: hidden;
   padding: 0.1em 0;
 }
+/* The narrowest phones (320–360 px): tables and long equations in question text a little smaller, so they fit. */
+@media (max-width: 360px) {
+  .q-stem .katex-display,
+  .q-stem .eq-flow {
+    font-size: 0.86em;
+  }
+}
 .para-gap {
   display: block;
   height: 0.7em;

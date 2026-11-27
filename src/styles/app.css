@@ -868,11 +868,12 @@ h4.next {
   margin: 0;
   padding: 0;
 }
+/* A step's explanation, then its maths underneath at the full width of the box. */
 .step {
   display: grid;
-  grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1.15fr);
+  grid-template-columns: 26px minmax(0, 1fr);
   gap: 6px 14px;
-  align-items: center;
+  align-items: start;
   padding: 9px 0;
   border-top: 1px solid rgba(90, 167, 255, 0.12);
 }
@@ -900,11 +901,29 @@ h4.next {
   font-size: 0.95rem;
 }
 .step-math {
+  grid-column: 2;
   min-width: 0;
-  overflow-x: auto;
+  overflow-x: auto; /* only for a single piece too wide to wrap */
 }
 .step-graph {
-  grid-column: 2 / -1;
+  grid-column: 2;
+}
+
+/* Display maths that wraps at top-level relations (Tex.tsx renderFlow). */
+.eq-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0; /* spacing comes from TeX: each later piece starts with {} */
+  row-gap: 0.35em;
+  max-width: 100%;
+}
+.eq-flow.is-centered {
+  justify-content: center;
+  margin: 0.7em 0;
+}
+.eq-piece {
+  white-space: nowrap;
 }
 .graph-small {
   max-width: 440px;
@@ -944,6 +963,161 @@ h4.next {
   color: var(--muted);
   font-style: italic;
   padding: 4px 0;
+}
+
+/* ---------- Sankey diagram (drawn to scale on a counting grid) ---------- */
+
+.sankey {
+  margin: 0;
+  max-width: 460px;
+}
+.sankey svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+}
+.sk-grid {
+  stroke: var(--g-major);
+  stroke-width: 1;
+}
+.sk-band {
+  stroke: var(--g-axis);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.sk-input {
+  fill: rgba(170, 181, 200, 0.35);
+}
+.sk-useful {
+  fill: rgba(90, 167, 255, 0.55);
+}
+.sk-waste {
+  fill: rgba(245, 184, 74, 0.45);
+}
+.sk-label {
+  fill: var(--g-text);
+  font-size: 13px;
+  font-family: var(--font);
+}
+.sk-key {
+  font-size: 0.92rem;
+  color: var(--text);
+  margin-top: 6px;
+  display: grid;
+  gap: 2px;
+}
+.sk-scale {
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* ---------- Hertzsprung–Russell diagram ---------- */
+
+.hr {
+  margin: 0;
+  max-width: 500px;
+}
+.hr svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+}
+.hr-bg {
+  fill: #070b12;
+}
+.hr-grid {
+  stroke: var(--g-minor);
+  stroke-width: 1;
+}
+.hr-frame {
+  fill: none;
+  stroke: var(--g-axis);
+  stroke-width: 1.2;
+}
+.hr-region {
+  stroke: none;
+}
+.hr-ms {
+  fill: rgba(90, 167, 255, 0.16);
+}
+.hr-giants {
+  fill: rgba(255, 150, 90, 0.16);
+}
+.hr-super {
+  fill: rgba(233, 196, 106, 0.12);
+}
+.hr-dwarfs {
+  fill: rgba(200, 210, 235, 0.16);
+}
+.hr-radius {
+  fill: none;
+  stroke: rgba(170, 181, 200, 0.4);
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+}
+.hr-radius-label {
+  fill: rgba(170, 181, 200, 0.85);
+  font-size: 11px;
+  font-family: var(--font);
+}
+.hr-pop {
+  opacity: 0.55;
+}
+.hr-region-label {
+  fill: var(--g-text);
+  font-size: 13px;
+  font-style: italic;
+  font-family: var(--font);
+}
+.hr-tick,
+.hr-axis-title,
+.hr-class-title {
+  fill: var(--g-text);
+  font-size: 14px;
+  font-family: var(--font);
+}
+.hr-class-title {
+  font-size: 12px;
+  font-style: italic;
+}
+.hr-class {
+  fill: var(--text-soft);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font);
+}
+.hr-class-tick {
+  stroke: var(--g-axis);
+  stroke-width: 1;
+}
+.hr-star circle {
+  stroke: #0b0f16;
+  stroke-width: 1.6;
+}
+.hr-sun circle {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1.6;
+}
+.hr-sun .hr-sun-dot {
+  fill: var(--gold);
+  stroke: none;
+}
+.hr-star-label {
+  fill: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font);
+  paint-order: stroke;
+  stroke: #070b12;
+  stroke-width: 3px;
+}
+.hr-caption {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin-top: 6px;
 }
 
 /* ---------- Graph ---------- */
@@ -1118,6 +1292,10 @@ h4.next {
   gap: 24px;
   margin: 16px 0 10px;
 }
+.details-grid > * {
+  min-width: 0;
+  overflow-x: auto; /* a wide table scrolls inside its own column */
+}
 
 .table-wrap {
   overflow-x: auto;
@@ -1159,7 +1337,9 @@ h4.next {
 }
 .builder-side {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
+  min-width: 0;
 }
 .std-filter {
   display: flex;
@@ -1212,6 +1392,20 @@ h4.next {
 .pick-title {
   font-weight: 600;
 }
+.pick-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.std-codes {
+  overflow-wrap: anywhere;
+}
+.chip-uses {
+  white-space: normal;
+  max-width: 100%;
+}
 .pick-side {
   display: flex;
   flex-direction: column;
@@ -1249,8 +1443,13 @@ h4.next {
 }
 .inline-fields {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 6px;
+}
+.inline-fields input {
+  min-width: 0;
+  max-width: 100%;
 }
 .inline-fields input:last-child {
   flex: 1;
@@ -1261,10 +1460,78 @@ h4.next {
   margin-bottom: 8px;
 }
 .selected-list {
-  margin: 0 0 14px;
-  padding-left: 1.3em;
+  margin: 0 0 8px;
+  padding-left: 1.5em;
   color: var(--text-soft);
   font-size: 0.92rem;
+}
+.selected-list li {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+.sel-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.sel-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.sel-title {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.sel-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.sel-actions {
+  display: inline-flex;
+  gap: 3px;
+  flex: none;
+}
+.icon-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-soft);
+  width: 26px;
+  height: 26px;
+  line-height: 1;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0;
+}
+.icon-btn:hover:not(:disabled) {
+  border-color: var(--accent-line);
+  color: var(--accent);
+}
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.icon-remove:hover:not(:disabled) {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+.clear-btn {
+  margin-bottom: 12px;
+}
+.editing-banner {
+  margin-bottom: 10px;
+}
+.editing-banner .link-btn {
+  margin-left: 6px;
+  text-decoration: underline;
+}
+.keep-note {
+  color: var(--accent);
+}
+.assignments-table tr.is-editing td {
+  background: var(--accent-soft);
 }
 .saved .muted {
   margin-top: -6px;
@@ -1448,6 +1715,15 @@ h4.next {
   color: var(--muted);
   font-size: 0.78rem;
   text-align: center;
+}
+.std-hl {
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+}
+.std-chip.is-on .std-hl {
+  color: #fff4cf;
 }
 .std-chip.is-on .std-count {
   background: rgba(0, 0, 0, 0.22);
@@ -1704,6 +1980,83 @@ h4.next {
   cursor: default;
 }
 
+/* Written extensions (paper only), as the teacher sees them in a preview */
+.extension-teacher {
+  margin: 14px 0 6px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+.extension-teacher summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+.ext-item {
+  margin-top: 12px;
+}
+
+/* One topic / Combine topics */
+.bank-mode {
+  margin-bottom: 14px;
+}
+.mode-hint {
+  margin: 4px 0 12px;
+}
+.later-toggle {
+  align-items: flex-start;
+  margin: -4px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elev);
+  line-height: 1.45;
+}
+.later-toggle input {
+  margin-top: 3px;
+  flex: none;
+}
+.combine {
+  margin-bottom: 14px;
+}
+.combine-help {
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(138, 180, 255, 0.35);
+  border-radius: var(--radius-sm);
+  background: var(--info-soft);
+}
+.combine-help strong {
+  display: block;
+  margin-bottom: 6px;
+}
+.combine-help ol {
+  margin: 0 0 6px;
+  padding-left: 1.3em;
+}
+.combine-help li {
+  margin: 3px 0;
+}
+.combine-help .muted {
+  margin: 0;
+}
+.combine-theme {
+  margin-bottom: 12px;
+}
+.combine-theme .side-theme {
+  margin-bottom: 6px;
+}
+.chip-uses {
+  background: var(--surface-3);
+  color: var(--text-soft);
+}
+.chip-uses.is-later {
+  background: var(--warn-soft);
+  border-color: rgba(245, 184, 74, 0.45);
+  color: var(--warn);
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 980px) {
@@ -1817,5 +2170,199 @@ h4.next {
   }
   .std-picker-head {
     align-items: flex-start;
+  }
+}
+
+/* The narrowest phones: question rows wrap, with marks, difficulty and Preview under the title. */
+@media (max-width: 420px) {
+  .pick-list li {
+    flex-wrap: wrap;
+    padding-right: 0;
+  }
+  .pick-list label {
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  .pick-side {
+    flex-direction: row;
+    align-items: center;
+    margin-left: 32px;
+  }
+  .pick-preview {
+    margin: -4px 0 10px 44px;
+  }
+}
+
+/* The course menu never makes the page wider than the screen (its longest name is long). */
+.course-select {
+  max-width: 100%;
+}
+.page-actions {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* ---------- IB++: one standards box per subject ---------- */
+
+.dual-picker {
+  display: grid;
+  gap: 14px;
+  margin: 10px 0 14px;
+  min-width: 0;
+}
+.dual-boxes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 760px) {
+  .dual-boxes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.dual-box {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-strong);
+  border-top-width: 4px;
+  background: var(--bg-elev);
+  min-width: 0;
+}
+.dual-box.is-physics {
+  border-color: rgba(90, 167, 255, 0.55);
+}
+.dual-box.is-math {
+  border-color: rgba(183, 148, 246, 0.6);
+}
+.dual-box-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dual-box-head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.dual-box.is-physics .dual-box-head h3 {
+  color: #8cc2ff;
+}
+.dual-box.is-math .dual-box-head h3 {
+  color: #cdb4ff;
+}
+.dual-box select {
+  max-width: 100%;
+  min-width: 0;
+}
+.dual-box.is-math .std-chip.is-on {
+  background: #6d4bb8;
+  border-color: #b794f6;
+}
+.dual-box.is-math .std-chip.is-on:hover {
+  background: #7b57cc;
+}
+.dual-box.is-physics .std-chip.is-on {
+  background: #1d6fbf;
+  border-color: #5aa7ff;
+}
+.dual-box.is-physics .std-chip.is-on:hover {
+  background: #2280d9;
+}
+.dual-box-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.segmented-sm button {
+  padding: 3px 10px;
+  font-size: 0.82rem;
+}
+.dual-chosen {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 760px) {
+  .dual-chosen {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.dual-chosen-col {
+  min-width: 0;
+  padding: 8px 10px;
+  border-left: 3px solid var(--border-strong);
+}
+.dual-chosen-col.is-physics {
+  border-left-color: #5aa7ff;
+}
+.dual-chosen-col.is-math {
+  border-left-color: #b794f6;
+}
+.dual-chosen-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+.dual-chosen-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+}
+.dual-chosen-col li {
+  min-width: 0;
+}
+.dual-chosen-chip {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-align: left;
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.dual-chosen-chip span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dual-chosen-chip:hover {
+  border-color: var(--bad);
+  color: var(--text);
+}
+.dual-chosen-col.is-physics .dual-chosen-chip strong {
+  color: #8cc2ff;
+}
+.dual-chosen-col.is-math .dual-chosen-chip strong {
+  color: #cdb4ff;
+}
+.std-codes .math-codes {
+  color: #cdb4ff;
+}
+.std.std-math {
+  color: #cdb4ff;
+}
+
+/* Phones: maths a little smaller, so that fewer lines of working need to wrap. */
+@media (max-width: 560px) {
+  .eq-flow .katex,
+  .ms-mark .katex {
+    font-size: 1.04em;
   }
 }

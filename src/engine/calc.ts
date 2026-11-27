@@ -24,8 +24,12 @@ export interface Calc {
    * depending on the rounding scenario being evaluated. Give it the result name
    * (e.g. 'a') when `x` is also an answer to an earlier part: that enables
    * error-carried-forward (ECF) marking of later parts.
+   *
+   * `minSf`: the fewest significant figures a student is assumed to keep for this value.
+   * Use 3 for a value that is next subtracted from a similar one (T − W, E1 − E2), where
+   * rounding to 2 s.f. would swing the difference far more than any examiner allows.
    */
-  carry(x: number, name?: string): number;
+  carry(x: number, name?: string, minSf?: number): number;
   /**
    * A physical assumption of the method, e.g. assume(timeOfFlight > 0). If it fails
    * (usually because a student's wrong earlier answer was substituted), the
@@ -61,7 +65,7 @@ class RunCalc implements Calc {
     private readonly overrides: Readonly<Record<string, number>> = {},
   ) {}
 
-  carry(x: number, name?: string): number {
+  carry(x: number, name?: string, minSf?: number): number {
     const index = this.carries++;
     if (name !== undefined && name in this.overrides) return this.overrides[name];
     const mode = this.modes[index] ?? null;
@@ -70,7 +74,7 @@ class RunCalc implements Calc {
     // Values that are exact to 3 s.f. or fewer (10.5, 0.48, 84) are written down as
     // they are; only longer values (11.5702...) get rounded by students.
     if (exactSigFigs(x, 3) !== null) return x;
-    return roundSig(x, mode);
+    return roundSig(x, Math.max(mode, minSf ?? 0));
   }
 
   assume(condition: boolean): void {
@@ -198,11 +202,13 @@ export function computeAnswerRanges<P, R extends Results>(
 
 /**
  * Adds the small extra allowance (TOLERANCE.relFloor, or a question's own
- * tolerance) to both ends of a raw range.
+ * tolerance) to both ends of a raw range, and makes sure the range reaches at least
+ * TOLERANCE.relMin (2 %) either side of the exact value.
  */
 export function padRange(raw: RawRange, tol?: { rel?: number; abs?: number }): AnswerRange {
   const pad = (tol?.rel ?? TOLERANCE.relFloor) * Math.abs(raw.exact) + (tol?.abs ?? 0);
-  return { exact: raw.exact, lo: raw.min - pad, hi: raw.max + pad };
+  const floor = TOLERANCE.relMin * Math.abs(raw.exact);
+  return { exact: raw.exact, lo: Math.min(raw.min - pad, raw.exact - floor), hi: Math.max(raw.max + pad, raw.exact + floor) };
 }
 
 /**

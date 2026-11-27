@@ -7,13 +7,15 @@
  * grade and IB marks. In the teacher preview, tries are unlimited.
  */
 import { useId, type CSSProperties } from 'react';
-import { findCourse, findTopic } from '../content/catalog';
+import { courseOfQuestionIn, findCourse, findTopic, type Course } from '../content/catalog';
 import { attemptLimit, percentLabel, summarizeGrades, type GradingPolicy, type LastMark } from '../engine/gradebook';
-import { gradePart, markGraph, remarkLaterParts, summarize } from '../engine/grading';
+import { gradePart, markGraph, summarize } from '../engine/grading';
 import { fmtRange } from '../engine/numbers';
 import { unitTex } from '../engine/units';
 import type { AnyTemplate, MarkLine, PartInstance, PartResponse, PartResult, QuestionInstance, SolutionStep } from '../engine/types';
 import type { PartWork, QuestionWork, WorkUpdater } from '../store/progress';
+import { KEY_NAMES } from '../config/site';
+import { Figure } from './Figure';
 import { Graph } from './Graph';
 import { MathBlock, Tex } from './Tex';
 
@@ -34,16 +36,36 @@ interface QuestionViewProps {
   closesAt?: number | null;
   /** The browser refused to save the last change. */
   saveFailed?: boolean;
+  /** The course of the assignment the question is in, for its label (an HL assignment names shared questions HL). */
+  context?: Course;
 }
 
 function samePoints(a: [number, number][], b: [number, number][]): boolean {
   return a.length === b.length && a.every(([x, y], i) => Math.abs(x - b[i][0]) < 1e-9 && Math.abs(y - b[i][1]) < 1e-9);
 }
 
-export function questionMeta(template: AnyTemplate): string {
-  const course = findCourse(template.courses[0]);
+/**
+ * The exam format, said honestly: IB Paper 2 has short-answer and extended-response
+ * questions only, so a "Paper 2 style" question whose explanations are asked as
+ * multiple choice (for computer marking) says so.
+ */
+export function paperLabel(template: Pick<AnyTemplate, 'paper' | 'parts'>): string | undefined {
+  if (template.paper === 'Paper 2 style' && template.parts.some((p) => p.response.kind === 'mcq')) return 'Paper 2 style, explanations as multiple choice';
+  return template.paper;
+}
+
+/** "IB Physics SL · E.1 Structure of the atom · Paper 2 style"; in an HL assignment, shared questions say IB Physics HL. */
+export function questionMeta(template: AnyTemplate, context?: Course): string {
+  const course = context ? courseOfQuestionIn(template, context) : findCourse(template.courses[0]);
   const topic = findTopic(template.topic);
-  return [course?.name, topic && `${topic.code} ${topic.name}`, template.level === 'HL' ? 'HL' : '', template.paper].filter(Boolean).join(' · ');
+  if (template.math) {
+    // IB++: the physics topic, the mathematics topic, and the level of each.
+    const mathTopic = findTopic(template.math.topic);
+    const levels = `Physics ${template.level === 'HL' ? 'HL' : 'SL'}, Math ${template.math.level === 'HL' ? 'HL' : 'SL'}`;
+    return [course?.name, topic && `${topic.code} ${topic.name} + Math ${mathTopic?.code ?? ''} ${mathTopic?.name ?? ''}`.trim(), levels, paperLabel(template)].filter(Boolean).join(' · ');
+  }
+  const hlTag = template.level === 'HL' && !course?.name.includes('HL') ? 'HL' : '';
+  return [course?.name, topic && `${topic.code} ${topic.name}`, hlTag, paperLabel(template)].filter(Boolean).join(' · ');
 }
 
 /** The grading state recorded after a result (null for unreadable input or written answers). */
@@ -59,9 +81,17 @@ export interface PartState {
   reason?: 'correct' | 'out-of-tries' | 'closed';
 }
 
-export function QuestionView({ template, instance, number, work, onWork, showSolutions, showMarkscheme, mode = 'preview', policy, closed, closesAt, saveFailed }: QuestionViewProps) {
+export function QuestionView({ template, instance, number, work, onWork, showSolutions, showMarkscheme, mode = 'preview', policy, closed, closesAt, saveFailed, context }: QuestionViewProps) {
   const responses: Record<string, PartResponse | undefined> = Object.fromEntries(instance.parts.map((p) => [p.id, work[p.id]?.response]));
-  const results: Record<string, PartResult | undefined> = Object.fromEntries(instance.parts.map((p) => [p.id, work[p.id]?.result]));
+  // The answers as last checked. Follow-through (error carried forward) uses these, so a
+  // later part can never earn marks from an earlier answer that was typed but not checked.
+  // (Work saved before this was recorded falls back to the saved answer if it was marked.)
+  const submitted: Record<string, PartResponse | undefined> = Object.fromEntries(
+    instance.parts.map((p) => {
+      const w = work[p.id];
+      return [p.id, w?.checked ?? (w?.last ? w.response : undefined)];
+    }),
+  );
   const inAssignment = mode === 'assignment';
 
   const stateOf = (part: PartInstance): PartState => {
@@ -77,33 +107,41 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
 
   const pastDue = () => inAssignment && closesAt != null && Date.now() >= closesAt;
 
-  // Editing an answer clears its own feedback and re-marks later parts that already
-  // have a result, since error-carried-forward credit depends on earlier answers.
-  // Clearing (response undefined, e.g. "Reset points") works the same way.
-  // In an assignment, locked parts (correct, out of tries) keep the mark they have.
+  // Editing an answer only changes its own draft and clears its own feedback (the
+  // recorded mark stays until the next check). Clearing ("Reset points") works the same way.
   const change = (part: PartInstance, response: PartResponse | undefined) => {
     if (stateOf(part).locked || pastDue()) return;
     // A graph whose points are all back at their starting places is not an answer.
     if (response?.kind === 'graph' && part.response.kind === 'graph' && samePoints(response.points, part.response.start)) response = undefined;
-    const next = { ...responses, [part.id]: response };
-    const patches: Record<string, Partial<PartWork>> = { [part.id]: { response, result: undefined } };
-    for (const [id, result] of Object.entries(remarkLaterParts(template, instance, part.id, next, results))) {
-      const later = instance.parts.find((p) => p.id === id);
-      if (inAssignment && later && stateOf(later).locked) continue;
-      patches[id] = { result, last: lastFrom(result, work[id]?.attempts ?? 0) };
-    }
-    onWork(patches);
+    onWork({ [part.id]: { response, result: undefined } });
   };
   const clear = (part: PartInstance) => change(part, undefined);
+  // Checking marks this part using the earlier parts' checked answers. Later parts that
+  // already have a mark are then re-marked against the newly checked answer, since
+  // error-carried-forward credit depends on it; in an assignment, locked parts
+  // (correct, out of tries) keep the mark they have.
   const check = (part: PartInstance) => {
     if (stateOf(part).locked || pastDue()) return;
-    const result = gradePart(template, instance, part, responses);
+    const now = { ...submitted, [part.id]: responses[part.id] };
+    const result = gradePart(template, instance, part, now);
     if (result.status === 'invalid') {
       onWork({ [part.id]: { result } }); // unreadable input does not use up a try
       return;
     }
     const attempts = (work[part.id]?.attempts ?? 0) + 1;
-    onWork({ [part.id]: { result, attempts, last: lastFrom(result, attempts) } });
+    const patches: Record<string, Partial<PartWork>> = {
+      [part.id]: { result, attempts, last: lastFrom(result, attempts), checked: responses[part.id] },
+    };
+    const index = instance.parts.indexOf(part);
+    for (const later of instance.parts.slice(index + 1)) {
+      const w = work[later.id];
+      if (!w?.last || !now[later.id] || (inAssignment && stateOf(later).locked)) continue;
+      const remarked = gradePart(template, instance, later, now);
+      if (remarked.status === 'invalid') continue;
+      // The feedback shown is updated only if the answer box still holds the checked answer.
+      patches[later.id] = { last: lastFrom(remarked, w.attempts), ...(w.result ? { result: remarked } : {}) };
+    }
+    onWork(patches);
   };
 
   const header = (() => {
@@ -121,7 +159,14 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
         </div>
       );
     }
-    const s = summarize(instance, results);
+    // Marks recorded at the latest checks (they stay while an answer is being edited).
+    const recorded: Record<string, PartResult | undefined> = Object.fromEntries(
+      instance.parts.map((p) => {
+        const l = work[p.id]?.last;
+        return [p.id, l ? { status: l.status, score: l.score, max: l.max } : undefined];
+      }),
+    );
+    const s = summarize(instance, recorded);
     return (
       <div className="q-score" title="Marks for your latest checked answers">
         <span className="q-score-num">
@@ -139,7 +184,7 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
         {number !== undefined && <div className="q-num">{number}</div>}
         <div className="q-title">
           <h2>{template.title}</h2>
-          <div className="q-meta">{questionMeta(template)}</div>
+          <div className="q-meta">{questionMeta(template, context)}</div>
         </div>
         {header}
       </header>
@@ -151,7 +196,7 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
       )}
 
       {instance.stem && <Tex block className="q-stem" text={instance.stem} />}
-      {instance.figure && <Graph spec={instance.figure} className="q-figure" />}
+      {instance.figure && <Figure spec={instance.figure} className="q-figure" />}
 
       {instance.parts.map((part) => (
         <PartBlock
@@ -165,8 +210,31 @@ export function QuestionView({ template, instance, number, work, onWork, showSol
           onCheck={() => check(part)}
           showSolutions={showSolutions}
           showMarkscheme={showMarkscheme}
+          keyName={KEY_NAMES[template.style]}
         />
       ))}
+
+      {!inAssignment && instance.extensions.length > 0 && (
+        <details className="extension-teacher">
+          <summary>
+            Written extension for printed copies ({instance.extensions.length}) · not shown to students online
+          </summary>
+          {instance.extensions.map((x, i) => (
+            <div key={i} className="ext-item">
+              <div className="part-head">
+                <span className="part-label">Ext.</span>
+                <Tex className="part-prompt" text={x.prompt} />
+                <span className="part-marks">[{x.marks}]</span>
+              </div>
+              {showMarkscheme ? (
+                <MarkschemeList marks={x.marks} lines={x.markscheme} title={KEY_NAMES[template.style]} />
+              ) : (
+                <p className="muted small">Turn on “{KEY_NAMES[template.style]}” to see its marking points.</p>
+              )}
+            </div>
+          ))}
+        </details>
+      )}
     </article>
   );
 }
@@ -181,9 +249,10 @@ interface PartBlockProps {
   onCheck: () => void;
   showSolutions?: boolean;
   showMarkscheme?: boolean;
+  keyName: string;
 }
 
-function PartBlock({ part, work, state, showTries, onChange, onClear, onCheck, showSolutions, showMarkscheme }: PartBlockProps) {
+function PartBlock({ part, work, state, showTries, onChange, onClear, onCheck, showSolutions, showMarkscheme, keyName }: PartBlockProps) {
   return (
     <section className={`part${part.label || part.prompt ? '' : ' part-single'}${state.locked ? ' is-locked' : ''}`}>
       {(part.label || part.prompt) && (
@@ -199,7 +268,7 @@ function PartBlock({ part, work, state, showTries, onChange, onClear, onCheck, s
         {(showSolutions || showMarkscheme) && (
           <div className="reveal">
             {showSolutions && <SolutionSteps steps={part.solution} />}
-            {showMarkscheme && <Markscheme part={part} />}
+            {showMarkscheme && <Markscheme part={part} title={keyName} />}
           </div>
         )}
       </div>
@@ -337,7 +406,8 @@ function PartAnswer({ part, work, disabled, onChange, onClear, onCheck }: PartAn
           {!disabled && (
             <>
               <p className="muted small">
-                Drag the {r.start.length} points into place; they snap to the grid and are joined in order of time. Each straight section is marked separately. Keyboard: Tab to a point, then use the arrow keys.
+                Drag the {r.start.length} points into place; they snap to the grid and are joined in order of time.{' '}
+                {r.markBy === 'points' ? 'Each point in the right place earns marks.' : 'Each straight section is marked separately.'} Keyboard: Tab to a point, then use the arrow keys.
               </p>
               <div className="answer-row">
                 <button className="btn btn-primary btn-sm" onClick={onCheck}>
@@ -432,7 +502,7 @@ export function SolutionSteps({ steps }: { steps: SolutionStep[] }) {
   );
 }
 
-export function Markscheme({ part }: { part: PartInstance }) {
+export function Markscheme({ part, title }: { part: PartInstance; title?: string }) {
   const r = part.response;
   const extra: MarkLine[] = [];
   if (r.kind === 'mcq') {
@@ -440,20 +510,33 @@ export function Markscheme({ part }: { part: PartInstance }) {
     if (right) extra.push({ mark: `Answer: **${right.letter}**` });
   }
   if (r.kind === 'numeric') {
-    const [lo, hi] = fmtRange(r.range.lo, r.range.hi);
     const unit = r.unit ? `\\ ${unitTex(r.unit)}` : '';
-    const others = r.altRanges.map((a) => {
-      const [alo, ahi] = fmtRange(a.lo, a.hi);
-      return `$${alo}$ to $${ahi}${unit}$`;
-    });
+    const span = (a: { lo: number; hi: number }) => {
+      if (a.lo === a.hi) return `only $${fmtRange(a.lo, a.hi)[0]}${unit}$`;
+      const [lo, hi] = fmtRange(a.lo, a.hi);
+      return `$${lo}$ to $${hi}${unit}$`;
+    };
+    const main = span(r.range);
+    // An alternative method whose range reads the same as one already listed is not repeated.
+    const others = [...new Set(r.altRanges.map(span))].filter((text) => text !== main);
     const alt = others.length ? ` (or ${others.join(' or ')} by the alternative method)` : '';
-    extra.push({ note: `Online marking: accepts any value from $${lo}$ to $${hi}${unit}$${alt}, or that value rounded to 2 or more significant figures.` });
+    const what = r.range.lo === r.range.hi ? `accepts ${main}` : `accepts any value from ${main}`;
+    const rounding = r.range.lo === r.range.hi ? '' : ', or that value rounded to 2 or more significant figures';
+    extra.push({ note: `Online marking: ${what}${alt}${rounding}.` });
   }
   const lines = [...(r.kind === 'mcq' ? extra : []), ...part.markscheme, ...(r.kind === 'numeric' ? extra : [])];
+  return <MarkschemeList marks={part.marks} lines={lines} title={title} />;
+}
+
+/**
+ * Marking-key lines: a tick per marking point, notes in italics. The title is what the
+ * question's exam style calls its key (Markscheme, Scoring guidelines, Grading rubric).
+ */
+export function MarkschemeList({ marks, lines, title = 'Markscheme' }: { marks: number; lines: MarkLine[]; title?: string }) {
   return (
     <div className="markscheme">
       <div className="panel-title">
-        Markscheme <span className="muted">[{part.marks}]</span>
+        {title} <span className="muted">[{marks}]</span>
       </div>
       <ul>
         {lines.map((line, i) =>

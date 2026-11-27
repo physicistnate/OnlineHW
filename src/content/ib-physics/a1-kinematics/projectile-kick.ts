@@ -151,4 +151,17 @@ export default defineQuestion({
       ],
     },
   ],
+  extensions: [
+    {
+      marks: 2,
+      lines: 5,
+      prompt: () =>
+        'In practice, air resistance acting on the ball is not negligible. Explain how air resistance affects the maximum height reached and the horizontal distance travelled by the ball.',
+      markscheme: () => [
+        { mark: 'Maximum height is lower, because drag has a downward component while the ball rises / increases the vertical deceleration' },
+        { mark: 'Horizontal distance is shorter, because the horizontal velocity decreases / is not constant' },
+        { note: 'Award [1 max] for "both are smaller" with no reasons. OWTTE.' },
+      ],
+    },
+  ],
 });
