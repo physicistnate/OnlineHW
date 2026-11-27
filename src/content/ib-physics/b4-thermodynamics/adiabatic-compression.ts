@@ -34,7 +34,7 @@ export default defineQuestion({
   },
 
   stem: ({ d }) =>
-    `Argon, an ideal monatomic gas, is compressed so quickly that no thermal energy is transferred: an adiabatic change, for which $pV^{5/3}$ is constant. At the start its pressure is ${Q(d.p1, 'kPa')}, its volume ${Q(d.V1, 'cm3')} and its temperature ${Q(d.T1, 'K')}. Its volume is reduced to $\\tfrac{1}{${d.ratio}}$ of the starting volume.`,
+    `Argon, an ideal monatomic gas, is compressed so quickly that no thermal energy is transferred (an adiabatic change), and smoothly enough to be treated as reversible: no friction and no turbulence. For a reversible adiabatic change of a monatomic ideal gas, $pV^{5/3}$ is constant. At the start its pressure is ${Q(d.p1, 'kPa')}, its volume ${Q(d.V1, 'cm3')} and its temperature ${Q(d.T1, 'K')}. Its volume is reduced to $\\tfrac{1}{${d.ratio}}$ of the starting volume.`,
 
   parts: [
     {

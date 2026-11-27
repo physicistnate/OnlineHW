@@ -31,12 +31,16 @@ export default defineQuestion({
     const Pin = p.P / p.eta; // MW
     const Pc = c.carry(Pin, 'Pin', 3);
     const Pout = Pc - p.P;
-    const dS = (c.carry(Pout, 'Pout', 3) * 1e6) / TcK - (Pc * 1e6) / ThK; // W K⁻¹
-    return { ThK, TcK, carnot, Pin, Pout, dS };
+    const Poc = c.carry(Pout, 'Pout', 3);
+    const dS = (Poc * 1e6) / TcK - (Pc * 1e6) / ThK; // W K⁻¹
+    // The same with the heat input from the first law, electrical output + waste heat: a
+    // student who follows on from their own waste heat this way is marked consistently.
+    const dS__firstLaw = (Poc * 1e6) / TcK - ((p.P + Poc) * 1e6) / ThK;
+    return { ThK, TcK, carnot, Pin, Pout, dS, dS__firstLaw };
   },
 
   stem: ({ d }) =>
-    `A power station produces electrical power at ${Q(d.P, 'MW')}. Its steam enters the turbines at ${Q(d.Th, '°C')}, and thermal energy is given out to a river at ${Q(d.Tc, '°C')}. The overall efficiency of the station is ${d.eta}.`,
+    `A power station produces electrical power at ${Q(d.P, 'MW')}. Its steam enters the turbines at ${Q(d.Th, '°C')}, and thermal energy is given out to a river at ${Q(d.Tc, '°C')}. The overall efficiency of the station is ${d.eta}. Treat the steam source and the river as ideal reservoirs whose temperatures do not change.`,
 
   parts: [
     {
@@ -65,9 +69,13 @@ export default defineQuestion({
       response: { kind: 'numeric', answer: 'dS', symbol: '\\dfrac{\\Delta S}{\\Delta t}', unit: 'W K-1', positive: true },
       solution: ({ r }) => [
         { text: 'Each second the hot reservoir loses entropy $P_{in}/T_h$ and the river gains $P_{river}/T_c$ ($\\Delta S = \\Delta Q/T$):', math: tex`\frac{\Delta S}{\Delta t} = \frac{${fmtW(r.Pout)} \times 10^{6}}{${r.TcK}} - \frac{${fmtW(r.Pin)} \times 10^{6}}{${r.ThK}} = ${fmtA(r.dS)}\ ${u('W K-1')}` },
-        { text: 'The total entropy increases, as the second law requires.' },
+        { text: 'The heat input can equally be found from the first law, as the electrical output plus the waste heat. The total entropy increases, as the second law requires.' },
       ],
-      markscheme: ({ r }) => [{ mark: '$\\Delta Q/T$ for each reservoir, with opposite signs' }, { mark: tex`$${fmtA(r.dS)}\ ${u('W K-1')}$` }, { note: 'Allow ECF from (b).' }],
+      markscheme: ({ r }) => [
+        { mark: '$\\Delta Q/T$ for each reservoir, with opposite signs' },
+        { mark: tex`$${fmtA(r.dS)}\ ${u('W K-1')}$` },
+        { note: 'Allow ECF from (b), with the heat input taken as $P/\\eta$ or as $P$ + the waste heat.' },
+      ],
     },
     {
       label: '(d)',

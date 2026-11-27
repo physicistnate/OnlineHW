@@ -23,7 +23,7 @@ export default defineQuestion({
 
   compute: (p, c) => {
     const q = p.C * 3.6; // C (1 mA h = 3.6 C)
-    const N = q / IB.e;
+    const N = c.carry(q, 'q', 3) / IB.e;
     const E = c.carry(q, 'q', 3) * p.V;
     const t = c.carry(q, 'q', 3) / p.I / 60; // minutes
     return { q, N, E, t };
@@ -47,7 +47,7 @@ export default defineQuestion({
       prompt: () => 'Calculate the number of electrons that flow round the circuit as the battery discharges completely.',
       response: { kind: 'numeric', answer: 'N', symbol: 'N', positive: true },
       solution: ({ r }) => [{ math: tex`N = \frac{Q}{e} = \frac{${fmtW(r.q)}}{1.60 \times 10^{-19}} = ${fmtA(r.N)}` }],
-      markscheme: ({ r }) => [{ mark: tex`$N = ${fmtA(r.N)}$` }],
+      markscheme: ({ r }) => [{ mark: tex`$N = ${fmtA(r.N)}$` }, { note: 'Allow ECF from (a).' }],
     },
     {
       label: '(c)',

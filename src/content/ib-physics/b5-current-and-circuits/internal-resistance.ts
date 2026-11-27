@@ -50,8 +50,11 @@ export default defineQuestion({
   constraint: (p) => p.E / p.r >= 2,
 
   compute: (p, c) => {
-    const Isc = p.E / p.r;
-    const I = p.E / (p.R + p.r);
+    // (c) and (d) use the emf and internal resistance the student read in (a) and (b).
+    const Ec = c.carry(p.E, 'E', 3);
+    const rc = c.carry(p.r, 'r', 3);
+    const Isc = Ec / rc;
+    const I = Ec / (p.R + rc);
     const PR = c.carry(I, undefined, 3) ** 2 * p.R;
     // (a) and (b) are read from the graph: the answers are the emf and internal resistance themselves.
     return { E: p.E, r: p.r, Isc, I, PR, Vat1: p.E - p.r };
@@ -86,7 +89,7 @@ export default defineQuestion({
       prompt: () => 'Calculate the current if the terminals of the battery were joined by a wire of negligible resistance.',
       response: { kind: 'numeric', answer: 'Isc', symbol: 'I', unit: 'A', positive: true },
       solution: ({ d, r }) => [{ math: tex`I = \frac{\varepsilon}{r} = \frac{${d.E}}{${d.r}} = ${fmtA(r.Isc)}\ ${u('A')}` }],
-      markscheme: ({ r }) => [{ mark: tex`$I = ${fmtA(r.Isc)}\ ${u('A')}$` }],
+      markscheme: ({ r }) => [{ mark: tex`$I = ${fmtA(r.Isc)}\ ${u('A')}$` }, { note: 'Allow ECF from (a) and (b).' }],
     },
     {
       label: '(d)',
@@ -97,7 +100,7 @@ export default defineQuestion({
         { math: tex`I = \frac{\varepsilon}{R + r} = \frac{${d.E}}{${d.R} + ${d.r}} = ${fmtW(r.I)}\ ${u('A')}` },
         { math: tex`P = I^2R = ${fmtW(r.I)}^2 \times ${d.R} = ${fmtA(r.PR)}\ ${u('W')}` },
       ],
-      markscheme: ({ r }) => [{ mark: '$I = \\varepsilon/(R + r)$' }, { mark: tex`$P = ${fmtA(r.PR)}\ ${u('W')}$` }],
+      markscheme: ({ r }) => [{ mark: '$I = \\varepsilon/(R + r)$' }, { mark: tex`$P = ${fmtA(r.PR)}\ ${u('W')}$` }, { note: 'Allow ECF from (a) and (b).' }],
     },
     {
       label: '(e)',

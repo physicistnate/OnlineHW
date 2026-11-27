@@ -12,7 +12,7 @@ const THEME_B = {
   'ibp-b2': ['earth-balance', 'sea-ice-albedo', 'planet-temperatures', 'greenhouse-gases', 'warmer-earth'],
   'ibp-b3': ['tyre-pressure', 'weather-balloon', 'molecular-speeds', 'helium-cylinder', 'scuba-tank', 'absolute-zero'],
   'ibp-b4': ['piston-heating', 'pv-cycle', 'power-station-entropy', 'adiabatic-compression', 'entropy-melting'],
-  'ibp-b5': ['phone-battery', 'resistivity-wire', 'filament-lamp', 'series-parallel', 'potential-divider', 'internal-resistance'],
+  'ibp-b5': ['phone-battery', 'resistivity-wire', 'filament-lamp', 'series-parallel', 'potential-divider', 'internal-resistance', 'kirchhoff-two-cells'],
 };
 const IDS = Object.entries(THEME_B).flatMap(([prefix, names]) => names.map((n) => `${prefix}-${n}`));
 const LOST = /(?<![A-Za-z])imes|(?<![A-Za-z])rac\{|\bfrac\{|\bsqrt\{|(?<![A-Za-z])ightarrow/;
@@ -53,7 +53,7 @@ const LOST = /(?<![A-Za-z])imes|(?<![A-Za-z])rac\{|\bfrac\{|\bsqrt\{|(?<![A-Za-z
   expect(status.includes('B.4 Thermodynamics: 5 questions (HL only)'), 'status lists B.4 as HL only');
 
   console.log('Theme B in the bank: SL without B.4, HL with it');
-  for (const [topic, n] of [['ibp.B.1', 6], ['ibp.B.2', 5], ['ibp.B.3', 6], ['ibp.B.5', 6]]) {
+  for (const [topic, n] of [['ibp.B.1', 6], ['ibp.B.2', 5], ['ibp.B.3', 6], ['ibp.B.5', 7]]) {
     const got = await cards('ib-physics-sl', topic);
     expect(got === n, `SL ${topic}: ${n} questions (${got})`);
   }
@@ -88,6 +88,12 @@ const LOST = /(?<![A-Za-z])imes|(?<![A-Za-z])rac\{|\bfrac\{|\bsqrt\{|(?<![A-Za-z
   await go('#/q/ibp-b1-kettle');
   await answer(0, '3.0e5');
   expect((await answer(1, '136')).includes('error carried forward'), '(b) follows on from a wrong (a)');
+
+  console.log('Follow-through from values read off a graph (internal resistance)');
+  await go('#/q/ibp-b5-internal-resistance');
+  await answer(0, '2.8');
+  await answer(1, '1.2');
+  expect((await answer(2, '2.33')).includes('error carried forward'), 'short-circuit current 2.8/1.2 = 2.33 A follows on from the student’s emf and r');
 
   console.log('Answers in °C (ice in a drink: 13.8 °C)');
   for (const typed of ['13.8', '13.8 °C', '13.8 C']) {

@@ -46,7 +46,7 @@ export default defineQuestion({
     {
       label: '(b)',
       marks: 2,
-      prompt: () => 'Treating the Earth as a black body, calculate its equilibrium temperature.',
+      prompt: () => 'In a simple model, the Earth reflects the fraction of sunlight given by its albedo and radiates as a black body (emissivity 1). Calculate the Earth’s effective radiating temperature in this model.',
       response: { kind: 'numeric', answer: 'Tbb', symbol: 'T', unit: 'K', positive: true },
       solution: ({ r }) => [{ text: 'In equilibrium the intensity radiated, $\\sigma T^4$, equals the intensity absorbed:', math: tex`T = \sqrt[4]{\frac{${fmtW(r.I)}}{5.67 \times 10^{-8}}} = ${fmtA(r.Tbb)}\ ${u('K')}` }],
       markscheme: ({ r }) => [{ mark: '$\\sigma T^4 = (1 - \\alpha)S/4$' }, { mark: tex`$T = ${fmtA(r.Tbb)}\ ${u('K')}$` }, { note: 'Allow ECF from (a).' }],
@@ -62,7 +62,7 @@ export default defineQuestion({
     {
       label: '(d)',
       marks: 1,
-      prompt: () => 'Why is the Earth’s mean surface temperature higher than the black-body temperature in (b)?',
+      prompt: () => 'Why is the Earth’s mean surface temperature higher than its effective radiating temperature in (b)?',
       response: {
         kind: 'mcq',
         options: () => [
@@ -72,7 +72,7 @@ export default defineQuestion({
           { text: 'The Earth’s core supplies more energy than the Sun.' },
         ],
       },
-      solution: () => [{ text: 'The atmosphere is mostly transparent to the incoming visible light but absorbs much of the outgoing infrared radiation. Greenhouse gases re-emit this energy in all directions, some back to the surface, so the surface must be warmer than a black body to radiate away what it absorbs.' }],
+      solution: () => [{ text: 'The effective radiating temperature is the temperature at which the Earth, seen from space, radiates away what it absorbs. The atmosphere is mostly transparent to the incoming visible light but absorbs much of the outgoing infrared radiation. Greenhouse gases re-emit this energy in all directions, some back to the surface, so the surface is warmer than the effective radiating temperature.' }],
       markscheme: () => [{ note: 'Infrared absorbed and re-emitted by greenhouse gases, partly back to the surface.' }],
     },
   ],

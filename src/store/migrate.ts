@@ -109,10 +109,12 @@ export function inferBuild(a: Pick<Assignment, 'id' | 'createdAt'>, item: Assign
 
 /** Tells assignments made with a build that reused a version number which revision they used. */
 export function repairReusedVersions(): void {
-  // Second pass ("r6-v2"): the first pass also counted pinned numbers, so an unanswered
-  // assignment that a later build had re-pinned kept the wrong revision. Items it gave a
-  // build keep it.
-  const done = 'repaired-builds:r6-v2';
+  // Third pass ("r6-v3"). The first pass also counted pinned numbers, which any build re-pins,
+  // so it could stamp an assignment made before 59f80b0 with build r6, or leave one made on
+  // 59f80b0 without it. Every version-1 item of these questions is therefore decided again
+  // from saved answers and the date, whatever an earlier pass decided. Only this repair
+  // ever sets a build on these items.
+  const done = 'repaired-builds:r6-v3';
   if (hasKey(done)) return;
   const list = readJson<unknown>('assignments', []);
   if (Array.isArray(list)) {
@@ -121,11 +123,12 @@ export function repairReusedVersions(): void {
       if (!a || typeof a.id !== 'string' || !Array.isArray(a.items)) return a;
       const items = a.items.map((item) => {
         const spec = REUSED_VERSIONS.find((s) => s.version === item?.version && s.ids.includes(item?.id));
-        if (!spec || item.build) return item;
+        if (!spec || (item.build && item.build !== spec.build)) return item;
         const build = inferBuild(a, item, spec);
-        if (!build) return item;
+        if (build === item.build) return item;
         changed = true;
-        return { ...item, build };
+        const { build: _old, ...rest } = item;
+        return build ? { ...rest, build } : rest;
       });
       return { ...a, items };
     });

@@ -5,5 +5,6 @@ import filamentLamp from './filament-lamp';
 import seriesParallel from './series-parallel';
 import potentialDivider from './potential-divider';
 import internalResistance from './internal-resistance';
+import kirchhoffTwoCells from './kirchhoff-two-cells';
 
-export default [phoneBattery, resistivityWire, filamentLamp, seriesParallel, potentialDivider, internalResistance];
+export default [phoneBattery, resistivityWire, filamentLamp, seriesParallel, potentialDivider, internalResistance, kirchhoffTwoCells];

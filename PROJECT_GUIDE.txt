@@ -39,10 +39,10 @@ listed as Physics/Math). HL includes every SL topic and question plus the
 HL-only topics (A.4, A.5, B.4, D.4, E.2); a question marked level 'HL'
 appears only in HL.
 
-Questions so far (186, 1198 marks): A.1 Kinematics (12), A.2 Forces and
+Questions so far (187, 1205 marks): A.1 Kinematics (12), A.2 Forces and
 momentum (15, two of them HL only), A.3 Work, energy and power (13), B.1
 Thermal energy transfers (6), B.2 Greenhouse effect (5), B.3 Gas laws (6),
-B.4 Thermodynamics (5, an HL-only topic), B.5 Current and circuits (6), D.1
+B.4 Thermodynamics (5, an HL-only topic), B.5 Current and circuits (7), D.1
 Gravitational fields (6, two HL only), D.2 Electric and magnetic fields (6,
 two HL only), D.3 Motion in electromagnetic fields (6), D.4 Induction (5, an
 HL-only topic), E.1
@@ -468,7 +468,7 @@ B.4 Thermodynamics (HL only): 5 questions (33 marks), in bank order
       spreading out                          for a free expansion, the second law,
                                              7 marks
 
-B.5 Current and circuits: 6 questions (34 marks), in bank order
+B.5 Current and circuits: 7 questions (41 marks), in bank order
    1. A phone battery                         charge from mA h, electrons, energy,
                                              charging time, secondary cells, 5 marks
    2. The resistance of a wire from its       R = ρL/A, current, power, twice as
@@ -486,6 +486,11 @@ B.5 Current and circuits: 6 questions (34 marks), in bank order
    6. The emf and internal resistance of a    emf and r from a V–I graph, short-
       battery from a graph                   circuit current, power in a load, lost
                                              volts, 7 marks
+   7. Kirchhoff's laws: two cells and three   the junction and loop equations, the
+      branches                               current in the shared resistor, the p.d.
+                                             across it, the current in one cell,
+                                             7 marks
+Kirchhoff's laws are kept as a B.5 standard (B.5.10), as decided for this course.
 
 D.1 Gravitational fields: 6 questions (42 marks), in bank order
    1. Gravitational field strength at the    g = GM/r² at the space station, the
@@ -1503,9 +1508,11 @@ src/store: saved data (browser storage now, Supabase in Phase 3)
                             Pinned numbers are not evidence: any build that
                             opens an assignment as another revision re-pins
                             them (e6066f1 did), and the right numbers come back
-                            from the same seed. The repair ran a second time
-                            (key repaired-builds:r6-v2) for browsers where the
-                            first version had used pinned numbers.
+                            from the same seed. Because an earlier version of
+                            the repair counted pinned numbers, the current one
+                            (key repaired-builds:r6-v3) decides every version-1
+                            item of these questions again, including items an
+                            earlier pass stamped with build r6.
   assignments.ts            Saved assignments (question versions and settings),
                             the built-in sample assignment, due-date and
                             answer-key checks.
@@ -1599,6 +1606,12 @@ tests (run with: npm test)
                             marking; no follow-through from an impossible
                             probability; the binding-energy, decay-chain and HR
                             wording; and honest exam-format labels.
+  review10.test.ts          Review 10: follow-through from the student's emf
+                            and internal resistance, charge and waste heat (by
+                            either route to the heat input); the effective
+                            radiating temperature; a reversible adiabatic
+                            change; Kirchhoff's laws in B.5; and an assignment
+                            an earlier repair wrongly stamped with build r6.
   review9.test.ts           Review 9: the velocity selector's band of speeds
                             and its follow-through, equal currents, field lines
                             of unequal charges, the comet's constant areal
@@ -1736,7 +1749,7 @@ Content (each batch on its own branch and pull request)
       all), with real contexts such as medical tracers, reactors and stars.
   [x] University Modern Physics: 12 calculus-based questions for the same
       ideas (integrals, differentials, a differential equation).
-  [x] Theme B The particulate nature of matter: 28 questions covering every
+  [x] Theme B The particulate nature of matter: 29 questions covering every
       SL and HL standard of B.1–B.5 (B.4 is HL only), including the Earth's
       energy balance, a p–V cycle and graphs for absolute zero, a filament
       lamp and internal resistance.

@@ -172,6 +172,7 @@ const T = {
     ['B.5.7', 'Resistors in series and in parallel; circuit diagrams with ideal ammeters and voltmeters'],
     ['B.5.8', 'Potential dividers, including light-dependent resistors and thermistors'],
     ['B.5.9', 'Internal resistance: ε = I(R + r)'],
+    ['B.5.10', 'Kirchhoff’s laws: the currents into a junction add up to the currents out of it, and round any loop the sum of the emfs equals the sum of the potential differences'],
   ]),
   C1: topic('C.1', 'Simple harmonic motion'),
   C2: topic('C.2', 'Wave model'),

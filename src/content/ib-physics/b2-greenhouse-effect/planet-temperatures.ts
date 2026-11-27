@@ -36,12 +36,14 @@ export default defineQuestion({
     const dist = b.d[p.pos];
     const Sp = IB.S / dist ** 2;
     const T = (((1 - b.a) * c.carry(Sp, 'Sp', 3)) / (4 * IB.sigma)) ** 0.25;
-    return { dist, Sp, T };
+    // The effective radiating temperature at the mean distance, for the comparison in (c).
+    const Tmean = (((1 - b.a) * IB.S) / b.d.mean ** 2 / (4 * IB.sigma)) ** 0.25;
+    return { dist, Sp, T, Tmean };
   },
 
   stem: ({ p }) => {
     const b = BODIES[p.body];
-    return `This question is about ${b.name} ${WHERE[p.pos]}, ${b.d[p.pos].toFixed(3)} AU. Its albedo is ${b.a.toFixed(2)}, and its measured mean surface temperature is about ${b.T} K. At the Earth’s mean distance from the Sun, 1.000 AU, the intensity of sunlight (the solar constant) is $1.36 \\times 10^{3}\\ \\mathrm{W\\,m^{-2}}$. The Stefan–Boltzmann constant is $5.67 \\times 10^{-8}\\ \\mathrm{W\\,m^{-2}\\,K^{-4}}$.`;
+    return `This question is about ${b.name} ${WHERE[p.pos]}, ${b.d[p.pos].toFixed(3)} AU. Its albedo is ${b.a.toFixed(2)}, and its measured mean surface temperature, averaged over its surface and its orbit, is about ${b.T} K. At the Earth’s mean distance from the Sun, 1.000 AU, the intensity of sunlight (the solar constant) is $1.36 \\times 10^{3}\\ \\mathrm{W\\,m^{-2}}$. The Stefan–Boltzmann constant is $5.67 \\times 10^{-8}\\ \\mathrm{W\\,m^{-2}\\,K^{-4}}$.`;
   },
 
   parts: [
@@ -56,7 +58,7 @@ export default defineQuestion({
     {
       label: '(b)',
       marks: 2,
-      prompt: () => 'Treating the surface as a black body at a single temperature, calculate its equilibrium temperature.',
+      prompt: () => 'In a simple model, the body reflects the fraction of sunlight given by its albedo and radiates as a black body (emissivity 1) at a single temperature. Calculate its effective radiating temperature at this distance.',
       response: { kind: 'numeric', answer: 'T', symbol: 'T', unit: 'K', positive: true },
       solution: ({ p, r }) => [
         { math: tex`\sigma T^4 = \frac{(1 - \alpha)S}{4} \;\Rightarrow\; T = \sqrt[4]{\frac{(1 - ${BODIES[p.body].a.toFixed(2)}) \times ${fmtW(r.Sp)}}{4 \times 5.67 \times 10^{-8}}} = ${fmtA(r.T)}\ ${u('K')}` },
@@ -66,7 +68,7 @@ export default defineQuestion({
     {
       label: '(c)',
       marks: 1,
-      prompt: () => 'What does comparing your answer to (b) with the measured mean surface temperature suggest?',
+      prompt: ({ p, r }) => `To compare like with like, use the mean distance: there, the effective radiating temperature of ${BODIES[p.body].name} is about ${Math.round(r.Tmean)} K. What does comparing this with the measured mean surface temperature suggest?`,
       response: {
         kind: 'mcq',
         ordered: true,
@@ -79,8 +81,8 @@ export default defineQuestion({
       },
       solution: ({ p, r }) =>
         BODIES[p.body].greenhouse
-          ? [{ text: `The estimate, ${fmtA(r.T)} K, is hundreds of kelvin below the measured ${BODIES[p.body].T} K. Venus’s thick carbon dioxide atmosphere traps outgoing infrared radiation: a runaway greenhouse effect.` }]
-          : [{ text: `The estimate, ${fmtA(r.T)} K, is close to the measured ${BODIES[p.body].T} K: ${BODIES[p.body].name} has little or no atmosphere to absorb the infrared radiation from its surface.` }],
+          ? [{ text: `The effective radiating temperature at the mean distance, about ${Math.round(r.Tmean)} K, is hundreds of kelvin below the measured mean surface temperature, ${BODIES[p.body].T} K. Venus’s thick carbon dioxide atmosphere traps outgoing infrared radiation: a runaway greenhouse effect.` }]
+          : [{ text: `The effective radiating temperature at the mean distance, about ${Math.round(r.Tmean)} K, is close to the measured mean surface temperature, ${BODIES[p.body].T} K: ${BODIES[p.body].name} has little or no atmosphere to absorb the infrared radiation from its surface. (The temperature in (b) changes with the distance from the Sun, which is why the comparison uses the mean distance.)` }],
       markscheme: ({ p }) => [{ note: BODIES[p.body].greenhouse ? 'Strong greenhouse effect.' : 'Little or no greenhouse effect.' }],
     },
     {
